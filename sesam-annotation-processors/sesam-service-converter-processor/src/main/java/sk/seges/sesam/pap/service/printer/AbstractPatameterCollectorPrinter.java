@@ -33,7 +33,7 @@ public abstract class AbstractPatameterCollectorPrinter extends AbstractServiceP
 	@Override
 	public void print(ServiceConverterPrinterContext context) {
 		List<ConverterParameter> newParams = parametersFilter.getPropagatedParameters(getConverterParameters(context.getService(), context.getLocalServiceInterface()));
-		converterParameters = unifyParameterNames(converterParameters, newParams);
+		converterParameters = unifyParameterNames(converterParameters, mergeSameParams(newParams));
 		
 		Collections.sort(converterParameters, new Comparator<ConverterParameter>() {
 

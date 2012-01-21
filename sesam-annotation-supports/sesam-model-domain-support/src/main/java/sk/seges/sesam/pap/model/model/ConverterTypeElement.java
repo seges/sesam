@@ -26,7 +26,6 @@ import sk.seges.sesam.core.pap.model.mutable.utils.MutableTypes;
 import sk.seges.sesam.core.pap.structure.DefaultPackageValidatorProvider;
 import sk.seges.sesam.core.pap.structure.api.PackageValidatorProvider;
 import sk.seges.sesam.core.pap.utils.ProcessorUtils;
-import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.api.GeneratedClass;
 import sk.seges.sesam.pap.model.model.api.domain.DomainDeclaredType;
 import sk.seges.sesam.pap.model.model.api.domain.DomainType;
@@ -97,7 +96,7 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 			return (MutableDeclaredType) getMutableTypesUtils().toMutableType((DeclaredType)converterTypeElement.asType());
 		}
 		return getGeneratedConverterTypeFromConfiguration(configurationTypeElement);
-	};
+	}
 
 	private void initialize() {
 		if (this.hasVariableParameterTypes() && configurationTypeElement.getDomain().hasTypeParameters()) {
@@ -183,7 +182,7 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 			
 			MutableDeclaredType referenceType = getMutableTypesUtils().toMutableType((DeclaredType)domainType.asType());
 			
-			//there are type parameters, so they should be passed into the converter definition itself			
+			//there are type parameters, so they should be passed into the converter definition itself
 			List<MutableTypeVariable> typeParameters = prefixTypeArguments(DTO_TYPE_ARGUMENT_PREFIX, (DeclaredType)domainType.asType(), referenceType);
 			typeParameters.addAll(prefixTypeArguments(DOMAIN_TYPE_ARGUMENT_PREFIX, (DeclaredType)domainType.asType(), referenceType));
 
@@ -347,6 +346,27 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 			}
 		}
 
+		//Parameter name resolving. Renaming arg0 to entityManager, etc.
+		DomainType domain = getDomain();
+		ParameterElement[] constructorAditionalParameters = null;
+		
+		if (domain != null && domain.getKind().isDeclared()) {
+			TypeMirror domainType = ((DomainDeclaredType)domain).asType();
+			if (domainType != null) {
+				constructorAditionalParameters = parametersResolver.getConstructorAditionalParameters(domainType);
+			}
+		}
+		
+		for (ConverterParameter converterParameter: parameters) {
+			if (/*asElement() == null && */constructorAditionalParameters != null) {
+				for (ParameterElement additionalParameter: constructorAditionalParameters) {
+					if (processingEnv.getTypeUtils().isSameType(additionalParameter.getType(), converterParameter.getType())) {
+						converterParameter.setName(additionalParameter.getName());
+					}
+				}
+			}
+		}
+		
 		return parameters;
 	}
 	
@@ -357,8 +377,10 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 		
 		return getConfiguration().getDomain();
 	}
-	
+
+	/*
 	public List<String> getLocalConverters() {
+	
 		List<String> result = new ArrayList<String>();
 
 		if (!(getDomain() instanceof DomainDeclaredType)) {
@@ -376,5 +398,5 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 		}
 
 		return result;
-	}
+	}*/
 }
