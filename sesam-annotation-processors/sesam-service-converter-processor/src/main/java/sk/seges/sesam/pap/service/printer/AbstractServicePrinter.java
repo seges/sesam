@@ -13,17 +13,18 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
 
+import sk.seges.sesam.core.pap.model.ConverterConstructorParameter;
 import sk.seges.sesam.core.pap.model.api.ClassSerializer;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
 import sk.seges.sesam.core.pap.utils.ProcessorUtils;
-import sk.seges.sesam.pap.model.model.ConverterParameter;
-import sk.seges.sesam.pap.model.model.ConverterTypeElement;
 import sk.seges.sesam.pap.model.model.ConverterParameterFilter;
+import sk.seges.sesam.pap.model.model.ConverterTypeElement;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
 import sk.seges.sesam.pap.model.model.api.domain.DomainType;
 import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterInstancerType;
-import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
+import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider.UsageType;
 import sk.seges.sesam.pap.service.model.LocalServiceTypeElement;
 import sk.seges.sesam.pap.service.model.RemoteServiceTypeElement;
 import sk.seges.sesam.pap.service.model.ServiceTypeElement;
@@ -31,11 +32,11 @@ import sk.seges.sesam.pap.service.model.ServiceTypeElement;
 public class AbstractServicePrinter {
 
 	protected final TransferObjectProcessingEnvironment processingEnv;
-	protected final ConverterConstructorParametersResolver parametersResolver;
+	protected final ConverterConstructorParametersResolverProvider parametersResolverProvider;
 	
-	protected AbstractServicePrinter(TransferObjectProcessingEnvironment processingEnv, ConverterConstructorParametersResolver parametersResolver) {
+	protected AbstractServicePrinter(TransferObjectProcessingEnvironment processingEnv, ConverterConstructorParametersResolverProvider parametersResolverProvider) {
 		this.processingEnv = processingEnv;
-		this.parametersResolver = parametersResolver;
+		this.parametersResolverProvider = parametersResolverProvider;
 	}
 	
 	/**
@@ -43,10 +44,10 @@ public class AbstractServicePrinter {
 	 * required by these converters.
 	 * This parameters should be passed to the service exporter constructor and initialized by dependency injection of in the upper layer.
 	 */
-	protected List<ConverterParameter> getConverterParameters(ServiceTypeElement serviceTypeElement, LocalServiceTypeElement localInterface) {
+	protected List<ConverterConstructorParameter> getConverterParameters(ServiceTypeElement serviceTypeElement, LocalServiceTypeElement localInterface) {
 		RemoteServiceTypeElement remoteServiceInterface = localInterface.getRemoteServiceInterface();
 
-		List<ConverterParameter> parameters = new LinkedList<ConverterParameter>();
+		List<ConverterConstructorParameter> parameters = new LinkedList<ConverterConstructorParameter>();
 
 		if (remoteServiceInterface == null) {
 			return parameters;
@@ -71,7 +72,7 @@ public class AbstractServicePrinter {
 				ConverterTypeElement converter = dtoReturnType.getConverter();
 			
 				if (converter != null && !converters.contains(converter)) {
-					parameters.addAll(converter.getConverterParameters(parametersResolver, ConverterInstancerType.SERVICE_CONVERETR_INSTANCER));
+					parameters.addAll(converter.getConverterParameters(parametersResolverProvider.getParameterResolver(UsageType.DEFINITION), ConverterInstancerType.SERVICE_CONVERETR_INSTANCER));
 					converters.add(converter);
 				}
 			}
@@ -84,7 +85,7 @@ public class AbstractServicePrinter {
 				ConverterTypeElement converter = dtoReturnType.getConverter();
 
 				if (converter != null && !converters.contains(converter)) {
-					parameters.addAll(converter.getConverterParameters(parametersResolver, ConverterInstancerType.SERVICE_CONVERETR_INSTANCER));
+					parameters.addAll(converter.getConverterParameters(parametersResolverProvider.getParameterResolver(UsageType.DEFINITION), ConverterInstancerType.SERVICE_CONVERETR_INSTANCER));
 					converters.add(converter);
 				}
 			}
@@ -124,10 +125,12 @@ public class AbstractServicePrinter {
 	
 				if (pairMethod) {
 					
-					DtoType returnDtoType = processingEnv.getTransferObjectUtils().getDtoType(method.getReturnType());
-					DomainType returnDomainType = returnDtoType.getDomain();
-	
-					if (processingEnv.getTypeUtils().isSameType(returnDomainType, returnDtoType)) {
+					DomainType returnDomainType = processingEnv.getTransferObjectUtils().getDomainType(method.getReturnType());
+					DtoType returnDtoType = returnDomainType.getDto();
+					
+					MutableTypeMirror mutableRemoteReturnType = processingEnv.getTypeUtils().toMutableType(remoteMethod.getReturnType());
+					
+					if (processingEnv.getTypeUtils().isSameType(returnDtoType, mutableRemoteReturnType)) {
 						return method;
 					}
 					
@@ -142,9 +145,9 @@ public class AbstractServicePrinter {
 		return null;
 	}
 	
-	protected List<ConverterParameter> unifyParameterNames(List<ConverterParameter> allPparameters, List<ConverterParameter> parameters) {
+	protected List<ConverterConstructorParameter> unifyParameterNames(List<ConverterConstructorParameter> allPparameters, List<ConverterConstructorParameter> parameters) {
 
-		for (ConverterParameter parameter : parameters) {
+		for (ConverterConstructorParameter parameter : parameters) {
 			int index = 1;
 			String name = parameter.getName();
 			while (ConverterParameterFilter.NAME.filterBy(allPparameters, parameter).size() > 0) {
@@ -156,11 +159,11 @@ public class AbstractServicePrinter {
 		return allPparameters;
 	}
 
-	protected List<ConverterParameter> mergeSameParams(List<ConverterParameter> converterParameters) {
-		List<ConverterParameter> result = new LinkedList<ConverterParameter>();
+	protected List<ConverterConstructorParameter> mergeSameParams(List<ConverterConstructorParameter> converterParameters) {
+		List<ConverterConstructorParameter> result = new LinkedList<ConverterConstructorParameter>();
 
-		for (ConverterParameter parameter : converterParameters) {
-			ConverterParameter sameParameterByType = getSameByType(parameter.getType(), result);
+		for (ConverterConstructorParameter parameter : converterParameters) {
+			ConverterConstructorParameter sameParameterByType = getSameByType(parameter.getType(), result);
 			if (sameParameterByType == null) {
 				result.add(parameter);
 			} else {
@@ -174,8 +177,8 @@ public class AbstractServicePrinter {
 	// TODO If the converter has 2 same parameters, like Cache cache1, Cache cache2
 	// and another converter has same 2 parameters, Cache cache1, Cache cache2, so the result won't be only unify cache parameter but 2, cache1 and
 	// cache2
-	private ConverterParameter getSameByType(MutableTypeMirror typeParameter, Collection<ConverterParameter> parameters) {
-		for (ConverterParameter parameter : parameters) {
+	private ConverterConstructorParameter getSameByType(MutableTypeMirror typeParameter, Collection<ConverterConstructorParameter> parameters) {
+		for (ConverterConstructorParameter parameter : parameters) {
 			if (parameter.getType().toString(ClassSerializer.CANONICAL).equals(typeParameter.toString(ClassSerializer.CANONICAL))) {
 				return parameter;
 			}

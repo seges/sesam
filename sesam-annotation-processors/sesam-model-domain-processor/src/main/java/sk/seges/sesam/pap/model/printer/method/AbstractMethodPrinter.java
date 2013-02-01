@@ -25,26 +25,22 @@ import sk.seges.sesam.pap.model.model.api.dto.DtoDeclaredType;
 import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.AbstractDtoPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
-import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
+import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
-import sk.seges.sesam.pap.model.utils.TransferObjectHelper;
+import sk.seges.sesam.utils.CastUtils;
 
 public abstract class AbstractMethodPrinter extends AbstractDtoPrinter {
 
 	protected final RoundEnvironment roundEnv;
-	protected final ConverterConstructorParametersResolver parametersResolver;
 	protected final TypeParametersSupport typeParametersSupport;
-	protected final TransferObjectHelper toHelper;
 	protected final EntityResolver entityResolver;
 	
 	protected ConverterProviderPrinter converterProviderPrinter;
 	
-	protected AbstractMethodPrinter(ConverterProviderPrinter converterProviderPrinter, ConverterConstructorParametersResolver parametersResolver, EntityResolver entityResolver, RoundEnvironment roundEnv, TransferObjectProcessingEnvironment processingEnv) {
-		super(parametersResolver, processingEnv);
+	protected AbstractMethodPrinter(ConverterProviderPrinter converterProviderPrinter, ConverterConstructorParametersResolverProvider parametersResolverProvider, EntityResolver entityResolver, RoundEnvironment roundEnv, TransferObjectProcessingEnvironment processingEnv) {
+		super(parametersResolverProvider, processingEnv);
 		this.roundEnv = roundEnv;
 		this.converterProviderPrinter = converterProviderPrinter;
-		this.parametersResolver = parametersResolver;
-		this.toHelper = new TransferObjectHelper(processingEnv);
 		this.typeParametersSupport = new TypeParametersSupport(processingEnv);
 		this.entityResolver = entityResolver;
 	}
@@ -85,8 +81,8 @@ public abstract class AbstractMethodPrinter extends AbstractDtoPrinter {
 		
 		return domainDelegate;
 	}
-	
-	protected MutableTypeMirror getDelegateCast(MutableTypeMirror domainNamedType) {
+		
+	protected MutableTypeMirror getDelegateCast(MutableTypeMirror domainNamedType, boolean stripWildcard) {
 		TypeMirror domainType = processingEnv.getTypeUtils().fromMutableType(domainNamedType);
 		
 		if (domainType == null) {
@@ -96,7 +92,7 @@ public abstract class AbstractMethodPrinter extends AbstractDtoPrinter {
 		DomainType domainTypeElement = processingEnv.getTransferObjectUtils().getDomainType(domainType);
 
 		return castToDelegate(domainNamedType, domainTypeElement.getDomainDefinitionConfiguration() == null ? null : 
-			domainTypeElement.getDomainDefinitionConfiguration().getDelegateConfigurationTypeElement());
+			domainTypeElement.getDomainDefinitionConfiguration().getDelegateConfigurationTypeElement(), stripWildcard);
 
 	}
 	
@@ -106,10 +102,15 @@ public abstract class AbstractMethodPrinter extends AbstractDtoPrinter {
 		MutableTypeMirror domainNamedType = processingEnv.getTypeUtils().toMutableType(domainType);
 
 		return castToDelegate(domainNamedType, domainTypeElement.getDomainDefinitionConfiguration() == null ? null : 
-			domainTypeElement.getDomainDefinitionConfiguration().getDelegateConfigurationTypeElement());
+			domainTypeElement.getDomainDefinitionConfiguration().getDelegateConfigurationTypeElement(), true);
 	}
 	
-	private MutableTypeMirror castToDelegate(MutableTypeMirror domainNamedType, ConfigurationTypeElement delegateConfigurationTypeElement) {
+	/**
+	 * Method is used to handle domain types with type variables (generics). If there is need to cast from
+	 * List<A> to the List<B> we should call {@link CastUtils}.cast(list, B.class) and this method will resolve
+	 * type variable from target domain type.
+	 */
+	private MutableTypeMirror castToDelegate(MutableTypeMirror domainNamedType, ConfigurationTypeElement delegateConfigurationTypeElement, boolean stripWildcard) {
 
 		if (delegateConfigurationTypeElement != null) {
 			DomainDeclaredType replacementType = delegateConfigurationTypeElement.getDomain();
@@ -136,10 +137,10 @@ public abstract class AbstractMethodPrinter extends AbstractDtoPrinter {
 					Iterator<? extends MutableTypeMirror> iterator = typeParameter.getUpperBounds().iterator();
 					
 					while (iterator.hasNext()) {
-						convertedBounds[i++] = getDelegateCast(iterator.next());
+						convertedBounds[i++] = getDelegateCast(iterator.next(), stripWildcard);
 					}
 
-					if (typeParameter.getVariable() != null && typeParameter.getVariable().equals(MutableWildcardType.WILDCARD_NAME)) {
+					if (typeParameter.getVariable() != null && typeParameter.getVariable().equals(MutableWildcardType.WILDCARD_NAME) && stripWildcard) {
 						convertedParameters[j++] = processingEnv.getTypeUtils().getTypeVariable(null, convertedBounds);
 					} else {
 						convertedParameters[j++] = processingEnv.getTypeUtils().getTypeVariable(typeParameter.getVariable(), convertedBounds);

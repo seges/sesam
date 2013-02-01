@@ -11,6 +11,7 @@ import javax.tools.Diagnostic.Kind;
 import sk.seges.sesam.core.pap.model.PathResolver;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
+import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror.MutableTypeKind;
 import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
@@ -24,7 +25,8 @@ import sk.seges.sesam.pap.model.model.api.dto.DtoDeclaredType;
 import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
-import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
+import sk.seges.sesam.pap.model.printer.converter.ConverterTargetType;
+import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
 
 public class CopyToDtoPrinter extends AbstractMethodPrinter implements TransferObjectElementPrinter {
@@ -33,16 +35,16 @@ public class CopyToDtoPrinter extends AbstractMethodPrinter implements TransferO
 
 	protected ElementHolderTypeConverter elementHolderTypeConverter;
 	
-	public CopyToDtoPrinter(ConverterProviderPrinter converterProviderPrinter, ElementHolderTypeConverter elementHolderTypeConverter, EntityResolver entityResolver, ConverterConstructorParametersResolver parametersResolver, 
-			RoundEnvironment roundEnv, TransferObjectProcessingEnvironment processingEnv, FormattedPrintWriter pw) {
-		super(converterProviderPrinter, parametersResolver, entityResolver, roundEnv, processingEnv);
+	public CopyToDtoPrinter(ConverterProviderPrinter converterProviderPrinter, ElementHolderTypeConverter elementHolderTypeConverter, EntityResolver entityResolver, 
+			ConverterConstructorParametersResolverProvider parametersResolverProvider, RoundEnvironment roundEnv, TransferObjectProcessingEnvironment processingEnv, FormattedPrintWriter pw) {
+		super(converterProviderPrinter, parametersResolverProvider, entityResolver, roundEnv, processingEnv);
 		this.pw = pw;
 		this.elementHolderTypeConverter = elementHolderTypeConverter;
 	}
 	
 	@Override
 	public void print(TransferObjectContext context) {
-		copy(context, pw, new CopyToDtoMethodPrinter(converterProviderPrinter, elementHolderTypeConverter, parametersResolver, entityResolver, roundEnv, processingEnv));
+		copy(context, pw, new CopyToDtoMethodPrinter(converterProviderPrinter, elementHolderTypeConverter, parametersResolverProvider, entityResolver, roundEnv, processingEnv));
 	}
 
 	@Override
@@ -100,31 +102,30 @@ public class CopyToDtoPrinter extends AbstractMethodPrinter implements TransferO
 			
 			String idName = "_id";
 			
-			pw.print(dtoIdType, " " + idName + " = ");
 			
 			String methodName = DOMAIN_NAME + "." + MethodHelper.toGetter(MethodHelper.toField(idMethod));
 
 			if (idMethod.getReturnType().getKind().equals(TypeKind.DECLARED)) {
 				if (domainIdTypeElement.getConverter() != null) {
+					pw.print(dtoIdType, " " + idName + " = ");
 					Field field = new Field(methodName, processingEnv.getTypeUtils().toMutableType(domainIdTypeElement));
-					converterProviderPrinter.printDomainEnsuredConverterMethodName(domainIdTypeElement, null, field, idMethod, pw, false);
+					//converterProviderPrinter.printDomainEnsuredConverterMethodName(domainIdTypeElement, null, field, idMethod, pw, false);
+					//TODO add NPE check
+					converterProviderPrinter.printObtainConverterFromCache(ConverterTargetType.DOMAIN, domainIdTypeElement, field, idMethod, true);
+
 					pw.print(".convertToDto(");
-					converterProviderPrinter.printDomainEnsuredConverterMethodName(domainIdTypeElement, null, field, idMethod, pw, false);
+					//converterProviderPrinter.printDomainEnsuredConverterMethodName(domainIdTypeElement, null, field, idMethod, pw, false);
+					//TODO add NPE check
+					converterProviderPrinter.printObtainConverterFromCache(ConverterTargetType.DOMAIN, domainIdTypeElement, field, idMethod, true);
+
 					pw.print(".createDtoInstance(null), ");
-					pw.print("(", getDelegateCast(idMethod.getReturnType()), ")");
+					pw.println("(", getDelegateCast(idMethod.getReturnType()), ")" + methodName + ");");
+					pw.println();
 					useIdConverter = true;
 				}
 			}
 
-			pw.print(methodName);
-
-			if (useIdConverter) {
-				pw.print(")");
-			}
-			pw.println(";");
-			pw.println();
-
-			pw.println(RESULT_NAME + " = createDtoInstance(" + idName + ");");
+			pw.println(RESULT_NAME + " = createDtoInstance(" + (useIdConverter ? idName : methodName) + ");");
 		}
 
 		pw.println("return convertToDto(" + RESULT_NAME + ", " + DOMAIN_NAME + ");");
@@ -147,14 +148,23 @@ public class CopyToDtoPrinter extends AbstractMethodPrinter implements TransferO
 			pw.println();
 		}
 		
-		DomainDeclaredType domainsuperClass = configurationElement.getDomain().getSuperClass();
+		DomainDeclaredType domainSuperClass = configurationElement.getDomain().getSuperClass();
 		
-		if (domainsuperClass != null && domainsuperClass.getConverter() != null) {
+		if (domainSuperClass != null && domainSuperClass.getConverter() != null) {
+			domainSuperClass = domainSuperClass.getDomainDefinitionConfiguration().getInstantiableDomain();
+		}
+		
+		if (domainSuperClass != null && domainSuperClass.getConverter() != null && domainSuperClass.getKind().equals(MutableTypeKind.CLASS)) {
+			MutableDeclaredType fieldType = processingEnv.getTypeUtils().getDeclaredType(processingEnv.getTypeUtils().toMutableType(Class.class), new MutableDeclaredType[] { domainSuperClass });
+			//TODO: change canonical name to simple name and add import
 			
-			MutableDeclaredType fieldType = processingEnv.getTypeUtils().getDeclaredType(processingEnv.getTypeUtils().toMutableType(Class.class), new MutableDeclaredType[] { domainsuperClass });
-			Field field = new Field(domainsuperClass.getSimpleName() + ".class", fieldType);
+			Field field = new Field(domainSuperClass.getCanonicalName() + ".class", fieldType);
+			//Field field = new Field(DOMAIN_NAME, domainsuperClass);
 			
-			converterProviderPrinter.printDomainEnsuredConverterMethodName(domainsuperClass, null, field, null, pw, false);
+//			converterProviderPrinter.printDomainEnsuredConverterMethodName(domainsuperClass, null, field, null, pw, false);
+			//TODO add NPE check
+			converterProviderPrinter.printObtainConverterFromCache(ConverterTargetType.DOMAIN, domainSuperClass, field, null, false);
+
 			pw.println(".convertToDto(" + RESULT_NAME + ", " + DOMAIN_NAME + ");");
 			pw.println();
 		}

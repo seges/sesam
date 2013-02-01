@@ -6,6 +6,9 @@ import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Wait;
+
+import com.google.common.base.Function;
 
 public class StateHolder {
 	
@@ -13,10 +16,12 @@ public class StateHolder {
 	private final WebDriver webDriver;
 
 	private List<WebElement> webElements;
+	private final Wait<WebDriver> wait;
 	
-	public StateHolder(WebDriver webDriver, By selector) {
+	public StateHolder(Wait<WebDriver> wait, WebDriver webDriver, By selector) {
 		this.selector = selector;
 		this.webDriver = webDriver;
+		this.wait = wait;
 	}
 
 	public StateHolder rememberState() {
@@ -27,15 +32,43 @@ public class StateHolder {
 	}
 
 	public WebElement getLastElement() {
-		webDriver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-		int size = webElements.size();
-		webElements = webDriver.findElements(selector);
-		webDriver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-		
-		if (webElements.size() <= size) {
+		if (webElements.size() == 0) {
 			return null;
 		}
-		
+		return webElements.get(webElements.size() - 1);
+	}
+
+	private void refind() {
+		webDriver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		webElements = webDriver.findElements(selector);
+		webDriver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+	}
+	
+	public void waitUntilDeleted() {
+		final int size = webElements.size();
+
+		wait.until(new Function<WebDriver, Boolean>() {
+
+			@Override
+			public Boolean apply(WebDriver arg0) {
+				refind();
+				return webElements.size() < size;
+			}
+		});
+	}
+	
+	public WebElement getNewElement() {
+		final int size = webElements.size();
+
+		wait.until(new Function<WebDriver, Boolean>() {
+
+			@Override
+			public Boolean apply(WebDriver arg0) {
+				refind();
+				return webElements.size() > size;
+			}
+		});
+
 		return webElements.get(size);
 	}
 }

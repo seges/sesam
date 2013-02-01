@@ -14,21 +14,22 @@ import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
 import sk.seges.sesam.pap.model.model.api.domain.DomainType;
 import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
-import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
+import sk.seges.sesam.pap.model.printer.converter.ConverterTargetType;
+import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.service.printer.model.ServiceConverterPrinterContext;
 
 public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter {
 
+	public static final String RESULT_VARIABLE_NAME = "result";
+
 	public ServiceMethodConverterPrinter(TransferObjectProcessingEnvironment processingEnv,
-			ConverterConstructorParametersResolver parametersResolver, FormattedPrintWriter pw,
+			ConverterConstructorParametersResolverProvider parametersResolverProvider, FormattedPrintWriter pw,
 			ConverterProviderPrinter converterProviderPrinter) {
-		super(processingEnv, parametersResolver, pw, converterProviderPrinter);
+		super(processingEnv, parametersResolverProvider, pw, converterProviderPrinter);
 	}
 
 	protected void printCastLocalMethodResult(DtoType returnDtoType, ServiceConverterPrinterContext context) {}
-	
-	public static final String RESULT_VARIABLE_NAME = "result";
-	
+		
 	protected void handleMethod(ServiceConverterPrinterContext context, ExecutableElement localMethod, ExecutableElement remoteMethod) {
 
 		DtoType returnDtoType = null;
@@ -39,7 +40,8 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 
 		new AnnotationPrinter(pw, processingEnv).printMethodAnnotations(localMethod, new AnnotationTypeFilter(false, getSupportedAnnotations(localMethod)));
 
-		new MethodPrinter(pw, processingEnv).printMethodDefinition(remoteMethod);
+		//TODO is NULL ok?
+		new MethodPrinter(pw, processingEnv).printMethodDefinition(remoteMethod, null);
 		
 		pw.println("{");
 
@@ -90,14 +92,24 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 			if (parameterDtoType.getConverter() != null) {
 				pw.print("(", parameterDomainType, ")");
 				Field field = new Field(parameterName, parameterDtoType);
-				converterProviderPrinter.printDtoEnsuredConverterMethodName(parameterDtoType, field, localMethod, pw, true);
+				pw.print("(");
+				//DtoConverter<Object, ClientSession<UserData>> converterForDomain = 
+				//converterProvider.getConverterForDomain(result, new MapConvertedInstanceCache());
+
+				converterProviderPrinter.printObtainConverterFromCache(ConverterTargetType.DTO, parameterDomainType, field, localMethod, false);
+
+				//NPE check
+				pw.print(" == null ? null : ");
+				converterProviderPrinter.printObtainConverterFromCache(ConverterTargetType.DTO, parameterDomainType, field, localMethod, false);
+				
+				//converterProviderPrinter.printDtoEnsuredConverterMethodName(parameterDtoType, field, localMethod, pw, true);
 				pw.print(".fromDto(");
 			}
 
 			pw.print(parameterName);
 
 			if (parameterDtoType.getConverter() != null) {
-				pw.print(")");
+				pw.print("))");
 			}
 		}
 
@@ -107,9 +119,18 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 		if (!remoteMethod.getReturnType().getKind().equals(TypeKind.VOID) && returnDtoType.getConverter() != null) {
 			pw.print("return (", processingEnv.getTypeUtils().toMutableType(remoteMethod.getReturnType()), ")");
 			
+			pw.print("(");
+			
 			Field field = new Field(RESULT_VARIABLE_NAME, processingEnv.getTypeUtils().toMutableType(remoteMethod.getReturnType()));
-			converterProviderPrinter.printDomainEnsuredConverterMethodName(returnDtoType.getDomain(), null, field, localMethod, pw, true);
-			pw.println(".toDto(" + RESULT_VARIABLE_NAME + ");");
+			//converterProviderPrinter.printDomainEnsuredConverterMethodName(returnDtoType.getDomain(), null, field, localMethod, pw, true);
+
+			converterProviderPrinter.printObtainConverterFromCache(ConverterTargetType.DOMAIN, returnDtoType.getDomain(), field, localMethod, false);
+			
+			//NPE check
+			pw.print(" == null ? null : ");
+			converterProviderPrinter.printObtainConverterFromCache(ConverterTargetType.DOMAIN, returnDtoType.getDomain(), field, localMethod, false);
+			
+			pw.println(".toDto(" + RESULT_VARIABLE_NAME + "));");
 		} else if (!remoteMethod.getReturnType().getKind().equals(TypeKind.VOID)) {
 			pw.println("return " + RESULT_VARIABLE_NAME + ";");
 		}

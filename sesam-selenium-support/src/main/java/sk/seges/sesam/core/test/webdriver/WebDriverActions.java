@@ -21,7 +21,6 @@ import org.openqa.selenium.interactions.SendKeysAction;
 import org.openqa.selenium.internal.Locatable;
 
 import sk.seges.sesam.core.test.selenium.configuration.annotation.SeleniumSettings;
-import sk.seges.sesam.core.test.webdriver.action.DoubleClickAction;
 
 public class WebDriverActions extends Actions {
 
@@ -130,11 +129,11 @@ public class WebDriverActions extends Actions {
 
 	@Override
 	public Actions doubleClick(WebElement onElement) {
-		try {
-			action.addAction(new DoubleClickAction(webDriver, testEnvironment, onElement));
-		} catch (Exception e) {
+//		try {
+//			action.addAction(new DoubleClickAction(webDriver, testEnvironment, onElement));
+//		} catch (Exception e) {
 			action.addAction(new org.openqa.selenium.interactions.DoubleClickAction(mouse, (Locatable) onElement));
-		}
+//		}
 		
 		return this;
 	}

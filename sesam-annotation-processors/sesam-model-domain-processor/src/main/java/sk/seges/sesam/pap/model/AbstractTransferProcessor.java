@@ -18,6 +18,7 @@ import javax.tools.Diagnostic.Kind;
 
 import sk.seges.sesam.core.pap.configuration.api.ProcessorConfigurer;
 import sk.seges.sesam.core.pap.model.PathResolver;
+import sk.seges.sesam.core.pap.model.PojoElement;
 import sk.seges.sesam.core.pap.processor.MutableAnnotationProcessor;
 import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
@@ -46,7 +47,6 @@ import sk.seges.sesam.pap.model.utils.TransferObjectHelper;
 
 public abstract class AbstractTransferProcessor extends MutableAnnotationProcessor {
 
-	protected TransferObjectHelper toHelper;
 	protected TransferObjectProcessorContextProvider transferObjectContextProvider;
 	
 	protected TransferObjectProcessingEnvironment processingEnv;
@@ -94,7 +94,7 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 		
 		return configurationTypeElement;
 	}
-	
+		
 	@Override
 	protected void printAnnotations(ProcessorContext context) {
 		
@@ -161,7 +161,6 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 		super.init(element, roundEnv);
 		this.processingEnv = new TransferObjectProcessingEnvironment(super.processingEnv, roundEnv, getConfigurationCache());
 		this.processingEnv.setConfigurationProviders(getConfigurationProviders());
-		this.toHelper = new TransferObjectHelper(processingEnv);
 		this.transferObjectContextProvider = getProcessorContextProvider(processingEnv, roundEnv);
 	}
 	
@@ -252,7 +251,6 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 											generated.add(idPath);
 										}
 									}
-	//								printer.print(context);
 							}
 						} else {
 							if (pathResolver.hasNext()) {
@@ -280,7 +278,6 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 			TransferObjectContext context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PROTECTED, idMethod, idMethod, getConfigurationProviders());
 			if (context != null) {
 				contexts.add(context);
-				//printer.print(context);
 			}
 		}
 
@@ -303,6 +300,8 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 			List<TransferObjectContext> contexts) {
 		List<ExecutableElement> methods = ElementFilter.methodsIn(processingElement.asConfigurationElement().getEnclosedElements());
 		
+		PojoElement pojoElement = new PojoElement(domainTypeElement.asConfigurationElement(), processingEnv);
+		
 		if (mappingType.equals(MappingType.AUTOMATIC)) {
 			for (ExecutableElement method: methods) {
 				
@@ -310,7 +309,7 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 				
 				boolean isProcessed = isProcessed(generated, fieldName);
 				boolean isGetter = MethodHelper.isGetterMethod(method);
-				boolean hasSetter = toHelper.hasSetterMethod(domainTypeElement.asConfigurationElement(), method);
+				boolean hasSetter = pojoElement.hasSetterMethod(method);
 				boolean isPublic = method.getModifiers().contains(Modifier.PUBLIC);
 				if (!isProcessed && isGetter && hasSetter && isPublic) {
 
@@ -338,13 +337,14 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 	private void processType(ConfigurationTypeElement configurationTypeElement, MappingType mappingType, final DomainDeclaredType processingElement, DomainDeclaredType domainTypeElement, List<String> generated, List<TransferObjectContext> contexts) {
 		List<ExecutableElement> methods = ElementFilter.methodsIn(processingElement.asConfigurationElement().getEnclosedElements());
 		
+		PojoElement pojoElement = new PojoElement(domainTypeElement.asConfigurationElement(), processingEnv);
+
 		if (mappingType.equals(MappingType.AUTOMATIC)) {
 			for (ExecutableElement method: methods) {
 				
 				String fieldName = TransferObjectHelper.getFieldPath(method);
 				
-				if (!isProcessed(generated, fieldName) && MethodHelper.isGetterMethod(method) && 
-						toHelper.hasSetterMethod(domainTypeElement.asConfigurationElement(), method) && method.getModifiers().contains(Modifier.PUBLIC)) {
+				if (!isProcessed(generated, fieldName) && MethodHelper.isGetterMethod(method) && pojoElement.hasSetterMethod(method) && method.getModifiers().contains(Modifier.PUBLIC)) {
 
 					generated.add(fieldName);
 
@@ -371,5 +371,4 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 			processType(configurationTypeElement, mappingType, (DomainDeclaredType) processingEnv.getTransferObjectUtils().getDomainType(domainInterface), domainTypeElement, generated, contexts);
 		}
 	}
-	
 }

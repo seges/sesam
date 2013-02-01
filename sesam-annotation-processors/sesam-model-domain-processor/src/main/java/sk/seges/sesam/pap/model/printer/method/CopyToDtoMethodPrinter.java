@@ -14,13 +14,14 @@ import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConverterTypeElement;
 import sk.seges.sesam.pap.model.model.Field;
+import sk.seges.sesam.pap.model.model.TransferObjectMappingAccessor;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
 import sk.seges.sesam.pap.model.model.api.ElementHolderTypeConverter;
 import sk.seges.sesam.pap.model.model.api.domain.DomainType;
 import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterTargetType;
-import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
+import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
 import sk.seges.sesam.utils.CastUtils;
 
@@ -29,8 +30,8 @@ public class CopyToDtoMethodPrinter extends AbstractMethodPrinter implements Cop
 	private ElementHolderTypeConverter elementHolderTypeConverter;
 	
 	public CopyToDtoMethodPrinter(ConverterProviderPrinter converterProviderPrinter, ElementHolderTypeConverter elementHolderTypeConverter, 
-			ConverterConstructorParametersResolver parametersResolver, EntityResolver entityResolver, RoundEnvironment roundEnv, TransferObjectProcessingEnvironment processingEnv) {
-		super(converterProviderPrinter, parametersResolver, entityResolver, roundEnv, processingEnv);
+			ConverterConstructorParametersResolverProvider parametersResolverProvider, EntityResolver entityResolver, RoundEnvironment roundEnv, TransferObjectProcessingEnvironment processingEnv) {
+		super(converterProviderPrinter, parametersResolverProvider, entityResolver, roundEnv, processingEnv);
 		this.elementHolderTypeConverter = elementHolderTypeConverter;
 	}
 
@@ -79,29 +80,55 @@ public class CopyToDtoMethodPrinter extends AbstractMethodPrinter implements Cop
 			String converterName = "converter" + MethodHelper.toMethod("", context.getDtoFieldName());
 			
 			pw.print(context.getConverter().getConverterBase(), " " + converterName + " = ");
-			
-			Field field = new Field(TransferObjectElementPrinter.DOMAIN_NAME  + "." + context.getDomainFieldName(), context.getConverter().getDomain());
-			converterProviderPrinter.printDomainEnsuredConverterMethodName(context.getConverter().getDomain(), context.getDomainMethodReturnType(), 
-					field, null, pw, false);
+
+//			(context.getDomainMethodReturnType().getKind().equals(MutableTypeKind.TYPEVAR) ? ("(" + ConverterTypeElement.DOMAIN_TYPE_ARGUMENT_PREFIX + "_" +
+//					((MutableTypeVariable)context.getDomainMethodReturnType()).getVariable().toString() + ")") : "") +
+
+			Field field = new Field(
+					(context.getDomainMethodReturnType().getKind().equals(MutableTypeKind.TYPEVAR) ? "(" + context.getConverter().getDomain() + ")" : "") + 
+					TransferObjectElementPrinter.DOMAIN_NAME  + "." + context.getDomainFieldName(), context.getConverter().getDomain());
+//			converterProviderPrinter.printDomainEnsuredConverterMethodName(context.getConverter().getDomain(), context.getDomainMethodReturnType(), 
+//					field, null, pw, false);
+			TransferObjectMappingAccessor transferObjectMappingAccessor = new TransferObjectMappingAccessor(context.getDtoMethod(), processingEnv);
+			if (transferObjectMappingAccessor.isValid() && transferObjectMappingAccessor.getConverter() != null) {
+//				converterProviderPrinter.printDomainEnsuredConverterMethodName(context.getConverter().getDomain(), context.getDomainMethodReturnType(), field, null, pw, false);
+				converterProviderPrinter.printDomainGetConverterMethodName(context.getConverter().getDomain(), field, null, pw, false);
+			} else {
+				converterProviderPrinter.printObtainConverterFromCache(ConverterTargetType.DOMAIN, context.getConverter().getDomain(), field, null, true);
+			}
 			pw.println(";");
 
+			pw.println("if (" + converterName + " != null) {");
 			pw.print(TransferObjectElementPrinter.RESULT_NAME + "." + MethodHelper.toSetter(context.getDtoFieldName()) + "(");
 
+			if (context.getDomainMethodReturnType().getKind().equals(MutableTypeKind.TYPEVAR)) {
+				pw.print("(" + ConverterTypeElement.DTO_TYPE_ARGUMENT_PREFIX + "_" + ((MutableTypeVariable)context.getDomainMethodReturnType()).getVariable().toString() + ")");
+			}
+			
 			pw.print(converterName + ".toDto(");
+
 			pw.print(CastUtils.class, ".cast(");
-			MutableTypeMirror delegateCast = getDelegateCast(context.getConverter().getDomain());
+			MutableTypeMirror delegateCast = getDelegateCast(context.getConverter().getDomain(), false);
+
 			pw.print("(", getWildcardDelegate(delegateCast), ")");
 			pw.print(TransferObjectElementPrinter.DOMAIN_NAME  + "." + context.getDomainFieldName());
 			pw.print(", ", getTypeVariableDelegate(delegateCast), ".class)");
-
-		} else if (context.isLocalConverter()) {
-			String converterName = printLocalConverter(context, ConverterTargetType.DOMAIN, pw);
+		} else if (context.useConverter()) {
+			String converterName = "converter" + MethodHelper.toMethod("", context.getDtoFieldName());
+			pw.print(converterProviderPrinter.getDtoConverterType(context.getDomainMethodReturnType(), true), " " + converterName + " = ");
+			converterProviderPrinter.printObtainConverterFromCache(ConverterTargetType.DOMAIN, context.getDomainMethodReturnType(), 
+					new Field(TransferObjectElementPrinter.DOMAIN_NAME  + "." + context.getDomainFieldName(), null), context.getDomainMethod(), true);
+			pw.println(";");
 			pw.println("if (" + converterName + " != null) {");
 			pw.print(TransferObjectElementPrinter.RESULT_NAME + "." + MethodHelper.toSetter(context.getDtoFieldName()) + "(" + 
 					converterName + ".toDto(" + TransferObjectElementPrinter.DOMAIN_NAME  + "." + context.getDomainFieldName() + ")");
 		} else {
+			pw.print(TransferObjectElementPrinter.RESULT_NAME + "." + MethodHelper.toSetter(context.getDtoFieldName()) + "(");
+			if (context.getDtoFieldType() != null && context.getDtoFieldType() instanceof MutableTypeVariable) {
+				pw.print("(" + ((MutableTypeVariable)context.getDtoFieldType()).getVariable() + ")");
+			}
 			//TODO: check why context.getConfigurationTypeElement().getDomain().asElement() return null when generating UserDTO
-			pw.print(TransferObjectElementPrinter.RESULT_NAME + "." + MethodHelper.toSetter(context.getDtoFieldName()) + "(" + TransferObjectElementPrinter.DOMAIN_NAME  + "." + MethodHelper.toGetterMethod(context.getConfigurationTypeElement().getInstantiableDomain(), 
+			pw.print(TransferObjectElementPrinter.DOMAIN_NAME  + "." + MethodHelper.toGetterMethod(context.getConfigurationTypeElement().getInstantiableDomain(), 
 					context.getDomainFieldPath()));
 		}
 		
@@ -118,8 +145,10 @@ public class CopyToDtoMethodPrinter extends AbstractMethodPrinter implements Cop
 		}
 		
 		pw.println(");");
-		
-		if (context.isLocalConverter()) {
+
+		if (context.getConverter() != null) {
+			pw.println("}");
+		} else if (context.useConverter()) {
 			printCopyByLocalConverter(context.getDomainFieldName(), context.getDomainMethodReturnType(), context.getDtoFieldName(), pw);
 		}
 		

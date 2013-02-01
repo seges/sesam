@@ -44,15 +44,16 @@ public @interface Report {
 		@Target(ElementType.ANNOTATION_TYPE)
 		public @interface Before {
 			@Parameter(name = "operations", description = "operations")
-			SeleniumOperation[] value() default { SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, 
+			SeleniumOperation[] value() default { SeleniumOperation.ASSERTION, SeleniumOperation.FAIL,
+				   SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, 
 			  	   SeleniumOperation.NAVIGATE_BACK, SeleniumOperation.NAVIGATE_FORWARD };
 		}
 
 		@Target(ElementType.ANNOTATION_TYPE)
 		public @interface After {
 			@Parameter(name = "operations", description = "operations")
-			SeleniumOperation[] value() default { SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, 
-			  	   SeleniumOperation.NAVIGATE_BACK, SeleniumOperation.NAVIGATE_FORWARD };
+			SeleniumOperation[] value() default { SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.SEND_KEYS,
+				SeleniumOperation.NAVIGATE_TO};
 		}
 
 		@Parameter(name = "support", description = "Screenshot reports")
@@ -67,11 +68,31 @@ public @interface Report {
 		@Parameter(name = "after", description = "after specified")
 		After after() default @After;
 	}
-	
+
+	@Target(ElementType.ANNOTATION_TYPE)
+	public @interface CommandReport {
+
+		@Parameter(name = "command", description = "command")
+		SeleniumOperation[] value() default {};
+	}
+
 	@Target(ElementType.ANNOTATION_TYPE)
 	public @interface HtmlReport {
 
-		@Parameter(name = "report.html", description = "HTML reports")
+		@Target(ElementType.ANNOTATION_TYPE)
+		public @interface IssueTracker {
+
+			public static final String URL = "%url%";
+			public static final String ISSUE_NUMBER = "%issue_number%";
+
+			@Parameter(name = "url", description = "URL")
+			String url() default Constants.NULL;
+
+			@Parameter(name = "issue.link", description = "issue link format")
+			String issueLink() default URL + ISSUE_NUMBER;
+		}
+		
+		@Parameter(name = "enabled", description = "enables/disables HTML report")
 		Support support() default @Support(directory = Report.CURRENT_DATE + "_" + Report.CURRENT_TIME + "_" + Report.TEST_CASE_NAME + "_" + Report.TEST_NAME);
 		
 		@Parameter(name = "test.template.path", description = "Defines path to the used template for tests")
@@ -80,10 +101,43 @@ public @interface Report {
 		@Parameter(name = "suite.template.path", description = "Defines path to the used template for suite")
 		String suiteTemplatePath() default Report.CLASSPATH_TEMPLATE_PREFIX + "sk/seges/sesam/webdriver/report/metal/report_default.vm";
 
-		@Parameter(name = "suite.template.locale", description = "Defines locale for the generated report")
+		@Parameter(name = "locale", description = "Defines locale for the generated report")
 		String locale() default "en";
+		
+		@Parameter(name = "command.failure.log", description = "Defines what to log when test fails")
+		CommandReport onFailure() default @CommandReport({SeleniumOperation.ASSERTION, SeleniumOperation.FAIL,
+				SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, 
+		  	   	SeleniumOperation.NAVIGATE_BACK, SeleniumOperation.NAVIGATE_FORWARD});
+
+		@Parameter(name = "command.success.log", description = "Defines what to log when test succeed")
+		CommandReport onSucess() default @CommandReport({SeleniumOperation.ASSERTION, SeleniumOperation.FAIL,
+				SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, 
+		  	   	SeleniumOperation.NAVIGATE_BACK, SeleniumOperation.NAVIGATE_FORWARD});
+		
+		@Parameter(name = "issue.tracker", description = "Settings for issue tracker")
+		IssueTracker issueTracker() default @IssueTracker();
 	}
-	
-	@Parameter(name = "report.html", description = "HTML reports")
+
+	@Target(ElementType.ANNOTATION_TYPE)
+	public @interface ConsoleReport {
+
+		@Parameter(name = "enabled", description = "enables/disables HTML report")
+		Support support() default @Support;
+		
+		@Parameter(name = "command.failure.log", description = "Defines what to log when test fails")
+		CommandReport onFailure() default @CommandReport({SeleniumOperation.ASSERTION, SeleniumOperation.FAIL,
+				SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, 
+		  	   	SeleniumOperation.NAVIGATE_BACK, SeleniumOperation.NAVIGATE_FORWARD});
+
+		@Parameter(name = "command.success.log", description = "Defines what to log when test succeed")
+		CommandReport onSucess() default @CommandReport({SeleniumOperation.ASSERTION, SeleniumOperation.FAIL,
+				SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, 
+		  	   	SeleniumOperation.NAVIGATE_BACK, SeleniumOperation.NAVIGATE_FORWARD});
+	}
+
+	@Parameter(name = "report.html", description = "HTML report settings")
 	HtmlReport html() default @HtmlReport(support = @Support(enabled = false));
+
+	@Parameter(name = "report.console", description = "Console report settings")
+	ConsoleReport console() default @ConsoleReport(support = @Support(enabled = true));
 }

@@ -11,14 +11,14 @@ import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
 import sk.seges.sesam.pap.model.model.api.domain.DomainDeclaredType;
 import sk.seges.sesam.pap.model.model.api.domain.DomainType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
-import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
+import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.service.printer.model.ServiceConverterProviderPrinterContext;
 
 public class ServiceMethodDomainConverterProviderPrinter extends AbstractDomainMethodConverterProviderPrinter {
 
-	public ServiceMethodDomainConverterProviderPrinter(ConverterConstructorParametersResolver parametersResolver,
+	public ServiceMethodDomainConverterProviderPrinter(ConverterConstructorParametersResolverProvider parametersResolverProvider,
 			TransferObjectProcessingEnvironment processingEnv, FormattedPrintWriter pw, ConverterProviderPrinter converterProviderPrinter) {
-		super(parametersResolver, processingEnv, pw, converterProviderPrinter);
+		super(parametersResolverProvider, processingEnv, pw, converterProviderPrinter);
 	}
 
 	protected void printResulConverter(ConverterProviderPrinterContext context) {
@@ -28,7 +28,7 @@ public class ServiceMethodDomainConverterProviderPrinter extends AbstractDomainM
 				processingEnv.getTypeUtils().getTypeVariable(ConverterTypeElement.DOMAIN_TYPE_ARGUMENT_PREFIX));
 
 		Field field = new Field(DOMAIN_CLASS_PARAMETER_NAME, fieldType);
-		field.setCastType(processingEnv.getTypeUtils().getDeclaredType(processingEnv.getTypeUtils().toMutableType(Class.class), new MutableDeclaredType[] { context.getDomain() }));
+		field.setCastType(processingEnv.getTypeUtils().getDeclaredType(processingEnv.getTypeUtils().toMutableType(Class.class), new MutableDeclaredType[] { context.getRawDomain() }));
 
 		converterProviderPrinter.printDomainGetConverterMethodName(context.getRawDomain(), field, 
 				((ServiceConverterProviderPrinterContext)context).getLocalMethod(), pw, false);
@@ -41,6 +41,18 @@ public class ServiceMethodDomainConverterProviderPrinter extends AbstractDomainM
 		if (domainType.getKind().isDeclared() && domainType.getConverter() != null) {
 			context = new ServiceConverterProviderPrinterContext((DomainDeclaredType)domainType, ((ServiceConverterProviderPrinterContext)context).getLocalMethod());
 			print(context);
+		}
+	}
+	
+	@Override
+	public void print(ConverterProviderPrinterContext context) {
+
+		if (types.size() == 0) {
+			initializeDomainConverterMethod();
+		}
+
+		if (!types.contains(context.getRawDomain().getCanonicalName())) {
+			types.add(context.getRawDomain().getCanonicalName());		
 		}
 	}
 }

@@ -1,11 +1,8 @@
 package sk.seges.sesam.pap.service.resolver;
 
-import sk.seges.sesam.core.pap.model.ParameterElement;
+import sk.seges.sesam.core.pap.model.mutable.api.MutableReferenceType;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
-import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.resolver.DefaultConverterConstructorParametersResolver;
-import sk.seges.sesam.shared.model.converter.ConvertedInstanceCache;
-import sk.seges.sesam.shared.model.converter.api.ConverterProvider;
 
 public class ServiceConverterConstructorParametersResolver extends DefaultConverterConstructorParametersResolver {
 
@@ -14,27 +11,17 @@ public class ServiceConverterConstructorParametersResolver extends DefaultConver
 	}
 
 	@Override
-	protected ParameterElement getConverterProviderParameter() {
-		return new ParameterElement(processingEnv.getTypeUtils().toMutableType(ConverterProvider.class), CONVERTER_PROVIDER_NAME, false);
+	protected boolean isConverterProviderContextParameterPropagated() {
+		return false;
 	}
 
 	@Override
-	protected ParameterElement getConverterCacheParameter() {
-		return new ParameterElement(processingEnv.getTypeUtils().toMutableType(ConvertedInstanceCache.class), ConverterProviderPrinter.CONVERTER_CACHE_NAME, false);
+	protected boolean isConverterCacheParameterPropagated() {
+		return false;
 	}
-
-//	@Override
-//	public ParameterElement[] getConstructorAditionalParameters() {
-//		ParameterElement[] constructorAditionalParameters = super.getConstructorAditionalParameters();
-//		
-//		ParameterElement[] result = new ParameterElement[constructorAditionalParameters.length + 1];
-//		
-//		for (int i = 0; i < constructorAditionalParameters.length; i++) {
-//			result[i] = constructorAditionalParameters[i];
-//		}
-//		
-//		result[constructorAditionalParameters.length] = getConverterCacheParameter();
-//		
-//		return result;
-//	}
+	
+	@Override
+	protected MutableReferenceType getConverterProviderContextReference() {
+		return null;
+	}
 }

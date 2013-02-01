@@ -107,7 +107,7 @@ public class ProcessorUtils {
 		return null;
 	}
 
-	public static TypeMirror erasureSuperclass(TypeElement typeElement, String parameterName, TypeElement owner) {
+	public static TypeMirror erasureSuperclass(Element typeElement, String parameterName, TypeElement owner) {
 
 		Element currentElement = typeElement;
 		
@@ -243,6 +243,10 @@ public class ProcessorUtils {
 	}
 
 	public static ExecutableElement getMethod(String name, Element element) {
+		return getMethod(name, element, true);
+	}
+	
+	public static ExecutableElement getMethod(String name, Element element, boolean searchInterfaces) {
 		assert name != null;
 		assert element != null;
 		List<ExecutableElement> methods = ElementFilter.methodsIn(element.getEnclosedElements());
@@ -262,23 +266,29 @@ public class ProcessorUtils {
 			}
 		}
 		
-		for (TypeMirror interfaceType: typeElement.getInterfaces()) {
-			if (interfaceType.getKind().equals(TypeKind.DECLARED)) {
-				ExecutableElement method = getMethod(name, ((DeclaredType)interfaceType).asElement());
-				
-				if (method != null) {
-					return method;
+		if (searchInterfaces) {
+			for (TypeMirror interfaceType: typeElement.getInterfaces()) {
+				if (interfaceType.getKind().equals(TypeKind.DECLARED)) {
+					ExecutableElement method = getMethod(name, ((DeclaredType)interfaceType).asElement());
+					
+					if (method != null) {
+						return method;
+					}
 				}
 			}
 		}
-
+		
 		return null;
 	}
 	
 	public static boolean hasMethod(String name, Element element) {
-		return getMethod(name, element) != null;
+		return hasMethod(name, element, true);
 	}
-	
+
+	public static boolean hasMethod(String name, Element element, boolean searchInterfaces) {
+		return getMethod(name, element, searchInterfaces) != null;
+	}
+
 	public static ExecutableElement getOverrider(TypeElement element, ExecutableElement method, ProcessingEnvironment processingEnv) {
 		List<ExecutableElement> methods = ElementFilter.methodsIn(element.getEnclosedElements());
 

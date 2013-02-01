@@ -20,7 +20,6 @@ import sk.seges.sesam.pap.model.model.ConverterTypeElement;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
 import sk.seges.sesam.pap.model.model.api.ElementHolderTypeConverter;
 import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
-import sk.seges.sesam.pap.model.printer.converter.ConverterFilterType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterInstancerType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.printer.equals.ConverterEqualsPrinter;
@@ -30,6 +29,9 @@ import sk.seges.sesam.pap.model.provider.ClasspathConfigurationProvider;
 import sk.seges.sesam.pap.model.provider.TransferObjectConverterProcessorContextProvider;
 import sk.seges.sesam.pap.model.provider.TransferObjectProcessorContextProvider;
 import sk.seges.sesam.pap.model.provider.api.ConfigurationProvider;
+import sk.seges.sesam.pap.model.resolver.CacheableConverterConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider.UsageType;
 import sk.seges.sesam.pap.model.resolver.DefaultConverterConstructorParametersResolver;
 import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
 import sk.seges.sesam.shared.model.converter.BasicCachedConverter;
@@ -85,9 +87,9 @@ public class TransferObjectConverterProcessor extends AbstractTransferProcessor 
 	@Override
 	protected TransferObjectElementPrinter[] getElementPrinters(FormattedPrintWriter pw) {
 		return new TransferObjectElementPrinter[] {
-				new ConverterEqualsPrinter(converterProviderPrinter, getEntityResolver(), getParametersResolver(), processingEnv, pw),
-				new CopyToDtoPrinter(converterProviderPrinter, getElementTypeConverter(),getEntityResolver(), getParametersResolver(), roundEnv, processingEnv, pw),
-				new CopyFromDtoPrinter(nestedInstances, converterProviderPrinter, getEntityResolver(), getParametersResolver(), roundEnv, processingEnv, pw)
+				new ConverterEqualsPrinter(converterProviderPrinter, getEntityResolver(), getParametersResolverProvider(), processingEnv, pw),
+				new CopyToDtoPrinter(converterProviderPrinter, getElementTypeConverter(),getEntityResolver(), getParametersResolverProvider(), roundEnv, processingEnv, pw),
+				new CopyFromDtoPrinter(nestedInstances, converterProviderPrinter, getEntityResolver(), getParametersResolverProvider(), roundEnv, processingEnv, pw)
 		};
 	}
 	
@@ -95,12 +97,18 @@ public class TransferObjectConverterProcessor extends AbstractTransferProcessor 
 		return new TransferObjectConverterProcessorContextProvider(getEnvironmentContext(), getEntityResolver());
 	}
 
-	protected ConverterConstructorParametersResolver getParametersResolver() {
-		return new DefaultConverterConstructorParametersResolver(processingEnv);
+	protected ConverterConstructorParametersResolverProvider getParametersResolverProvider() {
+		return new CacheableConverterConstructorParametersResolverProvider() {
+			
+			@Override
+			public ConverterConstructorParametersResolver constructParameterResolver(UsageType usageType) {
+				return new DefaultConverterConstructorParametersResolver(processingEnv);
+			}
+		};
 	}
 	
 	protected ConverterProviderPrinter getConverterProviderPrinter(FormattedPrintWriter pw) {
-		return new ConverterProviderPrinter(pw, processingEnv, getParametersResolver());
+		return new ConverterProviderPrinter(pw, processingEnv, getParametersResolverProvider(), UsageType.CONVERTER_PROVIDER_OUTSIDE_USAGE);
 	}
 	
 	@Override
@@ -112,7 +120,7 @@ public class TransferObjectConverterProcessor extends AbstractTransferProcessor 
 
 		TypeElement cachedConverterType = processingEnv.getElementUtils().getTypeElement(BasicCachedConverter.class.getCanonicalName());
 		
-		ParameterElement[] constructorAditionalParameters = getParametersResolver().getConstructorAditionalParameters();
+		ParameterElement[] constructorAditionalParameters = getParametersResolverProvider().getParameterResolver(UsageType.DEFINITION).getConstructorAditionalParameters();
 		
 		for (ParameterElement parameter: constructorAditionalParameters) {
 			pw.println("private ", parameter.getType(), " " + parameter.getName().toString() + ";");
@@ -124,6 +132,7 @@ public class TransferObjectConverterProcessor extends AbstractTransferProcessor 
 
 		super.processElement(context);
 		
-		converterProviderPrinter.printConverterMethods(false, ConverterFilterType.NONE, ConverterInstancerType.REFERENCED_CONVERTER_INSTANCER);
+//		converterProviderPrinter.printConverterMethods(false, ConverterProviderMethodType.ALL, ConverterInstancerType.REFERENCED_CONVERTER_INSTANCER);
+		converterProviderPrinter.printConverterMethods(false, ConverterInstancerType.REFERENCED_CONVERTER_INSTANCER);
 	}	
 }
