@@ -16,15 +16,20 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 
+import com.sun.org.apache.xpath.internal.operations.Mod;
+
 import sk.seges.sesam.core.pap.model.api.ClassSerializer;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
+import sk.seges.sesam.core.pap.model.mutable.api.MutableExecutableType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableWildcardType;
+import sk.seges.sesam.core.pap.model.mutable.api.element.MutableVariableElement;
 import sk.seges.sesam.core.pap.structure.api.PackageValidator;
+import sk.seges.sesam.core.pap.writer.HierarchyPrintWriter;
 
 //TODO rename to MutableType
-class MutableDeclared extends MutableAnnotated implements MutableDeclaredType {
+class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclaredType {
 
 	protected String simpleName;
 	private String packageName;
@@ -34,12 +39,17 @@ class MutableDeclared extends MutableAnnotated implements MutableDeclaredType {
 	private MutableTypeKind kind;
 
 	private List<MutableTypeMirror> interfaces;
+	private List<MutableVariableElement> fields;
+	private List<MutableDeclaredType> nestedTypes;
 	
 	private boolean superClassInitialized = false;
 	private MutableDeclaredType superClass;
 
 	private List<Modifier> modifiers;
-	
+	private List<MutableExecutableType> mutableMethods = new LinkedList<MutableExecutableType>();
+
+	private MutableExecutableType constructor;
+
 	//TypeMirror for the primitive types, otherwise DeclaredType
 	private TypeMirror type;
 	private boolean dirty = false;
@@ -77,35 +87,6 @@ class MutableDeclared extends MutableAnnotated implements MutableDeclaredType {
 
 	public List<Modifier> getModifiers() {
 		return Collections.unmodifiableList(ensureModifiers());
-
-	}
-
-	private int getModifierType(Modifier modifier) {
-		switch (modifier) {
-			case PUBLIC:
-			case PRIVATE:
-			case PROTECTED:
-				return 1;
-				
-			case ABSTRACT:
-			case FINAL:
-				return 2;
-				
-			case NATIVE:
-				return 3;
-			case STATIC:
-				return 4;
-			case STRICTFP:
-				return 5;
-			case SYNCHRONIZED:
-				return 6;
-			case TRANSIENT:
-				return 7;
-			case VOLATILE:
-				return 8;
-		}
-		
-		return 0;
 	}
 
 	public MutableDeclaredType setModifier(Modifier... modifiers) {
@@ -117,9 +98,12 @@ class MutableDeclared extends MutableAnnotated implements MutableDeclaredType {
 	public MutableDeclaredType addModifier(Modifier... modifiers) {
 		dirty();
 		List<Modifier> result = new ArrayList<Modifier>();
+		
+		ModifierConverter modifierConverter = new ModifierConverter();
+		
 		for (Modifier modifier: modifiers) {
 			for (Modifier mod: ensureModifiers()) {
-				if (getModifierType(mod) != getModifierType(modifier)) {
+				if (modifierConverter.getModifierType(mod) != modifierConverter.getModifierType(modifier)) {
 					result.add(mod);
 				}
 			}
@@ -779,4 +763,80 @@ class MutableDeclared extends MutableAnnotated implements MutableDeclaredType {
 		
 		return (TypeElement)((DeclaredType)type).asElement();
 	}
+
+	@Override
+	public MutableDeclaredType addField(MutableVariableElement field) {
+		dirty();
+		if (fields == null) {
+			fields = new LinkedList<MutableVariableElement>();
+		}
+		fields.add(field);
+		return this;
+	}
+	
+	public List<MutableVariableElement> getFields() {
+		if (fields == null) {
+			return null;
+		}
+		
+		return Collections.unmodifiableList(fields);
+	}
+	
+	public MutableDeclaredType clearFields() {
+		dirty();
+		if (fields != null) {
+			fields.clear();
+		}
+		return this;
+	}
+
+	private HierarchyPrintWriter printWriter;
+	
+	@Override
+	public HierarchyPrintWriter getPrintWriter() {
+		if (printWriter == null) {
+			printWriter = new HierarchyPrintWriter(processingEnv);
+		}
+		
+		return printWriter;
+	}
+
+	@Override
+	public MutableDeclaredType addMethod(MutableExecutableType method) {
+		mutableMethods.add(method);
+		return this;
+	}
+
+	@Override
+	public List<MutableExecutableType> getMethods() {
+		return Collections.unmodifiableList(mutableMethods);
+	}
+
+	@Override
+	public MutableExecutableType getConstructor() {
+		if (constructor == null) {
+			constructor = new MutableMethod(processingEnv, getSimpleName()).addModifier(Modifier.PUBLIC);
+		}
+		
+		return constructor;
+	}
+
+	@Override
+	public MutableDeclaredType addNestedType(MutableDeclaredType nestedType) {
+		if (nestedTypes == null) {
+			nestedTypes = new ArrayList<MutableDeclaredType>();
+		}
+		
+		nestedTypes.add(nestedType);
+		
+		return nestedType;
+	}
+
+	@Override
+	public List<MutableDeclaredType> getNestedTypes() {
+		if (nestedTypes == null) {
+			return new ArrayList<MutableDeclaredType>();
+		}
+		return Collections.unmodifiableList(nestedTypes);
+	}	
 }

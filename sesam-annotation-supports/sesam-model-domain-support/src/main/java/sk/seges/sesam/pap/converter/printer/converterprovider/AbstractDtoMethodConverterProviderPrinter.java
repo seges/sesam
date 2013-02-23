@@ -1,6 +1,6 @@
 package sk.seges.sesam.pap.converter.printer.converterprovider;
 
-import sk.seges.sesam.core.pap.model.api.ClassSerializer;
+import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.pap.converter.printer.AbstractObjectConverterProviderPrinter;
 import sk.seges.sesam.pap.converter.printer.model.ConverterProviderPrinterContext;
@@ -32,7 +32,8 @@ public abstract class AbstractDtoMethodConverterProviderPrinter extends Abstract
 	@Override
 	public void print(ConverterProviderPrinterContext context) {
 		
-		if (context.getConverterType() == null) {
+		//There is no direct converter between DTO <-> DOMAIN, but DOMAIN <-> DTO neither
+		if (context.getConverterType() == null && context.getDomain().getConverter() == null) {
 			return;
 		}
 		
@@ -42,10 +43,8 @@ public abstract class AbstractDtoMethodConverterProviderPrinter extends Abstract
 				initializeDtoConverterMethod();
 			}
 			
-			String rawDtoName = context.getRawDto().toString(ClassSerializer.SIMPLE, false);
-			
 			types.add(context.getRawDto().getCanonicalName());
-			pw.println("if (" + rawDtoName + ".class.equals(" + DTO_CLASS_PARAMETER_NAME + ")) {");
+			pw.println("if (", context.getRawDto().clone().setTypeVariables(new MutableTypeVariable[] {}), ".class.equals(" + DTO_CLASS_PARAMETER_NAME + ")) {");
 
 			printResultConverter(context);
 			
