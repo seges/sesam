@@ -130,7 +130,6 @@ public class ServiceConverterProcessor extends AbstractTransferProcessingProcess
 				new ServiceConstructorDefinitionPrinter(processingEnv, getParametersFilter(), getParametersResolverProvider(serviceTypeElement)),
 				new ServiceConstructorBodyPrinter(processingEnv, getParametersFilter(), getParametersResolverProvider(serviceTypeElement)),
 				new ServiceMethodConverterPrinter(processingEnv, getParametersResolverProvider(serviceTypeElement), converterProviderPrinter),
-				new ServiceConverterProviderContextPrinter(processingEnv, getParametersResolverProvider(serviceTypeElement), converterProviderPrinter, getClassPathTypes())
 		};
 	}
 
