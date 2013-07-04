@@ -23,31 +23,13 @@ public class ConverterProviderPrinterDelegate {
 
 		ParameterElement[] generatedParameters = type.getConverterParameters(parametersResolverProvider.getParameterResolver(usageType));
 
-		HierarchyPrintWriter printWriter = type.getConstructor().addModifier(Modifier.PUBLIC).getPrintWriter();
+		type.getConstructor().addModifier(Modifier.PUBLIC).getPrintWriter();
 		
 		for (ParameterElement generatedParameter : generatedParameters) {
 			ProcessorUtils.addField(processingEnv, type, generatedParameter.getType(), generatedParameter.getName());
 		}
-
-		printConstructorBody(printWriter);
 	}
 
-	protected void printConstructorBody(HierarchyPrintWriter printWriter) {}
-	
-	protected ParameterElement getParameterElementByType(ConstructorParameter constructorParameter, ParameterElement[] converterParameters) {
-		if (converterParameters == null) {
-			return null;
-		}
-		
-		for (int i = 0; i < converterParameters.length; i++) {
-			if (constructorParameter.getType().toString().equals(converterParameters[i].getType().toString())) {
-				return converterParameters[i];
-			}
-		}
-		
-		return null;
-	}
-	
 	public void finalize() {
 	}
 }

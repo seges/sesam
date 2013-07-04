@@ -35,7 +35,7 @@ public class ServiceConverterProviderContextPrinter implements ConverterContextE
     public ServiceConverterProviderContextPrinter(TransferObjectProcessingEnvironment processingEnv, ConverterConstructorParametersResolverProvider parametersResolverProvider,
 			ClassPathTypes classPathTypes) {
         this.processingEnv = processingEnv;
-        this.converterProviderContextPrinterDelegate = new ConverterProviderContextPrinterDelegate(parametersResolverProvider);
+        this.converterProviderContextPrinterDelegate = new ConverterProviderContextPrinterDelegate(processingEnv, parametersResolverProvider);
 		this.classPathTypes = classPathTypes;
 	}
 	
@@ -44,21 +44,15 @@ public class ServiceConverterProviderContextPrinter implements ConverterContextE
 
 	}
 	
-	protected Set<? extends Element> getConverterProviderDelegates() {
-		return classPathTypes.getElementsAnnotatedWith(ConverterProviderDefinition.class);
-	}
-
-
     @Override
 	public void initialize(ConverterProviderContextType contextType) {
-		
-
-		converterProviderContextPrinterDelegate.initialize(processingEnv, contextType,
-				UsageType.CONVERTER_PROVIDER_CONTEXT_CONSTRUCTOR, getConverterProviderDelegates());
+        converterProviderContextPrinterDelegate.initialize(processingEnv, contextType,
+                UsageType.CONVERTER_PROVIDER_CONTEXT_CONSTRUCTOR);
     }
 
     @Override
 	public void print(ConverterProviderType serviceConverterProvider) {
+        converterProviderContextPrinterDelegate.print(serviceConverterProvider.asElement());
 	}
 
     @Override

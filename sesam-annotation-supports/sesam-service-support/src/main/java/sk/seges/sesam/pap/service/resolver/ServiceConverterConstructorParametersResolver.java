@@ -12,7 +12,7 @@ public class ServiceConverterConstructorParametersResolver extends DefaultConver
 
 	@Override
 	protected boolean isConverterProviderContextParameterPropagated() {
-		return false;
+		return true;
 	}
 
 	@Override
