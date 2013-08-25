@@ -1,8 +1,8 @@
 package sk.seges.sesam.core.test.webdriver.action.logging;
 
-import org.openqa.selenium.Mouse;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Mouse;
 import org.openqa.selenium.interactions.MoveToOffsetAction;
 import org.openqa.selenium.internal.Locatable;
 

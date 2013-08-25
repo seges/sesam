@@ -1,14 +1,13 @@
 package sk.seges.sesam.core.test.webdriver.factory;
 
-import java.net.URL;
-
-import org.openqa.selenium.SeleneseCommandExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import sk.seges.sesam.core.test.selenium.configuration.annotation.SeleniumSettings;
+
+import com.thoughtworks.selenium.DefaultSelenium;
+import com.thoughtworks.selenium.Selenium;
 
 public class RemoteWebDriverFactory implements WebDriverFactory {
 
@@ -16,15 +15,12 @@ public class RemoteWebDriverFactory implements WebDriverFactory {
 	public WebDriver createSelenium(SeleniumSettings testEnvironment) {
 		DesiredCapabilities capabilities = new DesiredCapabilities();
 		capabilities.setBrowserName(testEnvironment.getBrowser().toString());
-		CommandExecutor executor;
-		try {
-			executor = new SeleneseCommandExecutor(
-					new URL("http", extractHost(testEnvironment.getSeleniumServer()),testEnvironment.getSeleniumPort(), "/"), 
-					new URL("http", extractHost(testEnvironment.getTestURL()), 80, "/"), capabilities);
-		} catch (Exception ex) {
-			throw new RuntimeException("Invalid test environment specified.", ex);
-		}
-		return new RemoteWebDriver(executor, capabilities);
+	
+		WebDriver driver = new RemoteWebDriver(capabilities);
+		Selenium selenium = new DefaultSelenium(testEnvironment.getSeleniumServer(), testEnvironment.getSeleniumPort(), "*webdriver", testEnvironment.getTestURL());
+		selenium.start(driver);
+		
+		return driver;
 	}
 	
 	protected String extractHost(String host) {

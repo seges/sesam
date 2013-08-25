@@ -1,9 +1,9 @@
 package sk.seges.sesam.core.test.webdriver.action.logging;
 
-import org.openqa.selenium.Keyboard;
-import org.openqa.selenium.Mouse;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Keyboard;
+import org.openqa.selenium.interactions.Mouse;
 import org.openqa.selenium.interactions.SendKeysAction;
 import org.openqa.selenium.internal.Locatable;
 

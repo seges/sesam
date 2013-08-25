@@ -1,9 +1,6 @@
 package sk.seges.sesam.core.test.webdriver;
 
-import org.openqa.selenium.HasInputDevices;
-import org.openqa.selenium.Keyboard;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.Mouse;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Action;
@@ -13,8 +10,11 @@ import org.openqa.selenium.interactions.ClickAction;
 import org.openqa.selenium.interactions.ClickAndHoldAction;
 import org.openqa.selenium.interactions.CompositeAction;
 import org.openqa.selenium.interactions.ContextClickAction;
+import org.openqa.selenium.interactions.HasInputDevices;
 import org.openqa.selenium.interactions.KeyDownAction;
 import org.openqa.selenium.interactions.KeyUpAction;
+import org.openqa.selenium.interactions.Keyboard;
+import org.openqa.selenium.interactions.Mouse;
 import org.openqa.selenium.interactions.MoveMouseAction;
 import org.openqa.selenium.interactions.MoveToOffsetAction;
 import org.openqa.selenium.interactions.SendKeysAction;
