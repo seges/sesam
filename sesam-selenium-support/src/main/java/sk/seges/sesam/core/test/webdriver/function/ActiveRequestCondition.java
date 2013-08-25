@@ -3,6 +3,7 @@
  */
 package sk.seges.sesam.core.test.webdriver.function;
 
+import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -17,6 +18,8 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
  * @author ladislav.gazo
  */
 public class ActiveRequestCondition implements ExpectedCondition<Boolean> {
+	private static final Logger log = Logger.getLogger(ActiveRequestCondition.class);
+	
 	@Override
 	public Boolean apply(WebDriver input) {
 		WebElement element = input.findElement(By.id("activeRequest"));
@@ -30,6 +33,7 @@ public class ActiveRequestCondition implements ExpectedCondition<Boolean> {
 					"return arguments[0].innerHTML;", element);
 			outstanding.trim();
 		}
+		log.debug("outstanding requests = " + outstanding);
 		return "0".equals(outstanding);
 	}
 }
