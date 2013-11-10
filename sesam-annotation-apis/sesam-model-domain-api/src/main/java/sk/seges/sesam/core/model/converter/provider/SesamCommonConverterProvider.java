@@ -19,15 +19,13 @@ import sk.seges.sesam.shared.model.converter.provider.AbstractConverterProvider;
 public class SesamCommonConverterProvider extends AbstractConverterProvider {
 
 	private final ConverterProviderContext converterProviderContext;
-	private final ConvertedInstanceCache cache;
 	private final AclDataRegistry aclDataRegistry;
 	
-	public SesamCommonConverterProvider(ConverterProviderContext converterProviderContext, ConvertedInstanceCache cache, AclDataRegistry aclDataRegistry) {
+	public SesamCommonConverterProvider(ConverterProviderContext converterProviderContext, AclDataRegistry aclDataRegistry) {
 		this.converterProviderContext = converterProviderContext;
-		this.cache = cache;
 		this.aclDataRegistry = aclDataRegistry;
 	}
-	
+
 	public <DTO, DOMAIN> DtoConverter<DTO, DOMAIN> getConverterForDomain(Class<DOMAIN> domainClass) {
 
 		if (domainClass == null) {
@@ -72,7 +70,9 @@ public class SesamCommonConverterProvider extends AbstractConverterProvider {
 
 	@SuppressWarnings("unchecked")
 	protected <DTO, DOMAIN> DtoConverter<DTO, DOMAIN> getSecuredEntityConverter() {
-		return (DtoConverter<DTO, DOMAIN>) new SecuredEntityConverter(cache, converterProviderContext, aclDataRegistry);
+		SecuredEntityConverter securedEntityConverter = new SecuredEntityConverter(converterProviderContext, aclDataRegistry);
+		securedEntityConverter.setCache(cache);
+		return (DtoConverter<DTO, DOMAIN>)securedEntityConverter;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

@@ -76,6 +76,7 @@ public interface MutableDeclaredType extends MutableTypeMirror, HasAnnotations, 
 
 	MutableDeclaredType addMethod(MutableExecutableType method);
 	List<MutableExecutableType> getMethods();
+	MutableExecutableType getMethod(String name);
 	MutableExecutableType getConstructor();
 	
 	List<? extends MutableTypeMirror> getInterfaces();
@@ -106,6 +107,7 @@ public interface MutableDeclaredType extends MutableTypeMirror, HasAnnotations, 
 	MutableDeclaredType addField(MutableVariableElement field);
 	List<MutableVariableElement> getFields();
 	MutableVariableElement getField(MutableVariableElement field);
+	MutableVariableElement getField(String name);
 	MutableDeclaredType clearFields();
 	
 	MutableDeclaredType addNestedType(MutableDeclaredType nestedType);

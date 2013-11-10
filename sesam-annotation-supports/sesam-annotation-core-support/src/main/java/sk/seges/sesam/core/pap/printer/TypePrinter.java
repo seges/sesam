@@ -165,7 +165,7 @@ public class TypePrinter {
 					new AnnotationPrinter(pw, processingEnv).print(mutableAnnotation);
 				}
 				
-				Set<Modifier> modifiers = field.getModifiers();
+				List<Modifier> modifiers = field.getModifiers();
 				
 				if (modifiers != null) {
 					for (Modifier modifier: modifiers) {

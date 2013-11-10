@@ -32,7 +32,7 @@ public abstract class AbstractDomainMethodConverterProviderPrinter extends Abstr
 		pw.println("}");
 		pw.println();
 	}
-	
+
 	@Override
 	public void print(ConverterProviderPrinterContext context) {
 
@@ -51,7 +51,7 @@ public abstract class AbstractDomainMethodConverterProviderPrinter extends Abstr
 			
 			pw.println("if (",instantiableDomain.clone().setTypeVariables(new MutableTypeVariable[] {}), ".class.equals(" + DOMAIN_CLASS_PARAMETER_NAME + ")) {");
 
-			printResulConverter(context);
+			printResultConverter(context);
 			
 			pw.println(";");
 			pw.println("}");
@@ -61,7 +61,7 @@ public abstract class AbstractDomainMethodConverterProviderPrinter extends Abstr
 		printTypeVariables(context);
 	}
 
-	protected abstract void printResulConverter(ConverterProviderPrinterContext context);
+	protected abstract void printResultConverter(ConverterProviderPrinterContext context);
 	
 	@Override
 	protected void printType(MutableTypeMirror type, ConverterProviderPrinterContext context) {

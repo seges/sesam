@@ -1,20 +1,15 @@
 package sk.seges.sesam.pap.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
-
 import sk.seges.sesam.core.pap.model.ParameterElement;
+import sk.seges.sesam.core.pap.model.api.PropagationType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
+import sk.seges.sesam.core.pap.model.mutable.api.MutableExecutableType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
+import sk.seges.sesam.core.pap.model.mutable.api.element.MutableVariableElement;
 import sk.seges.sesam.core.pap.printer.ConstructorPrinter;
 import sk.seges.sesam.core.pap.structure.DefaultPackageValidatorProvider;
 import sk.seges.sesam.core.pap.structure.api.PackageValidatorProvider;
+import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.pap.model.model.ConverterTypeElement;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
@@ -35,6 +30,21 @@ import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverP
 import sk.seges.sesam.pap.model.resolver.DefaultConverterConstructorParametersResolver;
 import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
 import sk.seges.sesam.shared.model.converter.BasicCachedConverter;
+
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class TransferObjectConverterProcessor extends AbstractTransferProcessor {
@@ -120,13 +130,50 @@ public class TransferObjectConverterProcessor extends AbstractTransferProcessor 
 
 		TypeElement cachedConverterType = processingEnv.getElementUtils().getTypeElement(BasicCachedConverter.class.getCanonicalName());
 		
-		ParameterElement[] constructorAditionalParameters = getParametersResolverProvider().getParameterResolver(UsageType.DEFINITION).getConstructorAditionalParameters();
+		ParameterElement[] constructorAdditionalParameters = getParametersResolverProvider().getParameterResolver(UsageType.DEFINITION).getConstructorAditionalParameters();
 		
-		ConstructorPrinter constructorPrinter = new ConstructorPrinter(context.getOutputType(),processingEnv);
-		constructorPrinter.printConstructors(cachedConverterType, constructorAditionalParameters);
+		ConstructorPrinter constructorPrinter = new ConstructorPrinter(context.getOutputType(), processingEnv);
+		constructorPrinter.printConstructors(cachedConverterType, constructorAdditionalParameters);
+
+		TypeElement superClassElement = context.getOutputType().getSuperClass() != null ? context.getOutputType().getSuperClass().asElement() : null;
+
+		for (ParameterElement constructorAdditionalParameter: constructorAdditionalParameters) {
+			String parameterName = constructorAdditionalParameter.getName().toString();
+			if (constructorAdditionalParameter.getPropagationType().equals(PropagationType.PROPAGATED_MUTABLE) && !containsField(superClassElement, constructorAdditionalParameter)) {
+				MutableVariableElement field = processingEnv.getElementUtils().getParameterElement(constructorAdditionalParameter.getType(), parameterName);
+				context.getOutputType().addField((MutableVariableElement) field.addModifier(Modifier.PROTECTED));
+
+				MutableExecutableType setterMethod = processingEnv.getTypeUtils().getExecutable(
+						processingEnv.getTypeUtils().toMutableType(processingEnv.getTypeUtils().getNoType(TypeKind.VOID)), MethodHelper.toSetter(parameterName)).
+						addParameter(processingEnv.getElementUtils().getParameterElement(constructorAdditionalParameter.getType(), parameterName)).addModifier(Modifier.PUBLIC);
+				context.getOutputType().addMethod(setterMethod);
+				setterMethod.getPrintWriter().println("this." + parameterName + " = " + parameterName + ";");
+			}
+		}
 
 		super.processElement(context);
 		
 		converterProviderPrinter.printConverterMethods(context.getOutputType(), false, ConverterInstancerType.REFERENCED_CONVERTER_INSTANCER);
-	}	
+	}
+
+	private boolean containsField(TypeElement superClassElement, ParameterElement constructorAdditionalParameter) {
+
+		if (superClassElement == null) {
+			return false;
+		}
+
+		List<VariableElement> fields = ElementFilter.fieldsIn(superClassElement.getEnclosedElements());
+
+		for (VariableElement field: fields) {
+			if (constructorAdditionalParameter.getType().isSameType(processingEnv.getTypeUtils().toMutableType(field.asType()))) {
+				return true;
+			}
+		}
+
+		if (superClassElement.getSuperclass().getKind().equals(TypeKind.DECLARED)) {
+			return containsField((TypeElement)((DeclaredType)superClassElement.getSuperclass()).asElement(), constructorAdditionalParameter);
+		}
+
+		return false;
+	}
 }

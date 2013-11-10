@@ -1,10 +1,6 @@
 package sk.seges.sesam.pap.service.printer;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
@@ -185,7 +181,20 @@ public class AbstractServicePrinter {
 			}
 		}
 
-		return result;
+		List<ConverterConstructorParameter> inverseResult = new LinkedList<ConverterConstructorParameter>();
+
+		for (int i = result.size() - 1; i >= 0; i--) {
+			ConverterConstructorParameter parameter = result.get(i);
+			ConverterConstructorParameter sameParameterByType = getSameByType(parameter.getType(), inverseResult);
+			if (sameParameterByType == null) {
+				inverseResult.add(parameter);
+			} else {
+				parameter.setSameParameter(sameParameterByType);
+			}
+		}
+
+		Collections.reverse(inverseResult);
+		return inverseResult;
 	}
 
 	// TODO If the converter has 2 same parameters, like Cache cache1, Cache cache2
@@ -193,7 +202,8 @@ public class AbstractServicePrinter {
 	// cache2
 	private ConverterConstructorParameter getSameByType(MutableTypeMirror typeParameter, Collection<ConverterConstructorParameter> parameters) {
 		for (ConverterConstructorParameter parameter : parameters) {
-			if (parameter.getType().toString(ClassSerializer.CANONICAL).equals(typeParameter.toString(ClassSerializer.CANONICAL))) {
+			if (processingEnv.getTypeUtils().isAssignable(parameter.getType(), typeParameter)) {
+			//if (parameter.getType().toString(ClassSerializer.CANONICAL).equals(typeParameter.toString(ClassSerializer.CANONICAL))) {
 				return parameter;
 			}
 		}

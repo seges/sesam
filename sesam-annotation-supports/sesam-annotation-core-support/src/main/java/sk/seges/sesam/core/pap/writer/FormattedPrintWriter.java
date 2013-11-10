@@ -246,61 +246,6 @@ public class FormattedPrintWriter extends PrintWriter implements DelayedPrintWri
 		print(new Object[] { obj });
 	}
 
-	private Set<MutableDeclaredType> extractDeclaredType(MutableTypeMirror type) {
-		return extractDeclaredType(type, new HashSet<MutableDeclaredType>());
-	}
-
-	private Set<MutableDeclaredType> extractDeclaredType(MutableTypeMirror type, Set<MutableDeclaredType> types) {
-
-		if (type instanceof MutableDeclaredType) {
-			types.add((MutableDeclaredType) type);
-			if (typed) {
-				for (MutableTypeVariable variable : ((MutableDeclaredType) type).getTypeVariables()) {
-					types.addAll(extractDeclaredType(variable));
-				}
-			}
-			return types;
-		}
-
-		if (type instanceof MutableArrayType) {
-			extractDeclaredType(((MutableArrayType) type).getComponentType(), types);
-			return types;
-		}
-
-		if (type instanceof MutableTypeVariable) {
-			MutableTypeVariable variable = ((MutableTypeVariable) type);
-			Set<? extends MutableTypeMirror> lowerBounds = variable.getLowerBounds();
-
-			for (MutableTypeMirror lowerBound : lowerBounds) {
-				extractDeclaredType(lowerBound, types);
-			}
-
-			Set<? extends MutableTypeMirror> upperBounds = variable.getUpperBounds();
-
-			for (MutableTypeMirror upperBound : upperBounds) {
-				extractDeclaredType(upperBound, types);
-			}
-
-			return types;
-		}
-
-		if (type instanceof MutableWildcardType) {
-			MutableWildcardType wildcard = (MutableWildcardType) type;
-
-			if (wildcard.getExtendsBound() != null) {
-				extractDeclaredType(wildcard.getExtendsBound(), types);
-			}
-
-			if (wildcard.getSuperBound() != null) {
-				extractDeclaredType(wildcard.getSuperBound(), types);
-			}
-
-			return types;
-		}
-
-		return types;
-	}
-
 	private MutableTypeMirror toMutableType(Object o) {
 		if (o instanceof MutableDeclaredType) {
 			return (MutableDeclaredType) o;
@@ -342,7 +287,7 @@ public class FormattedPrintWriter extends PrintWriter implements DelayedPrintWri
 	}
 
 	private boolean isConflictType(MutableTypeMirror mutableType) {
-		Set<MutableDeclaredType> declaredTypes = extractDeclaredType(mutableType);
+		Set<MutableDeclaredType> declaredTypes = new TypeExtractor(typed).extractDeclaredType(mutableType);
 
 		// TODO implement better version - print canonical names only those type variables that are in conflict (not
 		// whole declared type)
@@ -418,7 +363,7 @@ public class FormattedPrintWriter extends PrintWriter implements DelayedPrintWri
 						if (isConflictType(mutableType)) {
 							evalSerializer = ClassSerializer.CANONICAL;
 						} else {
-							processingEnv.getUsedTypes().addAll(extractDeclaredType(mutableType));
+							processingEnv.getUsedTypes().addAll(new TypeExtractor(typed).extractDeclaredType(mutableType));
 						}
 					}
 					String res = mutableType.toString(evalSerializer, typed);

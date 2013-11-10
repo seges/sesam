@@ -12,6 +12,7 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror.MutableTypeKi
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
 import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
+import sk.seges.sesam.core.pap.writer.TypeExtractor;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConverterTypeElement;
 import sk.seges.sesam.pap.model.model.Field;
@@ -83,8 +84,9 @@ public class CopyToDtoMethodPrinter extends AbstractMethodPrinter implements Cop
 			
 			pw.print(context.getConverter().getConverterBase(), " " + converterName + " = ");
 
+			processingEnv.getUsedTypes().addAll(new TypeExtractor(true).extractDeclaredType(context.getConverter().getDomain()));
 			Field field = new Field(
-					(context.getDomainMethodReturnType().getKind().equals(MutableTypeKind.TYPEVAR) ? "(" + context.getConverter().getDomain() + ")" : "") + 
+					(context.getDomainMethodReturnType().getKind().equals(MutableTypeKind.TYPEVAR) ? "(" + context.getConverter().getDomain().toString(ClassSerializer.SIMPLE, true) + ")" : "") +
 					TransferObjectElementPrinter.DOMAIN_NAME  + "." + context.getDomainFieldName(), context.getConverter().getDomain());
 			TransferObjectMappingAccessor transferObjectMappingAccessor = new TransferObjectMappingAccessor(context.getDtoMethod(), processingEnv);
 			if (transferObjectMappingAccessor.isValid() && transferObjectMappingAccessor.getConverter() != null) {
@@ -121,7 +123,7 @@ public class CopyToDtoMethodPrinter extends AbstractMethodPrinter implements Cop
 		} else {
 			pw.print(TransferObjectElementPrinter.RESULT_NAME + "." + MethodHelper.toSetter(context.getDtoFieldName()) + "(");
 			if (context.getDtoFieldType() != null && context.getDtoFieldType() instanceof MutableTypeVariable) {
-				pw.print("(" + ((MutableTypeVariable)context.getDtoFieldType()).getVariable() + ")");
+				pw.print("(", ((MutableTypeVariable)context.getDtoFieldType()).getVariable(), ")");
 			}
 			//TODO: check why context.getConfigurationTypeElement().getDomain().asElement() return null when generating UserDTO
 			TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(context.getConfigurationTypeElement().getInstantiableDomain().getCanonicalName());

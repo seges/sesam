@@ -1,26 +1,13 @@
 package sk.seges.sesam.pap.service.printer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-
 import sk.seges.sesam.core.pap.accessor.AnnotationAccessor.AnnotationFilter;
 import sk.seges.sesam.core.pap.accessor.AnnotationAccessor.AnnotationTypeFilter;
+import sk.seges.sesam.core.pap.model.ParameterElement;
 import sk.seges.sesam.core.pap.model.api.ClassSerializer;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableExecutableType;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableWildcardType;
+import sk.seges.sesam.core.pap.model.api.PropagationType;
+import sk.seges.sesam.core.pap.model.mutable.api.*;
 import sk.seges.sesam.core.pap.model.mutable.api.element.MutableExecutableElement;
+import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.core.pap.utils.ProcessorUtils;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.core.pap.writer.HierarchyPrintWriter;
@@ -31,8 +18,17 @@ import sk.seges.sesam.pap.model.model.api.domain.DomainType;
 import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterTargetType;
+import sk.seges.sesam.pap.model.printer.converter.ParameterUsagePrinter;
 import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.DefaultConverterConstructorParametersResolver;
 import sk.seges.sesam.pap.service.printer.model.ServiceConverterPrinterContext;
+
+import javax.lang.model.element.*;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter {
 
@@ -147,7 +143,7 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 		}
 		
 		context.getService().getServiceConverter().addMethod(mutableMethodType.addModifier(Modifier.PUBLIC));
-		
+
 		HierarchyPrintWriter pw = remoteMutableMethod.asType().getPrintWriter();
 		
 		//TODO is NULL ok?
@@ -173,6 +169,11 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 		}
 	
 		if (hasConverter) {
+
+			pw.println(context.getService().getServiceConverter().getField(DefaultConverterConstructorParametersResolver.CONVERTER_PROVIDER_CONTEXT_NAME).asType(),
+					" " + DefaultConverterConstructorParametersResolver.CONVERTER_PROVIDER_CONTEXT_NAME +
+					" = this.", DefaultConverterConstructorParametersResolver.CONVERTER_PROVIDER_CONTEXT_NAME, ".get();");
+
 			pw.addLazyPrinter(new LazyPrintWriter(processingEnv) {
 				
 				@Override
@@ -180,8 +181,31 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 					converterProviderPrinter.printConverterParams(localMethod, this);
 				}
 			});
+
+			ParameterElement[] converterParameters = parametersResolverProvider.getParameterResolver(ConverterConstructorParametersResolverProvider.UsageType.DEFINITION).getConstructorAditionalParameters();
+
+			ParameterUsagePrinter parameterUsagePrinter = new ParameterUsagePrinter(pw);
+
+			for (ParameterElement converterParameter: converterParameters) {
+				if (converterParameter.getPropagationType().equals(PropagationType.INSTANTIATED)) {
+
+					MutableType usage = converterParameter.getUsage(new ParameterElement.ParameterUsageContext() {
+
+						@Override
+						public ExecutableElement getMethod() {
+							return null;
+						}
+					});
+
+					if (usage instanceof MutableReferenceType && parameterUsagePrinter.isInline(usage)) {
+						pw.println(DefaultConverterConstructorParametersResolver.CONVERTER_PROVIDER_CONTEXT_NAME + "." + MethodHelper.toSetter(converterParameter.getName()) + "(new ", parameterUsagePrinter.getReferenceType(usage), "());");
+					}  else {
+						pw.println(DefaultConverterConstructorParametersResolver.CONVERTER_PROVIDER_CONTEXT_NAME + "." + MethodHelper.toSetter(converterParameter.getName()) + "(" + converterParameter.getName()  + ");");
+					}
+				}
+			}
 		}
-		
+
 		MutableTypeMirror returnType = null;
 		if (!remoteMethod.getReturnType().getKind().equals(TypeKind.VOID)) {
 			pw.print(returnType = ProcessorUtils.stripTypeParametersVariables(processingEnv.getTypeUtils().toMutableType(localMethod.getReturnType())), " " + RESULT_VARIABLE_NAME + " = ");
@@ -264,8 +288,10 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 			
 			shouldBeConverted = !remoteReturnType.isSameType(localReturnType);
 		}
-		
+
+
 		if (shouldBeConverted) {
+
 			returnType = ProcessorUtils.stripTypeParametersTypes(processingEnv.getTypeUtils().toMutableType(remoteMethod.getReturnType()));
 			
 			pw.print("return (", returnType, ")");

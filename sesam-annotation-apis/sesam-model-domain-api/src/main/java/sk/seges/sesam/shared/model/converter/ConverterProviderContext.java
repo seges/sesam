@@ -9,11 +9,26 @@ import sk.seges.sesam.shared.model.converter.api.DtoConverter;
 public abstract class ConverterProviderContext {
 
 	protected List<ConverterProvider> availableConverterProviders = new ArrayList<ConverterProvider>();
+	protected ConvertedInstanceCache cache;
 
 	public void registerConverterProvider(ConverterProvider converterProvider) {
 		availableConverterProviders.add(converterProvider);
 	}
-	
+
+	public void setCache(ConvertedInstanceCache cache) {
+		this.cache = cache;
+	}
+
+	public abstract ConverterProviderContext get();
+
+	protected <DTO, DOMAIN> DtoConverter<DTO, DOMAIN> initializeConverter(DtoConverter<DTO, DOMAIN> converter) {
+		if (converter instanceof BasicCachedConverter) {
+			((BasicCachedConverter)converter).setCache(cache);
+		}
+
+		return converter;
+	}
+
 	public <DTO, DOMAIN> DtoConverter<DTO, DOMAIN> getConverterForDomain(DOMAIN domain) {
 		if (domain == null) {
 			return null;
@@ -23,7 +38,7 @@ public abstract class ConverterProviderContext {
 			DtoConverter<DTO, DOMAIN> result = availableConverterProvider.getConverterForDomain(domain);
 			
 			if (result != null) {
-				return result;
+				return initializeConverter(result);
 			}
 		}
 
@@ -35,7 +50,7 @@ public abstract class ConverterProviderContext {
 			DtoConverter<DTO, DOMAIN> result = availableConverterProvider.getConverterForDomain(domainClass);
 			
 			if (result != null) {
-				return result;
+				return initializeConverter(result);
 			}
 		}
 
@@ -51,7 +66,7 @@ public abstract class ConverterProviderContext {
 			DtoConverter<DTO, DOMAIN> result = availableConverterProvider.getConverterForDto(dto);
 			
 			if (result != null) {
-				return result;
+				return initializeConverter(result);
 			}
 		}
 
@@ -63,7 +78,7 @@ public abstract class ConverterProviderContext {
 			DtoConverter<DTO, DOMAIN> result = availableConverterProvider.getConverterForDto(dtoClass);
 			
 			if (result != null) {
-				return result;
+				return initializeConverter(result);
 			}
 		}
 

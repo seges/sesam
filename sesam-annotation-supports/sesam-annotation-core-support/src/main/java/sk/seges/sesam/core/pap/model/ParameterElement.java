@@ -2,6 +2,7 @@ package sk.seges.sesam.core.pap.model;
 
 import javax.lang.model.element.ExecutableElement;
 
+import sk.seges.sesam.core.pap.model.api.PropagationType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
@@ -19,13 +20,13 @@ public class ParameterElement {
 	final MutableType usage;
 	final MutableTypeMirror type;
 	final String name;
-	final boolean propagated;
+	final PropagationType propagationType;
 	final ParameterUsageProvider usageProvider;
 	
-	public ParameterElement(MutableTypeMirror type, String name, MutableType usage, boolean isPropagated, MutableProcessingEnvironment processingEnv) {
+	public ParameterElement(MutableTypeMirror type, String name, MutableType usage, PropagationType propagationType, MutableProcessingEnvironment processingEnv) {
 		this.type = type;
 		this.name = name;
-		this.propagated = isPropagated;
+		this.propagationType = propagationType;
 
 		if (usage != null) {
 			this.usage = usage;
@@ -36,10 +37,10 @@ public class ParameterElement {
 		this.usageProvider = null;
 	}
 
-	public ParameterElement(MutableTypeMirror type, String name, ParameterUsageProvider usageProvider, boolean isPropagated) {
+	public ParameterElement(MutableTypeMirror type, String name, ParameterUsageProvider usageProvider, PropagationType propagationType) {
 		this.type = type;
 		this.name = name;
-		this.propagated = isPropagated;
+		this.propagationType = propagationType;
 		this.usage = null;
 		this.usageProvider = usageProvider;
 	}
@@ -64,7 +65,7 @@ public class ParameterElement {
 		return false;
 	}
 	
-	public boolean isPropagated() {
-		return propagated;
+	public PropagationType getPropagationType() {
+		return propagationType;
 	}
 }

@@ -8,6 +8,7 @@ import javax.lang.model.SourceVersion;
 
 import sk.seges.sesam.core.pap.configuration.api.ProcessorConfigurer;
 import sk.seges.sesam.core.pap.model.ConverterConstructorParameter;
+import sk.seges.sesam.core.pap.model.api.PropagationType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableReferenceType;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
@@ -41,7 +42,6 @@ import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResol
 public class ConverterProviderProcessor extends AbstractTransferProcessingProcessor {
 
 	protected ConverterProviderPrinter converterProviderPrinter;
-	protected ConfigurationProvider[] lookupConfigurationProviders = null;
 
 	@Override
 	public ExecutionType getExecutionType() {
@@ -80,8 +80,8 @@ public class ConverterProviderProcessor extends AbstractTransferProcessingProces
 						return new DefaultConverterConstructorParametersResolver(processingEnv) {
 	
 							@Override
-							protected boolean isConverterCacheParameterPropagated() {
-								return false;
+							protected PropagationType getConverterCacheParameterPropagation() {
+								return PropagationType.INSTANTIATED;
 							}
 						};
 
@@ -157,7 +157,7 @@ public class ConverterProviderProcessor extends AbstractTransferProcessingProces
 		UsageType previousUsage = converterProviderPrinter.changeUsage(UsageType.CONVERTER_PROVIDER_OUTSIDE_USAGE);
 		converterProviderPrinter.printConverterMethods(context.getOutputType(), false, ConverterInstancerType.REFERENCED_CONVERTER_INSTANCER);
 		converterProviderPrinter.changeUsage(previousUsage);
-		converterProviderPrinterDelegate.finalize();
+		converterProviderPrinterDelegate.finish((HasConstructorParameters) context.getOutputType());
 	}
 
 	@Override

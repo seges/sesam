@@ -17,7 +17,7 @@ public class LocalServiceFieldPrinter implements ServiceConverterElementPrinter 
 	@Override
 	public void print(ServiceConverterPrinterContext context) {
 		
-		MutableVariableElement field = (MutableVariableElement) context.getProcessingEnv().getElementUtils().getParameterElement(
+		MutableVariableElement field = context.getProcessingEnv().getElementUtils().getParameterElement(
 				ProcessorUtils.replaceTypeVariablesByWildcards(context.getLocalServiceInterface().clone()), context.getLocalServiceFieldName()).addModifier(Modifier.PROTECTED);
 		
 		if (context.getService().getServiceConverter().getField(field) == null) {

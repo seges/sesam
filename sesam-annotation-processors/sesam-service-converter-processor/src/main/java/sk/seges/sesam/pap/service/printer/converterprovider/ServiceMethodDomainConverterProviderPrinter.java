@@ -21,7 +21,7 @@ public class ServiceMethodDomainConverterProviderPrinter extends AbstractDomainM
 		super(parametersResolverProvider, processingEnv, pw, converterProviderPrinter);
 	}
 
-	protected void printResulConverter(ConverterProviderPrinterContext context) {
+	protected void printResultConverter(ConverterProviderPrinterContext context) {
 		pw.print("return (", getTypedDtoConverter(), ") ");
 		
 		MutableDeclaredType fieldType = processingEnv.getTypeUtils().getDeclaredType(processingEnv.getTypeUtils().toMutableType(Class.class), 

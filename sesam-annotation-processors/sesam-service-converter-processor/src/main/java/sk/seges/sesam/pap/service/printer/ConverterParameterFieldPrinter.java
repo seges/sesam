@@ -19,8 +19,13 @@ public class ConverterParameterFieldPrinter extends AbstractParameterCollectorPr
 	@Override
 	public void finish(ServiceTypeElement serviceTypeElement) {
 		for (ConverterConstructorParameter converterParameter: converterParameters) {
-			serviceTypeElement.getServiceConverter().addField((MutableVariableElement) processingEnv.getElementUtils().getParameterElement(
-					converterParameter.getType(), converterParameter.getName()).addModifier(Modifier.PROTECTED));
+			MutableVariableElement parameterElement = processingEnv.getElementUtils().getParameterElement(
+					converterParameter.getType(), converterParameter.getName());
+
+			if (serviceTypeElement.getServiceConverter().getField(parameterElement) == null) {
+				serviceTypeElement.getServiceConverter().addField(parameterElement);
+				parameterElement.addModifier(Modifier.PROTECTED);
+			}
 		}
 	}	
 }

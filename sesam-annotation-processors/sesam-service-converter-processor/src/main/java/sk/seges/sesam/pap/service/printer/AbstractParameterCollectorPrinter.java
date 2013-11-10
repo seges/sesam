@@ -26,6 +26,7 @@ public abstract class AbstractParameterCollectorPrinter extends AbstractServiceP
 	}
 		
 	@Override
+
 	public void initialize(ServiceTypeElement serviceTypeElement, MutableDeclaredType outputName) {}
 
 	@Override

@@ -10,6 +10,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 import sk.seges.sesam.core.pap.model.ParameterElement;
+import sk.seges.sesam.core.pap.model.api.PropagationType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
@@ -107,13 +108,17 @@ public class ConstructorPrinter {
 	protected void printConstructor(ExecutableElement constructor, ParameterElement... additionalParameters) {
 		printConstructor(constructor, constructor, new DefaultConstructorHelper(), true, additionalParameters);
 	}
-	
+
+	private static boolean isPropagated(ParameterElement parameterElement) {
+		return parameterElement.getPropagationType().equals(PropagationType.PROPAGATED_IMUTABLE);
+	}
+
 	private String getParameterName(VariableElement parameter, ParameterElement... additionalParameters) {
 		
 		MutableTypes typeUtils = processingEnv.getTypeUtils();
 				
 		for (ParameterElement additionalParameter: additionalParameters) {
-			if (additionalParameter.isPropagated() && typeUtils.isSameType(typeUtils.toMutableType(parameter.asType()), additionalParameter.getType())) {
+			if (isPropagated(additionalParameter) && typeUtils.isSameType(typeUtils.toMutableType(parameter.asType()), additionalParameter.getType())) {
 				return additionalParameter.getName();
 			}
 		}
@@ -182,7 +187,7 @@ public class ConstructorPrinter {
 		}
 		
 		for (ParameterElement additionalParameter: additionalParameters) {
-			if (additionalParameter.isPropagated()) {
+			if (isPropagated(additionalParameter)) {
 				ProcessorUtils.addField(processingEnv, ownerType, additionalParameter.getType(), additionalParameter.getName().toString());
 			}
 		}

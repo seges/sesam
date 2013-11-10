@@ -17,8 +17,7 @@ public class SecuredEntityConverter extends BasicCachedConverter<ClientSecuredEn
 	private final ConverterProviderContext converterProviderContext;
 	private final AclDataRegistry aclDataRegistry;
 	
-	public SecuredEntityConverter(ConvertedInstanceCache cache, ConverterProviderContext converterProviderContext, AclDataRegistry aclDataRegistry) {
-		super(cache);
+	public SecuredEntityConverter(ConverterProviderContext converterProviderContext, AclDataRegistry aclDataRegistry) {
 		this.aclDataRegistry = aclDataRegistry;
 		this.converterProviderContext = converterProviderContext;
 	}

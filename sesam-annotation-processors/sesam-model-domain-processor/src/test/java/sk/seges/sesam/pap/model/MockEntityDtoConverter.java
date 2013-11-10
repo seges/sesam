@@ -20,12 +20,8 @@ public class MockEntityDtoConverter extends BasicCachedConverter<MockEntityDto, 
 
 	private ConverterProvider converterProvider;
 
-	private ConvertedInstanceCache cache;
-
-	public MockEntityDtoConverter(ConverterProvider converterProvider, ConvertedInstanceCache cache) {
-		super(cache);
+	public MockEntityDtoConverter(ConverterProvider converterProvider) {
 		this.converterProvider = converterProvider;
-		this.cache = cache;
 	}
 
 	public boolean equals(DomainObject _domain, MockEntityDto _dto) {

@@ -35,15 +35,14 @@ public class ServiceConverterProviderContextPrinter implements ConverterContextE
     public ServiceConverterProviderContextPrinter(TransferObjectProcessingEnvironment processingEnv, ConverterConstructorParametersResolverProvider parametersResolverProvider,
 			ClassPathTypes classPathTypes) {
         this.processingEnv = processingEnv;
-        this.converterProviderContextPrinterDelegate = new ConverterProviderContextPrinterDelegate(processingEnv, parametersResolverProvider);
+        this.converterProviderContextPrinterDelegate = getConverterProviderContextPrinterDelegate(parametersResolverProvider);
 		this.classPathTypes = classPathTypes;
 	}
-	
-	protected void finalize() {
-		converterProviderContextPrinterDelegate.finalize();
 
+	protected ConverterProviderContextPrinterDelegate getConverterProviderContextPrinterDelegate(ConverterConstructorParametersResolverProvider parametersResolverProvider) {
+		return new ConverterProviderContextPrinterDelegate(processingEnv, parametersResolverProvider);
 	}
-	
+
     @Override
 	public void initialize(ConverterProviderContextType contextType) {
         converterProviderContextPrinterDelegate.initialize(processingEnv, contextType,
@@ -57,6 +56,7 @@ public class ServiceConverterProviderContextPrinter implements ConverterContextE
 
     @Override
     public void finish(ConverterProviderContextType contextType) {
+		converterProviderContextPrinterDelegate.finalize(contextType);
     }
 
     protected void handleMethod(ServiceConverterPrinterContext context, ExecutableElement localMethod, ExecutableElement remoteMethod) {

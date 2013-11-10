@@ -11,12 +11,7 @@ import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.processing.Processor;
 import javax.tools.Diagnostic;
@@ -35,12 +30,13 @@ import sk.seges.sesam.core.pap.utils.ClassFinder;
 
 public abstract class AnnotationTest {
 
-	private static final String TEST_SOURCE_FOLDER = "src/test/java";
-	private static final String MAIN_SOURCE_FOLDER = "src/main/java";
+	protected static final String DIRECTORY_SEPARATOR = "\\";
+	private static final String TEST_SOURCE_FOLDER = "src" + DIRECTORY_SEPARATOR + "test" + DIRECTORY_SEPARATOR + "java";
+	private static final String MAIN_SOURCE_FOLDER = "src" + DIRECTORY_SEPARATOR + "main" + DIRECTORY_SEPARATOR + "java";
 	protected static final String SOURCE_FILE_SUFFIX = ".java";
 	protected static final String OUTPUT_FILE_SUFFIX = ".output";
 	protected static final String OUTPUT_ECLIPSE_FILE_SUFFIX = "_eclipse.output";
-	protected static final String OUTPUT_DIRECTORY = "target/generated-test";
+	protected static final String OUTPUT_DIRECTORY = "target" + DIRECTORY_SEPARATOR + "generated-test";
 
 	public enum Compiler {
 		JAVAC {
@@ -100,7 +96,13 @@ public abstract class AnnotationTest {
 		return (MutableDeclaredType) processingEnv.getTypeUtils().toMutableType(processingEnv.getElementUtils().getTypeElement(clazz.getName()).asType());
 	}
 	
-	protected MutableProcessingEnvironment processingEnv = new MutableProcessingEnvironment(new TestProcessingEnvironment(), getProcessors()[0].getClass(), new ArrayList<MutableDeclaredType>());
+	protected MutableProcessingEnvironment processingEnv = new MutableProcessingEnvironment(new TestProcessingEnvironment(), getProcessors()[0].getClass(), new ArrayList<MutableDeclaredType>()) {
+		@Override
+		public Map<String, String> getOptions() {
+			return getProcessorOptions();
+		}
+	};
+
 	protected TestRoundEnvironment roundEnv = new TestRoundEnvironment(processingEnv);
 
 	/**
@@ -120,12 +122,27 @@ public abstract class AnnotationTest {
 		return CompilerOptions.GENERATED_SOURCES_DIRECTORY.getOption(ensureOutputDirectory().getAbsolutePath());
 	}
 
+	protected String getResource(String name) {
+		//getClass().getResource
+		return Thread.currentThread().getContextClassLoader().getResource(name).getFile().replaceAll("%5c", getDirectorySeparatorPattern());
+	}
+
+	private String getDirectorySeparatorPattern() {
+		return DIRECTORY_SEPARATOR.equals("\\") ? "\\\\" : DIRECTORY_SEPARATOR;
+	}
+
+	protected String getWorkingDirectory() {
+		String relativeClassPath = toPath(getClass().getPackage());
+		String targetClassesDirectory = getResource(relativeClassPath + DIRECTORY_SEPARATOR + getClass().getSimpleName().toString() + ".class").replaceAll(relativeClassPath.replaceAll("\\\\", "\\\\\\\\"), "");
+		return targetClassesDirectory.substring(0, targetClassesDirectory.indexOf("target"));
+	}
+
 	protected String toPath(Package packageName) {
 		return toPath(packageName.getName());
 	}
 
 	protected String toPath(String packageName) {
-		return packageName.replace(".", "/");
+		return packageName.replaceAll("\\.", getDirectorySeparatorPattern());
 	}
 
 	protected File getEclipseResourceFile(Class<?> clazz) {
@@ -133,15 +150,15 @@ public abstract class AnnotationTest {
 	}
 	
 	protected File getEclipseResourceFile(String directorySuffix, Class<?> clazz) {
-		URL resource = getClass().getResource(
-				"/" + toPath(clazz.getPackage()) + "/" + (directorySuffix != null ? (directorySuffix + "/") : "") + clazz.getSimpleName() + OUTPUT_ECLIPSE_FILE_SUFFIX);
+		String resource = getResource(
+				DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + OUTPUT_ECLIPSE_FILE_SUFFIX);
 		
 		if (resource == null) {
-			throw new RuntimeException("Unable to find output file " + 
-					"/" + toPath(clazz.getPackage()) + "/" + (directorySuffix != null ? (directorySuffix + "/") : "") + clazz.getSimpleName() + OUTPUT_ECLIPSE_FILE_SUFFIX);
+			throw new RuntimeException("Unable to find output file " +
+					DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + OUTPUT_ECLIPSE_FILE_SUFFIX);
 		}
 
-		return new File(resource.getFile());
+		return new File(resource);
 	}
 
 	protected File getResourceFile(Class<?> clazz) {
@@ -150,15 +167,15 @@ public abstract class AnnotationTest {
 	
 	protected File getResourceFile(String directorySuffix, Class<?> clazz) {
 
-		URL resource = getClass().getResource(
-				"/" + toPath(clazz.getPackage()) + "/" + (directorySuffix != null ? (directorySuffix + "/") : "") + clazz.getSimpleName() + OUTPUT_FILE_SUFFIX);
+		String resource = getResource(
+				DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + OUTPUT_FILE_SUFFIX);
 		
 		if (resource == null) {
-			throw new RuntimeException("Unable to find output file " + 
-					"/" + toPath(clazz.getPackage()) + "/" + (directorySuffix != null ? (directorySuffix + "/") : "") + clazz.getSimpleName() + OUTPUT_FILE_SUFFIX );
+			throw new RuntimeException("Unable to find output file " +
+					DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + OUTPUT_FILE_SUFFIX );
 		}
 
-		return new File(resource.getFile());
+		return new File(resource);
 	}
 
 	protected File ensureOutputDirectory() {
@@ -171,7 +188,7 @@ public abstract class AnnotationTest {
 	}
 
 	protected File toFile(MutableDeclaredType type) {
-		return new File(OUTPUT_DIRECTORY, toPath(type.getPackageName()) + "/" + type.getSimpleName() + SOURCE_FILE_SUFFIX);
+		return new File(OUTPUT_DIRECTORY, toPath(type.getPackageName()) + DIRECTORY_SEPARATOR + type.getSimpleName() + SOURCE_FILE_SUFFIX);
 	}
 
 	protected static void assertOutput(File expectedResult, File output) {
@@ -199,6 +216,7 @@ public abstract class AnnotationTest {
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 
 		return content.toArray(new String[] {});
@@ -232,7 +250,6 @@ public abstract class AnnotationTest {
 	 *            the classes to compile
 	 * @return the {@link Diagnostic diagnostics} returned by the compilation, as demonstrated in the documentation for
 	 *         {@link JavaCompiler}
-	 * @see #compileFiles(String...)
 	 */
 	protected List<Diagnostic<? extends JavaFileObject>> compileFiles(Type... compilationUnits) {
 		return compileFiles(Compiler.JAVAC, compilationUnits);
@@ -272,6 +289,9 @@ public abstract class AnnotationTest {
 	}
 
 	protected <T extends Type> void addCollection(List<File> files, T... compilationUnits) {
+
+		File currentDirectory = new File(getWorkingDirectory());
+
 		if (compilationUnits == null) {
 			return;
 		}
@@ -279,7 +299,7 @@ public abstract class AnnotationTest {
 			assert (element != null);
 
 			if (element instanceof Class<?>) {
-				File file = toFile(((Class<?>) element));
+				File file = toFile(currentDirectory, ((Class<?>) element));
 				if (file != null) {
 					files.add(file);
 				} else {
@@ -293,18 +313,19 @@ public abstract class AnnotationTest {
 	}
 
 	private String convertClassNameToResourcePath(String name) {
-		return name.replace(".", File.separator);
+		return name.replace(".", DIRECTORY_SEPARATOR);
 	}
 
-	private File toFile(Class<?> clazz) {
-		File file = new File(getTestSourceFolder() + File.separator
+	private File toFile(File currentDirectory, Class<?> clazz) {
+
+		File file = new File(currentDirectory, getTestSourceFolder() + DIRECTORY_SEPARATOR
 				+ convertClassNameToResourcePath(clazz.getCanonicalName()) + SOURCE_FILE_SUFFIX);
 		if (!file.exists()) {
-			file = new File(getMainSourceFolder() + File.separator
+			file = new File(currentDirectory, getMainSourceFolder() + DIRECTORY_SEPARATOR
 					+ convertClassNameToResourcePath(clazz.getCanonicalName()) + SOURCE_FILE_SUFFIX);
 			if (!file.exists()) {
 				if (clazz.getEnclosingClass() != null) {
-					return toFile(clazz.getEnclosingClass());
+					return toFile(currentDirectory, clazz.getEnclosingClass());
 				}
 				return null;
 			}
@@ -338,7 +359,7 @@ public abstract class AnnotationTest {
 
 		classPath = classPath.replaceAll(", ", isWindows() ? ";" : ":").trim();
 		return "\"" + classPath.substring(1, classPath.length() - 2).trim() + ";"
-				+ new File("target\\classes").getAbsolutePath() + "\"";
+				+ new File("target" + DIRECTORY_SEPARATOR + "classes").getAbsolutePath() + "\"";
 	}
 
 	public static String getOsName() {
@@ -350,7 +371,23 @@ public abstract class AnnotationTest {
 	}
 
 	private List<String> getCompilerInternalOptions() {
-		return mergeCompilerOptions(Arrays.asList("-proc:only", "-classpath", getClassPath(), "-Aclasspath=" + getClassPath(), "-AprojectName=" + getClass().getCanonicalName()));
+		List<String> options = new ArrayList<String>();
+		options.add("-proc:only");
+		options.add("-classpath");
+		options.add(getClassPath());
+
+		for (Map.Entry<String, String> option: getProcessorOptions().entrySet()) {
+			options.add("-A" + option.getKey() + "=" + option.getValue());
+		}
+
+		return mergeCompilerOptions(options);
+	}
+
+	protected Map<String, String> getProcessorOptions() {
+		Map<String, String> options = new HashMap<String, String>();
+		options.put("classpath", getClassPath());
+		options.put("projectName", getClass().getSimpleName());
+		return options;
 	}
 
 	protected List<Diagnostic<? extends JavaFileObject>> compileFiles(Collection<File> compilationUnits) {
@@ -385,7 +422,7 @@ public abstract class AnnotationTest {
 	 * 
 	 * @param expectedDiagnosticKinds
 	 *            the kinds of diagnostic expected
-	 * @param expectedLineNumber
+	 * @param expectedLineNumbers
 	 *            the line numbers at which the diagnostics are expected
 	 * @param diagnostics
 	 *            the result of the compilation

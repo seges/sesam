@@ -13,9 +13,9 @@ public class HasConstructorParametersDelegate {
 	public ParameterElement[] getRequiredParameters(MutableProcessingEnvironment processingEnv, 
 			ConverterConstructorParametersResolver parametersResolver, ConverterConstructorParametersResolver classParametersResolver) {
 
-		ParameterElement[] allParameters = ParametersFilter.PROPAGATED.filterParameters(parametersResolver.getConstructorAditionalParameters());
+		ParameterElement[] allParameters = ParametersFilter.PROPAGATED_IMUTABLE.filterParameters(parametersResolver.getConstructorAditionalParameters());
 
-		ParameterElement[] localParameters = ParametersFilter.PROPAGATED.filterParameters(classParametersResolver.getConstructorAditionalParameters());
+		ParameterElement[] localParameters = ParametersFilter.PROPAGATED_IMUTABLE.filterParameters(classParametersResolver.getConstructorAditionalParameters());
 
 		List<ParameterElement> generatedParameters = new ArrayList<ParameterElement>();
 
@@ -39,19 +39,6 @@ public class HasConstructorParametersDelegate {
 	}
 	
 	public ParameterElement[] getConverterParameters(MutableProcessingEnvironment processingEnv, ConverterConstructorParametersResolver parametersResolver) {
-		
-//		MutableDeclaredType converterProviderType = processingEnv.getTypeUtils().toMutableType(ConverterProvider.class);
-
-//		ParameterElement[] propagatedParameters = 
-				return ParametersFilter.PROPAGATED.filterParameters(parametersResolver.getConstructorAditionalParameters());
-
-	/*	List<ParameterElement> result = new ArrayList<ParameterElement>();
-		for (ParameterElement generatedParameter: propagatedParameters) {
-			if (!generatedParameter.getType().equals(converterProviderType)) {
-				result.add(generatedParameter);
-			}
-		}
-		
-		return result.toArray(new ParameterElement[] {});*/
+		return ParametersFilter.PROPAGATED_IMUTABLE.filterParameters(parametersResolver.getConstructorAditionalParameters());
 	}
 }

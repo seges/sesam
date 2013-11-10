@@ -97,8 +97,8 @@ class TestTypeElement extends TestElement implements TypeElement {
 
 	@Override
 	public List<? extends Element> getEnclosedElements() {
-		// TODO Auto-generated method stub
-		return null;
+		//TODO implement me
+		return new ArrayList<Element>();
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableWildcardType;
 import sk.seges.sesam.core.pap.model.mutable.api.element.MutableVariableElement;
 import sk.seges.sesam.core.pap.structure.api.PackageValidator;
+import sk.seges.sesam.core.pap.utils.ProcessorUtils;
 import sk.seges.sesam.core.pap.writer.HierarchyPrintWriter;
 
 //TODO rename to MutableType
@@ -851,14 +852,28 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 			return null;
 		}
 		for (MutableVariableElement localfield: fields) {
-			if (localfield.getSimpleName().equals(field.getSimpleName()) && localfield.asType().isSameType(field.asType())) {
+			if (localfield.getSimpleName().equals(field.getSimpleName()) && processingEnv.getTypeUtils().isAssignable(field.asType(), localfield.asType())) {
 				return localfield;
 			}
 		}
 		
 		return null;
 	}
-	
+
+	@Override
+	public MutableVariableElement getField(String name) {
+		if (fields == null) {
+			return null;
+		}
+		for (MutableVariableElement localfield: fields) {
+			if (localfield.getSimpleName().equals(name)) {
+				return localfield;
+			}
+		}
+
+		return null;
+	}
+
 	public List<MutableVariableElement> getFields() {
 		if (fields == null) {
 			return null;
@@ -895,6 +910,21 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 	@Override
 	public List<MutableExecutableType> getMethods() {
 		return Collections.unmodifiableList(mutableMethods);
+	}
+
+	@Override
+	public MutableExecutableType getMethod(String name) {
+		if (mutableMethods == null) {
+			return null;
+		}
+
+		for (MutableExecutableType method: mutableMethods) {
+			if (method.getSimpleName().equals(name)) {
+				return method;
+			}
+		}
+
+		return null;
 	}
 
 	@Override

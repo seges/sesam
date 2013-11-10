@@ -82,7 +82,12 @@ public class ProcessorUtils {
 		ownerType.getConstructor().addParameter(field);
 		ownerType.getConstructor().getPrintWriter().println("this." + fieldName + " = " + fieldName + ";");
 	}
-	
+
+	public static boolean hasField(MutableProcessingEnvironment processingEnv, MutableDeclaredType ownerType, MutableTypeMirror fieldType, String fieldName) {
+		MutableVariableElement field = processingEnv.getElementUtils().getParameterElement(fieldType, fieldName);
+		return ownerType.getField(field) != null;
+	}
+
 	public static boolean hasFieldByType(MutableDeclaredType ownerType, MutableTypeMirror fieldType) {
 		if (ownerType.getFields() == null) {
 			return false;

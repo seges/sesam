@@ -1,5 +1,6 @@
 package sk.seges.sesam.pap.service.resolver;
 
+import sk.seges.sesam.core.pap.model.api.PropagationType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableReferenceType;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
 import sk.seges.sesam.pap.model.resolver.DefaultConverterConstructorParametersResolver;
@@ -11,13 +12,13 @@ public class ServiceConverterConstructorParametersResolver extends DefaultConver
 	}
 
 	@Override
-	protected boolean isConverterProviderContextParameterPropagated() {
-		return true;
+	protected PropagationType getConverterProviderContextParameterPropagation() {
+		return PropagationType.PROPAGATED_IMUTABLE;
 	}
 
 	@Override
-	protected boolean isConverterCacheParameterPropagated() {
-		return false;
+	protected PropagationType getConverterCacheParameterPropagation() {
+		return PropagationType.PROPAGATED_MUTABLE;
 	}
 	
 	@Override

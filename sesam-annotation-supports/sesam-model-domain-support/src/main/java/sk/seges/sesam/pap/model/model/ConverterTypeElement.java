@@ -20,6 +20,7 @@ import javax.lang.model.util.ElementFilter;
 import sk.seges.sesam.core.pap.model.ConstructorParameter;
 import sk.seges.sesam.core.pap.model.ConverterConstructorParameter;
 import sk.seges.sesam.core.pap.model.ParameterElement;
+import sk.seges.sesam.core.pap.model.api.PropagationType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
@@ -68,9 +69,13 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 
 		setKind(MutableTypeKind.CLASS);
 		setSuperClass(getTypeUtils().getDeclaredType(
-				(MutableDeclaredType) getTypeUtils().toMutableType(BasicCachedConverter.class), 
+				(MutableDeclaredType) getTypeUtils().toMutableType(getGeneratedSuperClass()),
 					configurationTypeElement.getDto().stripTypeParametersTypes(), 
 					configurationTypeElement.getDomain().stripTypeParametersTypes()));
+	}
+
+	protected Class<?> getGeneratedSuperClass() {
+		return BasicCachedConverter.class;
 	}
 
 	public boolean isConverterInstantiable() {
@@ -262,7 +267,7 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 	
 	private ConverterConstructorParameter toConverterConstructorParameter(ConstructorParameter constructorParameter) {
 		return new ConverterConstructorParameter(constructorParameter.getType(), 
-				constructorParameter.getName(), null, true, environmentContext.getProcessingEnv());
+				constructorParameter.getName(), null, PropagationType.PROPAGATED_IMUTABLE, environmentContext.getProcessingEnv());
 	}
 	
 	private List<ExecutableElement> getSortedConstructorMethods(TypeElement element) {
@@ -319,10 +324,15 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 				for (ConstructorParameter converterParameter : constructorParameters) {
 
 					ConverterConstructorParameter param = toConverterConstructorParameter(converterParameter);
-					
+
 					for (ParameterElement constructorAditionalParameter: constructorAditionalParameters) {
-						if (!constructorAditionalParameter.isPropagated() && typeUtils.isSameType(typeUtils.toMutableType(converterParameter.getType()), constructorAditionalParameter.getType())) {
-							param.setPropagated(false);
+						if (typeUtils.isAssignable(constructorAditionalParameter.getType(), typeUtils.toMutableType(converterParameter.getType()))) {
+							param = new ConverterConstructorParameter(constructorAditionalParameter.getType(),
+									param.getName(), null, param.getPropagationType(), environmentContext.getProcessingEnv());
+						}
+
+						if (constructorAditionalParameter.getPropagationType().equals(PropagationType.INSTANTIATED) && typeUtils.isSameType(constructorAditionalParameter.getType(), typeUtils.toMutableType(converterParameter.getType()))) {
+							param.setPropagationType(constructorAditionalParameter.getPropagationType());
 							break;
 						}
 					}

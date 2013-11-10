@@ -97,6 +97,11 @@ public abstract class DelegateMutableDeclaredType extends DelegateMutableType im
 	}
 
 	@Override
+	public MutableExecutableType getMethod(String name) {
+		return ensureDelegateType().getMethod(name);
+	}
+
+	@Override
 	public MutableDeclaredType addModifier(Modifier... modifiers) {
 		return ensureDelegateType().addModifier(modifiers);
 	}
@@ -314,7 +319,12 @@ public abstract class DelegateMutableDeclaredType extends DelegateMutableType im
 	public MutableVariableElement getField(MutableVariableElement field) {
 		return ensureDelegateType().getField(field);
 	}
-	
+
+	@Override
+	public MutableVariableElement getField(String name) {
+		return ensureDelegateType().getField(name);
+	}
+
 	@Override
 	public MutableDeclaredType clearFields() {
 		return ensureDelegateType().clearFields();

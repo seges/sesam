@@ -14,7 +14,7 @@ public interface MutableElementType extends HasAnnotations {
 
 	MutableElementKind getKind();
 
-	Set<Modifier> getModifiers();
+	List<Modifier> getModifiers();
 	<T extends MutableElementType> T addModifier(Modifier... modifiers);
 
 	String getSimpleName();

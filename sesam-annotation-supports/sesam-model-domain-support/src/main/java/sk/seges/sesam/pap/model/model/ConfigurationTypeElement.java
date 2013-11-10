@@ -1,9 +1,6 @@
 package sk.seges.sesam.pap.model.model;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -137,6 +134,10 @@ public class ConfigurationTypeElement extends TomBaseType {
 			return null;
 		}
 
+		return getConverterTypeElement();
+	}
+
+	protected ConverterTypeElement getConverterTypeElement() {
 		return new ConverterTypeElement(this, envContext);
 	}
 
@@ -463,7 +464,7 @@ public class ConfigurationTypeElement extends TomBaseType {
 				}
 			}
 
-			if (this.dtoDeclaredType != null) {
+			if (this.dtoDeclaredType != null && this.dtoType == null) {
 				this.dtoDeclaredType.prefixTypeParameter(ConverterTypeElement.DTO_TYPE_ARGUMENT_PREFIX);
 			}
 			this.dtoTypeElementInitialized = true;
@@ -507,38 +508,48 @@ public class ConfigurationTypeElement extends TomBaseType {
 	}
 	
 	public ConfigurationTypeElement getDelegateConfigurationTypeElement() {
-		if (!delegateConfigurationTypeElementInitialized) {
-			if (transferObjectConfiguration.getConfiguration() != null) {
-				
-				ConfigurationContext configurationContext = new ConfigurationContext(envContext.getConfigurationEnv());
-				
-				List<ConfigurationTypeElement> configurations = new ArrayList<ConfigurationTypeElement>();
-				
-				for (ConfigurationTypeElement configuration: this.configurationContext.getConfigurations()) {
-					if (!configuration.isSameType(this)) {
-						configurations.add(configuration);
-					}
+
+		List<ConfigurationTypeElement> configurations = null;
+
+		if (transferObjectConfiguration.getConfiguration() != null) {
+
+			configurations = new LinkedList<ConfigurationTypeElement>();
+
+			for (ConfigurationTypeElement configuration: this.configurationContext.getConfigurations()) {
+				if (!configuration.isSameType(this)) {
+					configurations.add(configuration);
 				}
+			}
+		}
 
-				configurationContext.setConfigurations(configurations);
-				
-				this.delegateConfigurationTypeElement = getConfigurationTypeElement(transferObjectConfiguration.getConfiguration(), envContext, configurationContext);
-
-				configurations.add(this.delegateConfigurationTypeElement);
-
-//				List<ConfigurationTypeElement> configurations = new ArrayList<ConfigurationTypeElement>();
-//				configurations.add(this.delegateConfigurationTypeElement);
-//				configurationContext.setConfigurations(configurations);
-			
+		if (!delegateConfigurationTypeElementInitialized) {
+			if (configurations != null) {
+				this.delegateConfigurationTypeElement = getConfigurationTypeElement(configurations);
 			} else {
 				this.delegateConfigurationTypeElement = null;
 			}
-
 			this.delegateConfigurationTypeElementInitialized = true;
+		} else if (configurations != null) {
+			//TODO compare also each type in the list
+			if (delegateConfigurationTypeElement.configurationContext.getConfigurations().size() != configurations.size()) {
+				this.delegateConfigurationTypeElement = getConfigurationTypeElement(configurations);
+			}
 		}
+
 		return delegateConfigurationTypeElement;
 	}
-	
+
+	private ConfigurationTypeElement getConfigurationTypeElement(List<ConfigurationTypeElement> configurations) {
+		ConfigurationContext configurationContext = new ConfigurationContext(envContext.getConfigurationEnv());
+		configurationContext.setConfigurations(configurations);
+
+		ConfigurationTypeElement result = getConfigurationTypeElement(transferObjectConfiguration.getConfiguration(), envContext, configurationContext);
+
+		configurations.add(this.delegateConfigurationTypeElement);
+
+		return result;
+	}
+
 	public boolean appliesForDomainType(MutableTypeMirror domainType) {
 		
 		//Configuration should be applied only for declared types like classes or interfaces

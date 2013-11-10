@@ -1,6 +1,7 @@
 package sk.seges.sesam.pap.model.resolver;
 
 import sk.seges.sesam.core.pap.model.ParameterElement;
+import sk.seges.sesam.core.pap.model.api.PropagationType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableReferenceType;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
@@ -23,20 +24,20 @@ public class DefaultConverterConstructorParametersResolver implements ConverterC
 	
 	protected ParameterElement getConverterProviderContextParameter() {
 		return new ParameterElement(processingEnv.getTypeUtils().toMutableType(ConverterProviderContext.class), CONVERTER_PROVIDER_CONTEXT_NAME, 
-				getConverterProviderContextReference(), isConverterProviderContextParameterPropagated(), processingEnv);
+				getConverterProviderContextReference(), getConverterProviderContextParameterPropagation(), processingEnv);
 	}
 
-	protected boolean isConverterProviderContextParameterPropagated() {
-		return true;
+	protected PropagationType getConverterProviderContextParameterPropagation() {
+		return PropagationType.PROPAGATED_IMUTABLE;
 	}
-	
+
 	protected ParameterElement getConverterCacheParameter() {
 		return new ParameterElement(processingEnv.getTypeUtils().toMutableType(ConvertedInstanceCache.class), CONVERTER_CACHE_NAME, 
-				getConverterCacheReference(), isConverterCacheParameterPropagated(), processingEnv);
+				getConverterCacheReference(), getConverterCacheParameterPropagation(), processingEnv);
 	}
 	
-	protected boolean isConverterCacheParameterPropagated() {
-		return true;
+	protected PropagationType getConverterCacheParameterPropagation() {
+		return PropagationType.PROPAGATED_MUTABLE;
 	}
 
 	protected MutableReferenceType getConverterProviderContextReference() {

@@ -1,9 +1,6 @@
 package sk.seges.sesam.core.pap.model.mutable.utils;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.lang.model.element.Modifier;
 
@@ -16,7 +13,7 @@ abstract class MutableElement implements MutableElementType {
 
 	protected final MutableProcessingEnvironment processingEnv;
 	protected final MutableElementKind kind;
-	protected Set<Modifier> modifiers;
+	protected List<Modifier> modifiers;
 
 	protected final InitializableValue<MutableTypeMirror> type = new InitializableValue<MutableTypeMirror>();
 	protected final InitializableValue<String> simpleName = new InitializableValue<String>();
@@ -46,16 +43,16 @@ abstract class MutableElement implements MutableElementType {
 		return kind;
 	}
 
-	public Set<Modifier> ensureModifiers() {
+	public List<Modifier> ensureModifiers() {
 		if (modifiers == null) {
-			modifiers = new HashSet<Modifier>();
+			modifiers = new LinkedList<Modifier>();
 		}
 		return modifiers;
 	}
 
 	@Override
-	public Set<Modifier> getModifiers() {
-		return Collections.unmodifiableSet(ensureModifiers());
+	public List<Modifier> getModifiers() {
+		return Collections.unmodifiableList(ensureModifiers());
 	}
 
 	public MutableElementType setModifier(Modifier... modifiers) {
@@ -65,7 +62,7 @@ abstract class MutableElement implements MutableElementType {
 	
 	@Override
 	public MutableElementType addModifier(Modifier... modifiers) {
-		Set<Modifier> result = new HashSet<Modifier>();
+		List<Modifier> result = new LinkedList<Modifier>();
 		
 		ModifierConverter modifierConverter = new ModifierConverter();
 		
