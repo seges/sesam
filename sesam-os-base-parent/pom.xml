@@ -79,9 +79,9 @@
 		<log4j.version>1.2.14</log4j.version>
 		<slf4j.version>1.5.8</slf4j.version>
 		
-		<spring.version>3.0.5.RELEASE</spring.version>
-		<spring-security.version>2.0.4</spring-security.version>
-
+		<spring.version>3.2.3.RELEASE</spring.version>
+		<spring-security.version>3.1.4.RELEASE</spring-security.version>
+		<spring-security-tiger.version>2.0.8.RELEASE</spring-security-tiger.version>
 		<hibernate.version>3.6.0.Final</hibernate.version>
 		<hibernate-entitymanager.version>3.6.0.Final</hibernate-entitymanager.version>
 		<!-- since 3.6.0 it was merged into core -->
@@ -382,10 +382,20 @@
 			</dependency> 
 			<dependency>
 				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-config</artifactId>
+				<version>${spring-security.version}</version>				
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-web</artifactId>
+				<version>${spring-security.version}</version>				
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-core-tiger</artifactId>
-				<version>${spring-security.version}</version>
+				<version>${spring-security-tiger.version}</version>
 			</dependency> 
-			
+
 			<!-- JPA & Hibernate -->			
 			<dependency>
 				<groupId>cglib</groupId>
