@@ -83,14 +83,14 @@ class DtoDeclared extends TomDeclaredConfigurationHolder implements GeneratedCla
 		if (superClassDomainType != null) {
 			DtoDeclaredType superclassDto = superClassDomainType.getDto();
 
-			if (!superclassDto.getKind().equals(MutableTypeKind.INTERFACE)) {
+			if (superclassDto != null && !superclassDto.getKind().equals(MutableTypeKind.INTERFACE)) {
 				//TODO Possibly add interface here!
 				MutableDeclaredType mutableSuperclassType = getTypeUtils().toMutableType((DeclaredType)superClassDomainType.asConfigurationElement().asType());
 				
 				if (superclassDto instanceof MutableDeclaredType) {
 					//TODO convert type variables also
-					((MutableDeclaredType)superclassDto).setTypeVariables(mutableSuperclassType.getTypeVariables().toArray(new MutableTypeVariable[] {}));
-					setSuperClass((MutableDeclaredType)superclassDto);
+					superclassDto.setTypeVariables(mutableSuperclassType.getTypeVariables().toArray(new MutableTypeVariable[] {}));
+					setSuperClass(superclassDto);
 				} else {
 					//TODO log something here
 				}

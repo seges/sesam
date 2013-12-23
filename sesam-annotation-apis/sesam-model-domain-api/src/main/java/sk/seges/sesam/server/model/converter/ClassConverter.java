@@ -8,7 +8,7 @@ public class ClassConverter {
 
 	public static String getDtoClassName(ConverterProviderContext converterProviderContext, Class<?> domainClass) {
 		DtoConverter<Object, ?> converterForDomain = null;
-		
+
 		if (converterProviderContext != null) {
 			converterForDomain = converterProviderContext.getConverterForDomain(domainClass);
 		}
@@ -19,7 +19,7 @@ public class ClassConverter {
 				return annotation.dtoClassName();
 			}
 		}
-		
+
 		return domainClass.getCanonicalName();
 	}
 	

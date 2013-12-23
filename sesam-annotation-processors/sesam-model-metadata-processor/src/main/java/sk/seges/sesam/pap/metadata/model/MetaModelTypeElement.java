@@ -11,6 +11,9 @@ public class MetaModelTypeElement extends DelegateMutableDeclaredType {
 	
 	public MetaModelTypeElement(MutableDeclaredType metaModelMutableType) {
 		this.metaModelMutableType = metaModelMutableType;
+
+		setSuperClass(null);
+		setKind(MutableTypeKind.INTERFACE);
 	}
 	
 	@Override

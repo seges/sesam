@@ -404,7 +404,9 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 						for (ConfigurationTypeElement configurationElement: configurationElements) {
 							if (configurationElement.hasInstantiableDomainSpecified() &&
 									!configurationElement.getInstantiableDomain().toString(ClassSerializer.CANONICAL, false).equals(
-											this.toString(ClassSerializer.CANONICAL, false))) {
+											this.toString(ClassSerializer.CANONICAL, false)) &&
+								environmentContext.getProcessingEnv().getTypeUtils().isAssignable(domainSuperClass, configurationElement.getInstantiableDomain().asType())) {
+
 								//it can be the same if base class is the case as instance class
 								//usable for - when DTO is created from base class and converter from instance class
 								superClassDomainTypeValue.setValue(configurationElement.getInstantiableDomain());

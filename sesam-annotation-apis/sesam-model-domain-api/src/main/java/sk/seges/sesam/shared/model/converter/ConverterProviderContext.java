@@ -1,10 +1,10 @@
 package sk.seges.sesam.shared.model.converter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import sk.seges.sesam.shared.model.converter.api.ConverterProvider;
 import sk.seges.sesam.shared.model.converter.api.DtoConverter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class ConverterProviderContext {
 
@@ -33,10 +33,10 @@ public abstract class ConverterProviderContext {
 		if (domain == null) {
 			return null;
 		}
-		
+
 		for (ConverterProvider availableConverterProvider: availableConverterProviders) {
 			DtoConverter<DTO, DOMAIN> result = availableConverterProvider.getConverterForDomain(domain);
-			
+
 			if (result != null) {
 				return initializeConverter(result);
 			}
@@ -48,7 +48,7 @@ public abstract class ConverterProviderContext {
 	public <DTO, DOMAIN> DtoConverter<DTO, DOMAIN> getConverterForDomain(Class<DOMAIN> domainClass) {
 		for (ConverterProvider availableConverterProvider: availableConverterProviders) {
 			DtoConverter<DTO, DOMAIN> result = availableConverterProvider.getConverterForDomain(domainClass);
-			
+
 			if (result != null) {
 				return initializeConverter(result);
 			}

@@ -417,7 +417,9 @@ public class ConfigurationTypeElement extends TomBaseType {
 	public DtoDeclaredType getDto() {
 		
 		if (!dtoTypeElementInitialized) {
-			
+
+			this.dtoTypeElementInitialized = true;
+
 			MutableDeclaredType dtoType = null;
 			
 			if (this.dtoType != null) {
@@ -457,7 +459,7 @@ public class ConfigurationTypeElement extends TomBaseType {
 						if (!configurationElement.asType().getKind().equals(TypeKind.DECLARED)) {
 							return null;
 						}
-	
+
 						this.dtoDeclaredType = new DtoDeclared(envContext, configurationContext);
 						this.dtoDeclaredType.setup();
 					}
@@ -467,7 +469,6 @@ public class ConfigurationTypeElement extends TomBaseType {
 			if (this.dtoDeclaredType != null && this.dtoType == null) {
 				this.dtoDeclaredType.prefixTypeParameter(ConverterTypeElement.DTO_TYPE_ARGUMENT_PREFIX);
 			}
-			this.dtoTypeElementInitialized = true;
 		}
 		
 		return dtoDeclaredType;
@@ -525,6 +526,7 @@ public class ConfigurationTypeElement extends TomBaseType {
 		if (!delegateConfigurationTypeElementInitialized) {
 			if (configurations != null) {
 				this.delegateConfigurationTypeElement = getConfigurationTypeElement(configurations);
+				this.delegateConfigurationTypeElement.configurationContext.addConfiguration(this.delegateConfigurationTypeElement);
 			} else {
 				this.delegateConfigurationTypeElement = null;
 			}
@@ -533,6 +535,7 @@ public class ConfigurationTypeElement extends TomBaseType {
 			//TODO compare also each type in the list
 			if (delegateConfigurationTypeElement.configurationContext.getConfigurations().size() != configurations.size()) {
 				this.delegateConfigurationTypeElement = getConfigurationTypeElement(configurations);
+				this.delegateConfigurationTypeElement.configurationContext.addConfiguration(this.delegateConfigurationTypeElement);
 			}
 		}
 
@@ -543,11 +546,7 @@ public class ConfigurationTypeElement extends TomBaseType {
 		ConfigurationContext configurationContext = new ConfigurationContext(envContext.getConfigurationEnv());
 		configurationContext.setConfigurations(configurations);
 
-		ConfigurationTypeElement result = getConfigurationTypeElement(transferObjectConfiguration.getConfiguration(), envContext, configurationContext);
-
-		configurations.add(this.delegateConfigurationTypeElement);
-
-		return result;
+		return getConfigurationTypeElement(transferObjectConfiguration.getConfiguration(), envContext, configurationContext);
 	}
 
 	public boolean appliesForDomainType(MutableTypeMirror domainType) {

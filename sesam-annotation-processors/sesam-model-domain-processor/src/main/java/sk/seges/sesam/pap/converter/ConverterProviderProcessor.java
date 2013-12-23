@@ -114,7 +114,7 @@ public class ConverterProviderProcessor extends AbstractTransferProcessingProces
 
 	protected ConverterProviderElementPrinter[] getNestedPrinters(FormattedPrintWriter pw) {
 		return new ConverterProviderElementPrinter[] {
-			new DomainMethodConverterProviderPrinter(getParametersResolverProvider(), processingEnv, pw, ensureConverterProviderPrinter(processingEnv)),
+			//new DomainMethodConverterProviderPrinter(getParametersResolverProvider(), processingEnv, pw, ensureConverterProviderPrinter(processingEnv)),
 			new DtoMethodConverterProviderPrinter(getParametersResolverProvider(), processingEnv, pw, ensureConverterProviderPrinter(processingEnv))
 		};
 	}

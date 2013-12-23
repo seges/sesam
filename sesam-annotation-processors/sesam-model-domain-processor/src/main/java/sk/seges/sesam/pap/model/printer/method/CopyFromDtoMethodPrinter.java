@@ -341,6 +341,7 @@ public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements C
 								.asType(), processingEnv.getElementUtils().getTypeElement(typeParameter.toString(ClassSerializer.CANONICAL, false)).asType())) {
 					pw.print(domainType);
 				} else {
+					processingEnv.getMessager().printMessage(Kind.NOTE, "Params: [1] InputDomainType: " + inputDomainType.toString());
 					processingEnv.getMessager().printMessage(
 							Kind.ERROR,
 							"Method " + getSetterMethod(context, domainPathResolver).getSimpleName().toString() + " in type "
