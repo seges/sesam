@@ -141,7 +141,7 @@ public class AbstractServicePrinter {
 					MutableTypeMirror mutableRemoteReturnType = processingEnv.getTypeUtils().toMutableType(remoteMethod.getReturnType());
 					
 					if (processingEnv.getTypeUtils().isSameType(returnDtoType, mutableRemoteReturnType)) {
-						return method;
+						return overriderMethod;
 					}
 					
 					processingEnv.getMessager().printMessage(Kind.ERROR,
