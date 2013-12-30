@@ -12,6 +12,14 @@ public class ReadOnlyAccessor extends SingleAnnotationAccessor<ReadOnly> {
 		super(element, ReadOnly.class, processingEnv);
 	}
 
+	public ReadOnly.PropertyType getPropertyType() {
+		if (isValid()) {
+			return annotation.value();
+		}
+
+		return null;
+	}
+
 	public boolean isReadonly() {
 		return isValid();
 	}
