@@ -409,7 +409,18 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 		this.kind = kind;
 		return this;
 	}
-	
+
+	public MutableDeclaredType addInterface(MutableTypeMirror interfaceType) {
+		if (interfaces == null) {
+			interfaces = new ArrayList<MutableTypeMirror>();
+			copyInterfaces();
+		}
+
+		interfaces.add(interfaceType);
+
+		return this;
+	}
+
 	public List<? extends MutableTypeMirror> getInterfaces() {
 		if (interfaces == null) {
 			interfaces = new ArrayList<MutableTypeMirror>();

@@ -210,7 +210,12 @@ public abstract class DelegateMutableDeclaredType extends DelegateMutableType im
 	public MutableDeclaredType setKind(MutableTypeKind kind) {
 		return ensureDelegateType().setKind(kind);
 	}
-	
+
+	@Override
+	public MutableDeclaredType addInterface(MutableTypeMirror interfaceType) {
+		return ensureDelegateType().addInterface(interfaceType);
+	}
+
 	@Override
 	public List<? extends MutableTypeMirror> getInterfaces() {
 		return ensureDelegateType().getInterfaces();

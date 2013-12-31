@@ -78,7 +78,8 @@ public interface MutableDeclaredType extends MutableTypeMirror, HasAnnotations, 
 	List<MutableExecutableType> getMethods();
 	MutableExecutableType getMethod(String name);
 	MutableExecutableType getConstructor();
-	
+
+	MutableDeclaredType addInterface(MutableTypeMirror interfaceType);
 	List<? extends MutableTypeMirror> getInterfaces();
 	MutableDeclaredType setInterfaces(List<? extends MutableTypeMirror> interfaces);
 

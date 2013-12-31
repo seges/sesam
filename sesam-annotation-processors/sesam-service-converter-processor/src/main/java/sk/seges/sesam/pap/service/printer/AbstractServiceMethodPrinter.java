@@ -2,7 +2,11 @@ package sk.seges.sesam.pap.service.printer;
 
 import java.util.List;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
 
@@ -31,9 +35,10 @@ public abstract class AbstractServiceMethodPrinter extends AbstractServicePrinte
 
 	@Override
 	public void print(ServiceConverterPrinterContext context) {
+
 		LocalServiceTypeElement localInterface = context.getLocalServiceInterface();
 		ServiceTypeElement serviceTypeElement = context.getService();
-		
+
 		RemoteServiceTypeElement remoteServiceInterface = localInterface.getRemoteServiceInterface();
 
 		if (remoteServiceInterface == null) {
@@ -42,8 +47,23 @@ public abstract class AbstractServiceMethodPrinter extends AbstractServicePrinte
 			return;
 		}
 
-		List<ExecutableElement> remoteMethods = ElementFilter.methodsIn(remoteServiceInterface.asElement().getEnclosedElements());
-		
+		handleRemoteInterface(remoteServiceInterface.asElement(), context);
+	}
+
+	protected void handleRemoteInterface(Element element, ServiceConverterPrinterContext context) {
+
+		LocalServiceTypeElement localInterface = context.getLocalServiceInterface();
+		ServiceTypeElement serviceTypeElement = context.getService();
+
+		RemoteServiceTypeElement remoteServiceInterface = localInterface.getRemoteServiceInterface();
+
+		if (remoteServiceInterface == null) {
+			processingEnv.getMessager().printMessage(Kind.ERROR,
+					"[ERROR] Unable to find remote service pair for the local service definition " + localInterface.toString(), serviceTypeElement.asElement());
+			return;
+		}
+		List<ExecutableElement> remoteMethods = ElementFilter.methodsIn(element.getEnclosedElements());
+
 		for (ExecutableElement remoteMethod : remoteMethods) {
 			ExecutableElement localMethod = getDomainMethodPair(remoteMethod, serviceTypeElement);
 			if (localMethod == null) {
@@ -52,11 +72,16 @@ public abstract class AbstractServiceMethodPrinter extends AbstractServicePrinte
 								+ ". Please specify correct service implementation.", serviceTypeElement.asElement());
 				continue;
 			}
-			
+
 			handleMethod(context, localMethod, remoteMethod);
 		}
-	}
 
+		TypeElement typeElement = (TypeElement)element;
+
+		for (TypeMirror interfaceType: typeElement.getInterfaces()) {
+			handleRemoteInterface(((DeclaredType)interfaceType).asElement(), context);
+		}
+	}
 	protected abstract void handleMethod(ServiceConverterPrinterContext context, ExecutableElement localMethod, ExecutableElement remoteMethod);
 	
 	@Override
