@@ -195,6 +195,11 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 				String fieldName = TransferObjectHelper.getFieldPath(overridenMethod);
 				ExecutableElement domainMethod = processingElement.getGetterMethod(fieldName);
 
+				if (domainMethod == null) {
+					processingEnv.getMessager().printMessage(Kind.ERROR, "[ERROR] " + fieldName + " is not defined in " + configurationTypeElement.getInstantiableDomain() + ".", configurationTypeElement.asConfigurationElement());
+					return;
+				}
+
 				if (getEntityResolver().isIdMethod(domainMethod)) {
 					processingEnv.getMessager().printMessage(Kind.ERROR, "[ERROR] Id method can't be ignored. There should be an id method available for merging purposes.", configurationTypeElement.asConfigurationElement());
 					return;

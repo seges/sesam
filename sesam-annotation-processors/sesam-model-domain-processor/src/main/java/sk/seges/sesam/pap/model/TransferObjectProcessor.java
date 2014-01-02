@@ -30,6 +30,7 @@ import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
 import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.accessors.AccessorsPrinter;
 import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
+import sk.seges.sesam.pap.model.printer.clone.ClonePrinter;
 import sk.seges.sesam.pap.model.printer.constructor.EmptyConstructorPrinter;
 import sk.seges.sesam.pap.model.printer.constructor.EnumeratedConstructorBodyPrinter;
 import sk.seges.sesam.pap.model.printer.constructor.EnumeratedConstructorDefinitionPrinter;
@@ -178,7 +179,8 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 				new EnumeratedConstructorBodyPrinter(pw),
 				new AccessorsPrinter(processingEnv, pw),
 				new EqualsPrinter(getEntityResolver(), processingEnv, pw),
-				new HashCodePrinter(getEntityResolver(), processingEnv, pw)
+				new HashCodePrinter(getEntityResolver(), processingEnv, pw),
+				new ClonePrinter(processingEnv, pw),
 		};
 	}
 }

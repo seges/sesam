@@ -1,19 +1,17 @@
 package sk.seges.sesam.pap.model.printer.equals;
 
-import java.util.Arrays;
-
-import javax.tools.Diagnostic.Kind;
-
 import sk.seges.sesam.core.pap.model.api.ClassSerializer;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
-import sk.seges.sesam.pap.model.TransferObjectProcessor;
 import sk.seges.sesam.pap.model.accessor.GenerateEqualsAccessor;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
 import sk.seges.sesam.pap.model.printer.AbstractElementPrinter;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
+
+import javax.tools.Diagnostic.Kind;
+import java.util.Arrays;
 
 /**
  * {@link EqualsPrinter} prints equals method based on the fields defined in the class.
