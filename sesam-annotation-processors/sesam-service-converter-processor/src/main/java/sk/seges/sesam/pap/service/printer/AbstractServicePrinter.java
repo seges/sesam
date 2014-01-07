@@ -146,7 +146,7 @@ public class AbstractServicePrinter {
 					
 					processingEnv.getMessager().printMessage(Kind.ERROR,
 							"[ERROR] Service method return type does not match the remote interface definition " + remoteMethod.toString()
-									+ ". This should have never happened, you are probably a magician or there is a bug in the sesam processor itself.",
+									+ ". Probably you are using domain entities in remote interface.",
 							serviceTypeElement.asElement());
 				}
 			}
