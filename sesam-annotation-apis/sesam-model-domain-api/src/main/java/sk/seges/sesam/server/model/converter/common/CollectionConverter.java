@@ -15,13 +15,10 @@
 */
 package sk.seges.sesam.server.model.converter.common;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
 import sk.seges.sesam.shared.model.converter.ConverterProviderContext;
 import sk.seges.sesam.shared.model.converter.api.DtoConverter;
+
+import java.util.*;
 
 public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection<DTO>, Collection<DOMAIN>> {
 
@@ -36,15 +33,8 @@ public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection
 		if (domains == null) {
 			return null;
 		}
-		
-		T result;
-		try {
-			result = targetClass.newInstance();
-		} catch (Exception e) {
-			throw new RuntimeException("Unable to create collection instance for class " + domains.getClass().getCanonicalName(), e);
-		}
-		
-		return (T) convertToDto(result, domains);
+
+		return (T) convertToDto(createDtoInstance(targetClass), domains);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -56,20 +46,39 @@ public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection
 		return toDto(domains, domains.getClass());
 	}
 
+	protected <T extends Collection<DOMAIN>> T createDomainInstance(Class<T> targetClass) {
+
+		if (targetClass.getCanonicalName().equals("java.util.Arrays.ArrayList")) {
+			return (T) new ArrayList();
+		}
+
+		try {
+			return targetClass.newInstance();
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to create collection instance for class " + targetClass.getClass().getCanonicalName(), e);
+		}
+	}
+
+	protected <T extends Collection<DTO>> T createDtoInstance(Class<T> targetClass) {
+
+		if (targetClass.getCanonicalName().equals("java.util.Arrays.ArrayList")) {
+			return (T) new ArrayList();
+		}
+
+		try {
+			return targetClass.newInstance();
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to create collection instance for class " + targetClass.getClass().getCanonicalName(), e);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	public <T extends Collection<DOMAIN>> T fromDto(Collection<DTO> dtos, Class<T> targetClass) {
 		if (dtos == null) {
 			return null;
 		}
 		
-		T result;
-		try {
-			result = targetClass.newInstance();
-		} catch (Exception e) {
-			throw new RuntimeException("Unable to create collection instance for class " + dtos.getClass().getCanonicalName(), e);
-		}
-
-		return (T) convertFromDto(result, dtos);
+		return (T) convertFromDto(createDomainInstance(targetClass), dtos);
 	}
 
 	@SuppressWarnings("unchecked")
