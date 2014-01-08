@@ -606,6 +606,8 @@ public class ConverterProviderPrinter extends AbstractConverterPrinter {
 
 		MutableDeclaredType dtoConverter = null;
 
+		ConverterTargetType usingTargetType = targetType;
+
 		if (domainType instanceof MutableTypeVariable) {
 			dtoConverter = getDtoConverterType(domainType, true);
 		} else {
@@ -619,8 +621,24 @@ public class ConverterProviderPrinter extends AbstractConverterPrinter {
 		ParameterElement[] converterParametersUsage = getConverterParameters(domainType.getConverter(), domainMethod);
 		ParameterElement converterProviderParameter = getParameterOfType(converterParametersUsage, ConverterProviderContext.class);
 
-		pw.print(converterProviderParameter.getName() + "." + targetType.getConverterMethodName() + "(");
-		printField(pw, field);
+		switch (domainType.getKind()) {
+			case CLASS:
+			case INTERFACE:
+				usingTargetType = ConverterTargetType.DTO;
+				break;
+		}
+
+		pw.print(converterProviderParameter.getName() + "." + usingTargetType.getConverterMethodName() + "(");
+
+		switch (domainType.getKind()) {
+			case CLASS:
+			case INTERFACE:
+				pw.print(domainType.getDto().toString(ClassSerializer.CANONICAL, false), ".class");
+				break;
+			default:
+				printField(pw, field);
+				break;
+		}
 
 		pw.print((castConverter ? ")" : "") + ")");
 	}

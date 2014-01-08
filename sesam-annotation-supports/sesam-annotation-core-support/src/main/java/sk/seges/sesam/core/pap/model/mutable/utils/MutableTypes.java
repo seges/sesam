@@ -570,22 +570,24 @@ public class MutableTypes implements Types {
 			
 			int i = 0;
 
-			for (MutableTypeVariable typeParameter: mutableDeclaredType.getTypeVariables()) {
-				
-				TypeMirror typeVariable = fromMutableType(typeParameter);
-				
-				if (typeVariable != null) {
-					typeArgs.add(typeVariable);
-				} else {
-					if (typeElement != null) {
-						typeArgs.add(typeElement.getTypeParameters().get(i).asType());
+			if (mutableDeclaredType.getTypeVariables().size() == typeElement.getTypeParameters().size()) {
+				for (MutableTypeVariable typeParameter: mutableDeclaredType.getTypeVariables()) {
+
+					TypeMirror typeVariable = fromMutableType(typeParameter);
+
+					if (typeVariable != null) {
+						typeArgs.add(typeVariable);
 					} else {
-						//TODO It is not possible to add there a typeVariable with the specific name
-						//maybe we should put there types at least
+						if (typeElement != null) {
+							typeArgs.add(typeElement.getTypeParameters().get(i).asType());
+						} else {
+							//TODO It is not possible to add there a typeVariable with the specific name
+							//maybe we should put there types at least
+						}
 					}
+
+					i++;
 				}
-				
-				i++;
 			}
 
 			return getDeclaredType(typeElement, typeArgs.toArray(new TypeMirror[] {}));
