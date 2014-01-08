@@ -32,10 +32,6 @@ public class SesamCommonConverterProvider extends AbstractConverterProvider {
 			return null;
 		}
 
-		if (Collection.class.isAssignableFrom(domainClass)) {
-			return getCollectionConverter();
-		}
-
 		if (Map.class.isAssignableFrom(domainClass)) {
 			return getMapConverter();
 		}
@@ -51,10 +47,6 @@ public class SesamCommonConverterProvider extends AbstractConverterProvider {
 
 		if (dtoClass == null) {
 			return null;
-		}
-
-		if (Collection.class.isAssignableFrom(dtoClass)) {
-			return getCollectionConverter();
 		}
 
 		if (Map.class.isAssignableFrom(dtoClass)) {
@@ -73,11 +65,6 @@ public class SesamCommonConverterProvider extends AbstractConverterProvider {
 		SecuredEntityConverter securedEntityConverter = new SecuredEntityConverter(converterProviderContext, aclDataRegistry);
 		securedEntityConverter.setCache(cache);
 		return (DtoConverter<DTO, DOMAIN>)securedEntityConverter;
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected <DTO, DOMAIN> DtoConverter<DTO, DOMAIN> getCollectionConverter() {
-		return new CollectionConverter(converterProviderContext);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
