@@ -1,16 +1,13 @@
 package sk.seges.sesam.core.model.converter.provider;
 
-import java.util.Collection;
 import java.util.Map;
 
 import sk.seges.sesam.pap.model.annotation.ConverterProviderDefinition;
 import sk.seges.sesam.security.server.model.acl.AclDataRegistry;
 import sk.seges.sesam.security.server.model.acl.AclSecuredEntity;
 import sk.seges.sesam.security.shared.model.api.ClientSecuredEntity;
-import sk.seges.sesam.server.model.converter.common.CollectionConverter;
 import sk.seges.sesam.server.model.converter.common.MapConverter;
 import sk.seges.sesam.server.model.converter.security.SecuredEntityConverter;
-import sk.seges.sesam.shared.model.converter.ConvertedInstanceCache;
 import sk.seges.sesam.shared.model.converter.ConverterProviderContext;
 import sk.seges.sesam.shared.model.converter.api.DtoConverter;
 import sk.seges.sesam.shared.model.converter.provider.AbstractConverterProvider;
@@ -32,10 +29,6 @@ public class SesamCommonConverterProvider extends AbstractConverterProvider {
 			return null;
 		}
 
-		if (Collection.class.isAssignableFrom(domainClass)) {
-			return getCollectionConverter();
-		}
-
 		if (Map.class.isAssignableFrom(domainClass)) {
 			return getMapConverter();
 		}
@@ -51,10 +44,6 @@ public class SesamCommonConverterProvider extends AbstractConverterProvider {
 
 		if (dtoClass == null) {
 			return null;
-		}
-
-		if (Collection.class.isAssignableFrom(dtoClass)) {
-			return getCollectionConverter();
 		}
 
 		if (Map.class.isAssignableFrom(dtoClass)) {
@@ -73,11 +62,6 @@ public class SesamCommonConverterProvider extends AbstractConverterProvider {
 		SecuredEntityConverter securedEntityConverter = new SecuredEntityConverter(converterProviderContext, aclDataRegistry);
 		securedEntityConverter.setCache(cache);
 		return (DtoConverter<DTO, DOMAIN>)securedEntityConverter;
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected <DTO, DOMAIN> DtoConverter<DTO, DOMAIN> getCollectionConverter() {
-		return new CollectionConverter(converterProviderContext);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
