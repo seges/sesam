@@ -48,8 +48,10 @@ public abstract class AbstractDomainMethodConverterProviderPrinter extends Abstr
 			}
 			
 			types.add(instantiableDomain.getCanonicalName());
-			
-			pw.println("if (",instantiableDomain.clone().setTypeVariables(new MutableTypeVariable[] {}), ".class.equals(" + DOMAIN_CLASS_PARAMETER_NAME + ")) {");
+
+			pw.print("if (",instantiableDomain.clone().setTypeVariables(new MutableTypeVariable[] {}), ".class.");
+			pw.print(getClassAssignmentOperator(context.getConverterType()));
+			pw.println("(" + DOMAIN_CLASS_PARAMETER_NAME + ")) {");
 
 			printResultConverter(context);
 			
@@ -65,11 +67,8 @@ public abstract class AbstractDomainMethodConverterProviderPrinter extends Abstr
 	
 	@Override
 	protected void printType(MutableTypeMirror type, ConverterProviderPrinterContext context) {
-		
 		DomainType domainType = processingEnv.getTransferObjectUtils().getDomainType(type);
-//		if (domainType.getKind().isDeclared() && domainType.getConverter() != null) {
-			context = new ConverterProviderPrinterContext((DomainDeclaredType)domainType);
-			print(context);
-//		}
+		context = new ConverterProviderPrinterContext((DomainDeclaredType)domainType);
+		print(context);
 	}
 }

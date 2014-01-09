@@ -19,8 +19,6 @@ public class DomainMethodConverterProviderPrinter extends AbstractDomainMethodCo
 
 	@Override
 	protected void printResultConverter(ConverterProviderPrinterContext context) {
-		//MutableTypes typeUtils = processingEnv.getTypeUtils();
-		//pw.print("return (", getTypedDtoConverter(), ") (", typeUtils.getDeclaredType(typeUtils.toMutableType(DtoConverter.class), context.getDto(), context.getDomain()), ")");
 		pw.print("return (", getTypedDtoConverter(), ")");
 		converterProviderPrinter.printDomainGetConverterMethodName(context.getRawDomain(), null, null, pw, false);
 	}

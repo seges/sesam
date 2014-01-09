@@ -44,7 +44,10 @@ public abstract class AbstractDtoMethodConverterProviderPrinter extends Abstract
 			}
 			
 			types.add(context.getRawDto().getCanonicalName());
-			pw.println("if (", context.getRawDto().clone().setTypeVariables(new MutableTypeVariable[] {}), ".class.equals(" + DTO_CLASS_PARAMETER_NAME + ")) {");
+
+			pw.print("if (", context.getRawDto().clone().setTypeVariables(new MutableTypeVariable[] {}), ".class.");
+			pw.print(getClassAssignmentOperator(context.getConverterType()));
+			pw.println("(" + DTO_CLASS_PARAMETER_NAME + ")) {");
 
 			printResultConverter(context);
 			
