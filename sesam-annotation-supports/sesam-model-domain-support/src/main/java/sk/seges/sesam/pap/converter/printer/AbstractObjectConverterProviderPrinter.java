@@ -35,7 +35,15 @@ public abstract class AbstractObjectConverterProviderPrinter extends AbstractCon
 	public void initialize() {
 		this.types.clear();
 	}
-	
+
+	protected String getClassAssignmentOperator(ConverterTypeElement converter) {
+		if (converter.getConfiguration().getDtoSpecified() == null) {
+			return "isAssignableFrom";
+		}
+
+		return "equals";
+	}
+
 	protected MutableDeclaredType getTypedDtoConverter() {
 		MutableTypes typeUtils = processingEnv.getTypeUtils();
 		return typeUtils.getDeclaredType(typeUtils.toMutableType(DtoConverter.class), 
