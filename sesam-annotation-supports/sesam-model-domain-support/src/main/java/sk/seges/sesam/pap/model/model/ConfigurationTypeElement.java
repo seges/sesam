@@ -317,6 +317,10 @@ public class ConfigurationTypeElement extends TomBaseType {
 		return transferObjectConfiguration.getDomain() != null;
 	}
 
+	public boolean hasDtoInterfaceSpecified() {
+		return transferObjectConfiguration.getDtoInterface() != null;
+	}
+
 	public TypeElement getDtoSpecified() {
 		return transferObjectConfiguration.getDto();
 	}

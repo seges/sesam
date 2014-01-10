@@ -37,7 +37,7 @@ public abstract class AbstractObjectConverterProviderPrinter extends AbstractCon
 	}
 
 	protected String getClassAssignmentOperator(ConverterTypeElement converter) {
-		if (converter.getConfiguration().getDtoSpecified() == null) {
+		if (converter.getConfiguration().hasDtoInterfaceSpecified()) {
 			return "isAssignableFrom";
 		}
 
