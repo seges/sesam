@@ -453,7 +453,7 @@ public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathType
 			for (Element roundElement: roundElements) {
 				boolean found = false;
 				for (Element resultElement: result) {
-					if (resultElement.toString().equals(roundElement.toString())) {
+					if (resultElement.equals(roundElement)) {
 						found = true;
 						break;
 					}

@@ -105,32 +105,9 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 		return new ArrayList<ConfigurationTypeElement>();
 	}
 
-//	private ConverterTypeElement getDeclaredConverter() {
-//		ConfigurationTypeElement converterDefinitionConfiguration = getConverterDefinitionConfiguration();
-//		
-//		if (converterDefinitionConfiguration == null) {
-//			return null;
-//		}
-//		
-//		return converterDefinitionConfiguration.getConverter();
-//	}
-
 	@Override
 	public ConverterTypeElement getConverter() {
-		
 		return getDto().getConverter();
-		
-//		ConfigurationTypeElement domainDefinitionConfiguration = getDomainDefinitionConfiguration();
-//		
-//		if (domainDefinitionConfiguration == null) {
-//			return null;
-//		}
-//
-//		if (domainDefinitionConfiguration.getDelegateConfigurationTypeElement() != null) {
-//			return domainDefinitionConfiguration.getDelegateConfigurationTypeElement().getConverter();
-//		}
-//
-//		return ((DomainDeclared)domainDefinitionConfiguration.getInstantiableDomain()).getDeclaredConverter();
 	}
 
 	@Override

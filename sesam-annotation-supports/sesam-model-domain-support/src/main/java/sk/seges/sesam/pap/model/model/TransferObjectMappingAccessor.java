@@ -14,11 +14,13 @@ import javax.lang.model.type.TypeVariable;
 
 import sk.seges.sesam.core.pap.NullCheck;
 import sk.seges.sesam.core.pap.accessor.AnnotationAccessor;
+import sk.seges.sesam.core.pap.model.InitializableValue;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
 import sk.seges.sesam.core.pap.utils.AnnotationClassPropertyHarvester;
 import sk.seges.sesam.core.pap.utils.AnnotationClassPropertyHarvester.AnnotationClassProperty;
 import sk.seges.sesam.core.pap.utils.ProcessorUtils;
+import sk.seges.sesam.domain.ValueHolder;
 import sk.seges.sesam.pap.model.annotation.TransferObjectMapping;
 import sk.seges.sesam.pap.model.annotation.TransferObjectMapping.NotDefinedConverter;
 import sk.seges.sesam.pap.model.annotation.TransferObjectMappings;
@@ -58,25 +60,29 @@ public class TransferObjectMappingAccessor extends AnnotationAccessor {
 	 */
 	public TransferObjectMappingAccessor(Element element, MutableProcessingEnvironment processingEnv) {
 		super(processingEnv);
-		this.configurationHolderElement = element;
-		{
-			TransferObjectMapping mapping = element.getAnnotation(TransferObjectMapping.class);
-			if (mapping != null) {
-				this.mappings.add(mapping);
-			}
-		}
 
-		{
-			TransferObjectMappings mappings = element.getAnnotation(TransferObjectMappings.class);
-			if (mappings != null) {
-				for (TransferObjectMapping mapping : mappings.value()) {
+		this.configurationHolderElement = element;
+
+		if (element.getAnnotationMirrors().size() > 0) {
+			{
+				TransferObjectMapping mapping = element.getAnnotation(TransferObjectMapping.class);
+				if (mapping != null) {
 					this.mappings.add(mapping);
 				}
 			}
-		}
-		
-		if (mappings.size() == 1) {
-			referenceMapping = mappings.iterator().next();
+
+			if (this.mappings.size() == 0) {
+				TransferObjectMappings mappings = element.getAnnotation(TransferObjectMappings.class);
+				if (mappings != null) {
+					for (TransferObjectMapping mapping : mappings.value()) {
+						this.mappings.add(mapping);
+					}
+				}
+			}
+
+			if (mappings.size() == 1) {
+				referenceMapping = mappings.iterator().next();
+			}
 		}
 	}
 
@@ -110,8 +116,7 @@ public class TransferObjectMappingAccessor extends AnnotationAccessor {
 			MutableDeclaredType mutableAnnotationDtoType = null;
 
 			if (annotationDtoType != null) {
-				mutableAnnotationDtoType = processingEnv.getTypeUtils().toMutableType((DeclaredType)annotationDtoType.asType());
-				if (processingEnv.getTypeUtils().isSameType(mutableAnnotationDtoType, dtoType)) {
+				if (dtoType.getQualifiedName().equals(annotationDtoType.getQualifiedName().toString())) {
 					return mapping;
 				}
 			}
@@ -217,6 +222,8 @@ public class TransferObjectMappingAccessor extends AnnotationAccessor {
 		return null;
 	}
 
+	private InitializableValue<TypeElement> domainValue = new InitializableValue<TypeElement>();
+
 	/**
 	 * Returns domain object defined in the {@link TransferObjectMapping} annotation. If there are more the one
 	 * {@link TransferObjectMapping} annotations null type is returned. If there is any DTO class specified in the
@@ -224,11 +231,15 @@ public class TransferObjectMappingAccessor extends AnnotationAccessor {
 	 * configurations that has no DTO specified.
 	 */
 	public TypeElement getDomain() {
-		if (referenceMapping == null) {
-			return null;
+		if (domainValue.isInitialized()) {
+			return domainValue.getValue();
 		}
 
-		return getDomain(referenceMapping);
+		if (referenceMapping == null) {
+			return domainValue.setValue(null);
+		}
+
+		return domainValue.setValue(getDomain(referenceMapping));
 	}
 
 	public TypeElement getDtoInterface() {
@@ -324,33 +335,42 @@ public class TransferObjectMappingAccessor extends AnnotationAccessor {
 		return null;
 	}
 
+	private InitializableValue<TypeElement> domainInterface = new InitializableValue<TypeElement>();
+
 	TypeElement getDomainInterface(TransferObjectMapping mapping) {
-		TypeElement domainInterfaceType = NullCheck.checkNull(AnnotationClassPropertyHarvester.getTypeOfClassProperty(mapping,
-				new AnnotationClassProperty<TransferObjectMapping>() {
+		if (!domainInterface.isInitialized()) {
+			TypeElement domainInterfaceType = NullCheck.checkNull(AnnotationClassPropertyHarvester.getTypeOfClassProperty(mapping,
+					new AnnotationClassProperty<TransferObjectMapping>() {
 
-					@Override
-					public Class<?> getClassProperty(TransferObjectMapping annotation) {
-						return annotation.domainInterface();
-					}
-				}));
-		
-		if (domainInterfaceType != null) {
-			return domainInterfaceType;
-		}
-		
-		String domainInterfaceName = NullCheck.checkNull(mapping.domainInterfaceName());
-		
-		if (domainInterfaceName != null) {
-			return processingEnv.getElementUtils().getTypeElement(domainInterfaceName);
+						@Override
+						public Class<?> getClassProperty(TransferObjectMapping annotation) {
+							return annotation.domainInterface();
+						}
+					}));
+
+			if (domainInterfaceType != null) {
+				domainInterface.setValue(domainInterfaceType);
+				return domainInterface.getValue();
+			}
+
+			String domainInterfaceName = NullCheck.checkNull(mapping.domainInterfaceName());
+
+			if (domainInterfaceName != null) {
+				domainInterface.setValue(processingEnv.getElementUtils().getTypeElement(domainInterfaceName));
+				return domainInterface.getValue();
+			}
+
+			TypeElement delegatedConfiguration = getConfiguration();
+
+			if (delegatedConfiguration != null) {
+				domainInterface.setValue(new TransferObjectMappingAccessor(delegatedConfiguration, processingEnv).getDomainInterface(mapping));
+				return domainInterface.getValue();
+			}
+
+			domainInterface.setValue(null);
 		}
 
-		TypeElement delegatedConfiguration = getConfiguration();
-		
-		if (delegatedConfiguration != null) {
-			return new TransferObjectMappingAccessor(delegatedConfiguration, processingEnv).getDomainInterface(mapping);
-		}
-
-		return null;
+		return domainInterface.getValue();
 	}
 
 	TypeElement getDtoInterface(TransferObjectMapping mapping) {

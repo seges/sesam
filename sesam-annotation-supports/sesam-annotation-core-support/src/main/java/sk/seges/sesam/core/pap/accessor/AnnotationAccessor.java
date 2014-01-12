@@ -117,7 +117,7 @@ public abstract class AnnotationAccessor {
 		
 		@Override
 		public boolean isAnnotationIgnored(AnnotationMirror annotation) {
-			return isAnnotationIgnored(annotation.getAnnotationType().toString());
+			return isAnnotationIgnored(((TypeElement)annotation.getAnnotationType().asElement()).getQualifiedName().toString());
 		}
 
 		@Override

@@ -86,7 +86,7 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 						if (MethodHelper.isGetterMethod(method)) {
 							String fieldName = TransferObjectHelper.getFieldPath(method);
 	
-							if (!isProcessed(generated, fieldName)) {
+							if (!contains(generated, fieldName)) {
 	
 								TransferObjectContext context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PUBLIC, method, null, getConfigurationProviders());
 								if (context == null) {
