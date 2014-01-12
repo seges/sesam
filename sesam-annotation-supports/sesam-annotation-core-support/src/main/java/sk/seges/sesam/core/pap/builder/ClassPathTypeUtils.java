@@ -36,6 +36,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import sk.seges.sesam.core.pap.builder.api.ClassPathTypes;
 import sk.seges.sesam.core.pap.processor.ConfigurableAnnotationProcessor;
+import sk.seges.sesam.pap.model.TypeElementsList;
 
 public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathTypes {
 
@@ -44,7 +45,7 @@ public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathType
 		private static Set<Project> projects = new HashSet<Project>();
 
 		private String projectName;
-		private Map<String, Set<String>> annotatedElements;
+		private Map<String, TypeElementsList> annotatedElements;
 		private boolean targetChanged = true;
 		
 		private Project(String projectName) {
@@ -87,42 +88,40 @@ public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathType
 			return projectName;
 		}
 		
-		public Set<String> getAnnotatedElementNames(String annotationType) {
+		public TypeElementsList getAnnotatedElementNames(String annotationType) {
 			if (annotatedElements == null) {
 				return null;
 			}
 			return annotatedElements.get(annotationType);
 		}
 		
-		public void setAnnotatedElementNames(Map<String, Set<String>> annotatedElementNames) {
+		public void setAnnotatedElementNames(Map<String, TypeElementsList> annotatedElementNames) {
 			this.annotatedElements = annotatedElementNames;
 			if (annotatedElements == null) {
-				this.annotatedElements = new HashMap<String, Set<String>>();
+				this.annotatedElements = new HashMap<String, TypeElementsList>();
 			}
 		}
 
-		public void addAnnotatedElementNames(Map<String, Set<String>> annotatedElementNames) {
-			for (Entry<String, Set<String>> entry: annotatedElementNames.entrySet()) {
-				Set<String> existingSet = this.annotatedElements.get(entry.getKey());
+		public void addAnnotatedElementNames(Map<String, TypeElementsList> annotatedElementNames) {
+			for (Entry<String, TypeElementsList> entry: annotatedElementNames.entrySet()) {
+				TypeElementsList existingSet = this.annotatedElements.get(entry.getKey());
 				
 				if (existingSet == null) {
-					existingSet = new HashSet<String>();
+					existingSet = new TypeElementsList();
 					this.annotatedElements.put(entry.getKey(), existingSet);
 				}
 				
-				for (String className: entry.getValue()) {
-					if (!existingSet.contains(className)) {
-						existingSet.add(className);
-					}
+				for (TypeElement element: entry.getValue()) {
+					existingSet.add(element);
 				}
 			}
 		}
 		
-		public void addAnnotatedElementNames(String annotationType, Set<String> elementNames) {
+		public void addAnnotatedElementNames(String annotationType, TypeElementsList elements) {
 			if (annotatedElements == null) {
-				annotatedElements = new HashMap<String, Set<String>>();
+				annotatedElements = new HashMap<String, TypeElementsList>();
 			}
-			annotatedElements.put(annotationType, elementNames);
+			annotatedElements.put(annotationType, elements);
 		}
 
 		@Override
@@ -341,8 +340,8 @@ public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathType
 		}
 
 		@Override
-		public void handleFile(InputStreamProvider inputStreamProvider, String canonicalName, ProcessingEnvironment processingEnv, Map<String, Set<String>> annotatedClasses) {
-			addyTypeElement(canonicalName, processingEnv.getElementUtils().getTypeElement(canonicalName), annotatedClasses);
+		public void handleFile(InputStreamProvider inputStreamProvider, String canonicalName, ProcessingEnvironment processingEnv, Map<String, TypeElementsList> annotatedClasses) {
+			addTypeElement(processingEnv.getElementUtils().getTypeElement(canonicalName), annotatedClasses);
 		}
 
 		@Override
@@ -356,28 +355,27 @@ public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathType
 		}
 	}
 	
-	protected Map<String, Set<String>> getSubclasses() {
+	protected Map<String, TypeElementsList> getSubclasses() {
 		return getSubclasses(System.getProperty(PROCESSOR_CLASS_PATH), new ClassFileTypeHandler());
 	}
 
-	private static void addyTypeElement(String canonicalName, TypeElement type, Map<String, Set<String>> annotatedClasses) {
+	private static void addTypeElement(TypeElement type, Map<String, TypeElementsList> annotatedClasses) {
 		if (type == null) {
 			return;
 		}
 
 		List<? extends AnnotationMirror> annotationMirrors = type.getAnnotationMirrors();
 		for (AnnotationMirror annotationMirror: annotationMirrors) {
-			
+
 			String qualifiedName = ((TypeElement)annotationMirror.getAnnotationType().asElement()).getQualifiedName().toString();
-			
-			Set<String> types = annotatedClasses.get(qualifiedName);
+
+			TypeElementsList types = annotatedClasses.get(qualifiedName);
 			if (types == null) {
-				types = new HashSet<String>();
+				types = new TypeElementsList();
 				annotatedClasses.put(qualifiedName, types);
 			}
-			if (!types.contains(canonicalName)) {
-				types.add(canonicalName);
-			}
+
+			types.add(type);
 		}
 	}
 	
@@ -407,23 +405,22 @@ public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathType
 			project.setTargetChanged(false);
 		}
 		
-		Set<String> annotatedClassNames = project.getAnnotatedElementNames(a.getQualifiedName().toString());
+		TypeElementsList annotatedClassNames = project.getAnnotatedElementNames(a.getQualifiedName().toString());
 
-		Set<Element> annotatedClassSet = new HashSet<Element>();
+		TypeElementsList annotatedClassSet = new TypeElementsList();
 		
 		if (annotatedClassNames != null) {
-			for (String annotatedClassName: annotatedClassNames) {
-				TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(annotatedClassName);
+			for (TypeElement typeElement: annotatedClassNames) {
 				if (typeElement == null) {
-					processingEnv.getMessager().printMessage(Kind.ERROR, "Unable to find " + annotatedClassName + " in the processing environment!");
+					processingEnv.getMessager().printMessage(Kind.ERROR, "Unable to find " + typeElement.toString() + " in the processing environment!");
 				} else {
 					annotatedClassSet.add(typeElement);
 				}
 			}
 		}
 		
-				
-		return annotatedClassSet;
+
+		return new HashSet<TypeElement>(annotatedClassSet);
 	}
 
 	@Override

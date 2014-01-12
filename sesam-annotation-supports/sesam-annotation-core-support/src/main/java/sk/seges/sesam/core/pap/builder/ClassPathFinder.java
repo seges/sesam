@@ -1,5 +1,7 @@
 package sk.seges.sesam.core.pap.builder;
 
+import sk.seges.sesam.pap.model.TypeElementsList;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -23,6 +25,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 import javax.tools.Diagnostic.Kind;
 
 public abstract class ClassPathFinder {
@@ -36,7 +39,7 @@ public abstract class ClassPathFinder {
 		
 		String getExtension();
 		
-		void handleFile(InputStreamProvider inputStreamProvider, String canonicalName, ProcessingEnvironment processingEnv, Map<String, Set<String>> annotatedClasses);
+		void handleFile(InputStreamProvider inputStreamProvider, String canonicalName, ProcessingEnvironment processingEnv, Map<String, TypeElementsList> annotatedClasses);
 		
 		boolean continueProcessing();
 	}
@@ -241,13 +244,13 @@ public abstract class ClassPathFinder {
 		return s.replace('/', '.');
 	}
 	
-	protected Map<String, Set<String>> getSubclasses(String classpath, FileTypeHandler fileTypeHandler) {
+	protected Map<String, TypeElementsList> getSubclasses(String classpath, FileTypeHandler fileTypeHandler) {
 
 		Map<URL, String> classpathLocations = getClasspathLocations(classpath);
 		
 		Iterator<URL> it = classpathLocations.keySet().iterator();
 		
-		Map<String, Set<String>> annotatedClasses = new HashMap<String, Set<String>>();
+		Map<String, TypeElementsList> annotatedClasses = new HashMap<String, TypeElementsList>();
 		
 		while (it.hasNext()) {
 			URL url = it.next();
@@ -259,7 +262,7 @@ public abstract class ClassPathFinder {
 		return annotatedClasses;
 	}
 
-	private boolean findSubclasses(URL location, String packageName, Map<String, Set<String>> annotatedClasses, FileTypeHandler fileTypeHandler) {
+	private boolean findSubclasses(URL location, String packageName, Map<String, TypeElementsList> annotatedClasses, FileTypeHandler fileTypeHandler) {
 
 		if (!packageName.startsWith(this.packageName)) {
 			return true;

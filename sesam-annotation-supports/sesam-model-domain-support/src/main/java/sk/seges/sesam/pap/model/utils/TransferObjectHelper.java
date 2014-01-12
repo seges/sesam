@@ -1,10 +1,10 @@
 package sk.seges.sesam.pap.model.utils;
 
-import javax.lang.model.element.ExecutableElement;
-
 import sk.seges.sesam.core.pap.NullCheck;
 import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.pap.model.annotation.Field;
+
+import javax.lang.model.element.ExecutableElement;
 
 public class TransferObjectHelper {
 

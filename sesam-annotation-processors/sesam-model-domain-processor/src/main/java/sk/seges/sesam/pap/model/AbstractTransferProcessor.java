@@ -345,94 +345,10 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 		
 		printer.finish(configurationTypeElement);
 	}
-	
-	class ExecutableElementList extends ArrayList<ExecutableElement> {
-
-		private final List<String> fieldsList = new ArrayList<String>();
-
-		@Override
-		public boolean add(ExecutableElement executableElement) {
-			String fieldName = TransferObjectHelper.getFieldPath(executableElement);
-
-			if (fieldsList.contains(fieldName)) {
-				return false;
-			}
-			fieldsList.add(fieldName);
-			return super.add(executableElement);
-		}
-
-		@Override
-		public void add(int index, ExecutableElement element) {
-			String fieldName = TransferObjectHelper.getFieldPath(element);
-
-			if (fieldsList.contains(fieldName)) {
-				return;
-			}
-			fieldsList.add(index, fieldName);
-			super.add(index, element);
-		}
-
-		@Override
-		public boolean addAll(Collection<? extends ExecutableElement> c) {
-			for (ExecutableElement element: c) {
-				add(element);
-			}
-
-			return true;
-		}
-
-		@Override
-		public boolean addAll(int index, Collection<? extends ExecutableElement> c) {
-			int i = 0;
-			for (ExecutableElement element: c) {
-				int size = size();
-				add(index + i, element);
-				i += size() - size;
-			}
-
-			return true;
-		}
-
-		@Override
-		public boolean remove(Object o) {
-			String fieldPath = TransferObjectHelper.getFieldPath((ExecutableElement) o);
-			int index = fieldsList.indexOf(fieldPath);
-
-			if (index == -1) {
-				return false;
-			}
-			fieldsList.remove(fieldPath);
-			return super.remove(index) != null;
-		}
-
-		@Override
-		public ExecutableElement remove(int index) {
-			fieldsList.remove(index);
-			return super.remove(index);
-		}
-
-		@Override
-		public boolean removeAll(Collection<?> c) {
-			for (Object o: c) {
-				remove(o);
-			}
-			return true;
-		}
-
-		@Override
-		protected void removeRange(int fromIndex, int toIndex) {
-			throw new RuntimeException("Not implemented!");
-		}
-
-		@Override
-		public boolean contains(Object o) {
-			return fieldsList.contains(o.toString());
-		}
-	}
 
 	private List<ExecutableElement> getMethodsFroProcessings(ConfigurationTypeElement configurationTypeElement, MappingType mappingType, final DomainDeclaredType processingElement, DomainDeclaredType domainTypeElement) {
 
-		ExecutableElementList result = new ExecutableElementList();
+		ExecutableElementsList result = new ExecutableElementsList();
 
 		List<ExecutableElement> methods = ElementFilter.methodsIn(processingElement.asConfigurationElement().getEnclosedElements());
 
