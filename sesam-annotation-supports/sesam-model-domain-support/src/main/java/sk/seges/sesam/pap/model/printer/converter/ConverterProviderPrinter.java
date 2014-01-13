@@ -621,24 +621,24 @@ public class ConverterProviderPrinter extends AbstractConverterPrinter {
 		ParameterElement[] converterParametersUsage = getConverterParameters(domainType.getConverter(), domainMethod);
 		ParameterElement converterProviderParameter = getParameterOfType(converterParametersUsage, ConverterProviderContext.class);
 
-		switch (domainType.getKind()) {
-			case CLASS:
-			case INTERFACE:
-				usingTargetType = ConverterTargetType.DTO;
-				break;
-		}
+//		switch (domainType.getKind()) {
+//			case CLASS:
+//			case INTERFACE:
+//				usingTargetType = ConverterTargetType.DTO;
+//				break;
+//		}
 
 		pw.print(converterProviderParameter.getName() + "." + usingTargetType.getConverterMethodName() + "(");
 
-		switch (domainType.getKind()) {
-			case CLASS:
-			case INTERFACE:
-				pw.print(domainType.getDto().toString(ClassSerializer.CANONICAL, false), ".class");
-				break;
-			default:
+//		switch (domainType.getKind()) {
+//			case CLASS:
+//			case INTERFACE:
+//				pw.print(domainType.getDto().toString(ClassSerializer.CANONICAL, false), ".class");
+//				break;
+//			default:
 				printField(pw, field);
-				break;
-		}
+//				break;
+//		}
 
 		pw.print((castConverter ? ")" : "") + ")");
 	}
