@@ -54,6 +54,17 @@ public class ConfigurationEnvironment {
 		return new ArrayList<ConfigurationTypeElement>();
 	}
 
+	public List<ConfigurationTypeElement> getConfigurationsForDomain(MutableTypeMirror domainType) {
+		for (ConfigurationProvider configurationProvider: configurationProviders) {
+			List<ConfigurationTypeElement> configurationsForDomain = configurationProvider.getConfigurationsForDomain(domainType);
+			if (configurationsForDomain != null && configurationsForDomain.size() > 0) {
+				return configurationsForDomain;
+			}
+		}
+
+		return new ArrayList<ConfigurationTypeElement>();
+	}
+
 	public ConfigurationTypeElement getConfiguration(ExecutableElement configurationElementMethod, DomainDeclaredType returnType, 
 			ConfigurationContext configurationContext) {
 		if (configurationProviders == null) {

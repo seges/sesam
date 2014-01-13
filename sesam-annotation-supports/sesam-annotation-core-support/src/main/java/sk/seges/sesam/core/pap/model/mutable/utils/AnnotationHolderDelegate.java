@@ -1,9 +1,7 @@
 package sk.seges.sesam.core.pap.model.mutable.utils;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -124,8 +122,14 @@ class AnnotationHolderDelegate implements HasAnnotations {
 		}
 	}
 
+	private Map<Class<?>, Annotation> annotationsCache = new HashMap<Class<?>, Annotation>();
+
 	public <A extends Annotation> A getAnnotation(final Class<A> annotationType) {
-    	return new AnnotationAccessor(processingEnv) {
+		if (annotationsCache.containsKey(annotationType)) {
+			return (A) annotationsCache.get(annotationType);
+		}
+
+		A result = new AnnotationAccessor(processingEnv) {
 
 			@Override
 			public boolean isValid() {
@@ -137,6 +141,9 @@ class AnnotationHolderDelegate implements HasAnnotations {
 				return super.getAnnotation(AnnotationHolderDelegate.this, annotationType);
 			}
     	}.getAnnotation();
+		annotationsCache.put(annotationType, result);
+
+		return result;
     }
 
 	@Override

@@ -10,6 +10,7 @@ import javax.lang.model.element.TypeElement;
 import sk.seges.sesam.core.pap.builder.api.ClassPathSources;
 import sk.seges.sesam.core.pap.model.SourceFile;
 import sk.seges.sesam.core.pap.model.api.Source;
+import sk.seges.sesam.pap.model.TypeElementsList;
 
 public class ClassPathSourceUtils extends ClassPathFinder implements ClassPathSources {
 
@@ -32,7 +33,7 @@ public class ClassPathSourceUtils extends ClassPathFinder implements ClassPathSo
 		}
 
 		@Override
-		public void handleFile(InputStreamProvider inputStreamProvider, String canonicalName, ProcessingEnvironment processingEnv, Map<String, Set<String>> annotatedClasses) {
+		public void handleFile(InputStreamProvider inputStreamProvider, String canonicalName, ProcessingEnvironment processingEnv, Map<String, TypeElementsList> annotatedClasses) {
 			inputStream = inputStreamProvider.getInputStream();
 		}
 

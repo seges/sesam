@@ -16,6 +16,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
+import java.util.ArrayList;
 
 import sk.seges.sesam.core.pap.model.api.ClassSerializer;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
@@ -295,10 +296,12 @@ public class ProcessorUtils {
 	public static ExecutableElement getMethod(String name, Element element) {
 		return getMethod(name, element, true);
 	}
-	
+
 	public static ExecutableElement getMethod(String name, Element element, boolean searchInterfaces) {
+
 		assert name != null;
 		assert element != null;
+
 		List<ExecutableElement> methods = ElementFilter.methodsIn(element.getEnclosedElements());
 
 		for (ExecutableElement method : methods) {
