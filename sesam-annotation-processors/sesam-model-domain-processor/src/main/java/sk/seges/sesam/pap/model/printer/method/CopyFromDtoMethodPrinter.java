@@ -50,6 +50,10 @@ public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements C
 			return;
 		}
 
+		if (context.isSuperclassMethod()) {
+			return;
+		}
+
 		if (new ReadOnlyAccessor(context.getDtoMethod(), processingEnv).isReadonly()) {
 			return;
 		}

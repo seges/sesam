@@ -142,20 +142,20 @@ public class CopyFromDtoPrinter extends AbstractMethodPrinter implements Transfe
 			pw.println("}");
 			pw.println();
 		}
+
+		DtoDeclaredType dtoSuperClass = configurationElement.getDto().getSuperClass();
 		
-		DomainDeclaredType domainSuperClass = configurationElement.getDomain().getSuperClass();
-		
-		if (domainSuperClass != null && domainSuperClass.getConverter() != null) {
-			   domainSuperClass = domainSuperClass.getDomainDefinitionConfiguration().getInstantiableDomain();
+		if (dtoSuperClass != null && dtoSuperClass.getConverter() != null) {
+			dtoSuperClass = dtoSuperClass.getDomainDefinitionConfiguration().getDto();
 		}
 		
-		if (domainSuperClass != null && domainSuperClass.getConverter() != null && domainSuperClass.getKind().equals(MutableTypeKind.CLASS)) {
+		if (dtoSuperClass != null && dtoSuperClass.getConverter() != null && dtoSuperClass.getKind().equals(MutableTypeKind.CLASS)) {
 			MutableDeclaredType fieldType = processingEnv.getTypeUtils().getDeclaredType(processingEnv.getTypeUtils().toMutableType(Class.class), 
-					new MutableDeclaredType[] { domainSuperClass.getDto() });
+					new MutableDeclaredType[] { dtoSuperClass });
 			//TODO: change canonical name to simple name and add import
-			Field field = new Field(domainSuperClass.getDto().getCanonicalName() + ".class", fieldType);
+			Field field = new Field(dtoSuperClass.getCanonicalName() + ".class", fieldType);
 			
-			converterProviderPrinter.printObtainConverterFromCache(pw, ConverterTargetType.DTO, domainSuperClass, field, null, false);
+			converterProviderPrinter.printObtainConverterFromCache(pw, ConverterTargetType.DTO, dtoSuperClass.getDomain(), field, null, false);
 
 			pw.println(".convertFromDto(" + RESULT_NAME + ", " + DTO_NAME + ");");
 			pw.println();

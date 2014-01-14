@@ -147,23 +147,23 @@ public class CopyToDtoPrinter extends AbstractMethodPrinter implements TransferO
 			pw.println("}");
 			pw.println();
 		}
-		
-		DomainDeclaredType domainSuperClass = configurationElement.getDomain().getSuperClass();
-		
-		if (domainSuperClass != null && domainSuperClass.getConverter() != null) {
-			domainSuperClass = domainSuperClass.getDomainDefinitionConfiguration().getInstantiableDomain();
+
+		DtoDeclaredType dtoSuperClass = configurationElement.getDto().getSuperClass();
+
+		if (dtoSuperClass != null && dtoSuperClass.getConverter() != null) {
+			dtoSuperClass = dtoSuperClass.getDomainDefinitionConfiguration().getDto();
 		}
-		
-		if (domainSuperClass != null && domainSuperClass.getConverter() != null && domainSuperClass.getKind().equals(MutableTypeKind.CLASS)) {
-			MutableDeclaredType fieldType = processingEnv.getTypeUtils().getDeclaredType(processingEnv.getTypeUtils().toMutableType(Class.class), new MutableDeclaredType[] { domainSuperClass });
+
+		if (dtoSuperClass != null && dtoSuperClass.getConverter() != null && dtoSuperClass.getKind().equals(MutableTypeKind.CLASS)) {
+			MutableDeclaredType fieldType = processingEnv.getTypeUtils().getDeclaredType(processingEnv.getTypeUtils().toMutableType(Class.class), new MutableDeclaredType[] { dtoSuperClass.getDomain() });
 			//TODO: change canonical name to simple name and add import
 
-			processingEnv.getUsedTypes().add(domainSuperClass.getDto());
+			processingEnv.getUsedTypes().add(dtoSuperClass);
 
-			Field field = new Field(domainSuperClass.getDto().getSimpleName() + ".class", fieldType);
+			Field field = new Field(dtoSuperClass.getSimpleName() + ".class", fieldType);
 
 			//TODO add NPE check
-			converterProviderPrinter.printObtainConverterFromCache(pw, ConverterTargetType.DTO, domainSuperClass, field, null, false);
+			converterProviderPrinter.printObtainConverterFromCache(pw, ConverterTargetType.DTO, dtoSuperClass.getDomain(), field, null, false);
 
 			pw.println(".convertToDto(" + RESULT_NAME + ", " + DOMAIN_NAME + ");");
 			pw.println();

@@ -44,6 +44,10 @@ public class CopyToDtoMethodPrinter extends AbstractMethodPrinter implements Cop
 			return;
 		}
 
+		if (context.isSuperclassMethod()) {
+			return;
+		}
+
 		PathResolver pathResolver = new PathResolver(context.getDomainFieldPath());
 
 		boolean nested = pathResolver.isNested();
