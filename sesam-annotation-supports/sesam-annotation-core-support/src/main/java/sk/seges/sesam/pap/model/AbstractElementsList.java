@@ -103,4 +103,9 @@ public abstract class AbstractElementsList<T extends Element> extends ArrayList<
 	public boolean contains(Object o) {
 		return elements.contains(toString((T)o));
 	}
+
+	public boolean containsElement(String element) {
+		return elements.contains(element);
+	}
+
 }
