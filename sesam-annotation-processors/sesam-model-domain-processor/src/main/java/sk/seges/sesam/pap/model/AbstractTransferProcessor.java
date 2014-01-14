@@ -286,7 +286,7 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 			}
 		}
 
-		HistoryExecutableElementsList methodsForProcessings = getMethodsForProcessings(configurationTypeElement, mappingType, processingElement, domainTypeElement);
+		HistoryExecutableElementsList methodsForProcessings = getMethodsForProcessings(configurationTypeElement, mappingType, processingElement, domainTypeElement, generated);
 
 		for (ExecutableElement method: methodsForProcessings) {
 			TransferObjectContext context = createTOContext(method, domainTypeElement, false, configurationTypeElement, generated);
@@ -359,9 +359,9 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 		printer.finish(configurationTypeElement);
 	}
 
-	private HistoryExecutableElementsList getMethodsForProcessings(ConfigurationTypeElement configurationTypeElement, MappingType mappingType, final DomainDeclaredType processingElement, DomainDeclaredType domainTypeElement) {
+	private HistoryExecutableElementsList getMethodsForProcessings(ConfigurationTypeElement configurationTypeElement, MappingType mappingType, final DomainDeclaredType processingElement, DomainDeclaredType domainTypeElement, List<String> ignored) {
 
-		HistoryExecutableElementsList result = new HistoryExecutableElementsList();
+		HistoryExecutableElementsList result = new HistoryExecutableElementsList(ignored);
 
 		List<ExecutableElement> methods = ElementFilter.methodsIn(processingElement.asConfigurationElement().getEnclosedElements());
 
@@ -386,12 +386,12 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 		if (processingElement.getSuperClass() == null && processingElement.asConfigurationElement() != null) {
 			TypeMirror superclass = processingElement.asConfigurationElement().getSuperclass();
 			if (superclass.getKind().equals(TypeKind.DECLARED)) {
-				result.addAll(getMethodsForProcessings(configurationTypeElement, mappingType, (DomainDeclaredType) processingEnv.getTransferObjectUtils().getDomainType(superclass), domainTypeElement));
+				result.addAll(getMethodsForProcessings(configurationTypeElement, mappingType, (DomainDeclaredType) processingEnv.getTransferObjectUtils().getDomainType(superclass), domainTypeElement, ignored));
 			}
 		} else if (processingElement.getSuperClass() != null) {
 
 			List<ExecutableElement> superClassMethods = getMethodsForProcessings(configurationTypeElement, mappingType,
-					processingElement.getSuperClass(), domainTypeElement);
+					processingElement.getSuperClass(), domainTypeElement, ignored);
 			result.addAll(superClassMethods);
 
 			List<ConfigurationTypeElement> configurationsForDomain = processingEnv.getEnvironmentContext().getConfigurationEnv().getConfigurationsForDomain(processingElement.getSuperClass());
@@ -406,7 +406,7 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 				MappingType superMappingType = getConfigurationMappingType(superClassConfigutation.asConfigurationElement());
 
 				superClassMethods = getMethodsForProcessings(superClassConfigutation, superMappingType,
-						processingElement.getSuperClass(), processingElement.getSuperClass());
+						processingElement.getSuperClass(), processingElement.getSuperClass(), ignored);
 
 				//TODO remove only those that are listed in explicit configuration - this assume, that configuation is AUTOMATIC
 				result.removeAll(superClassMethods);

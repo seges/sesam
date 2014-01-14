@@ -8,8 +8,17 @@ import java.util.List;
 public abstract class AbstractElementsList<T extends Element> extends ArrayList<T> {
 
 	protected final List<String> elements = new ArrayList<String>();
+	private final List<String> ignoredElements;
 
 	protected abstract String toString(T t);
+
+	protected AbstractElementsList(List<String> ignoredElements) {
+		if (ignoredElements == null) {
+			this.ignoredElements = new ArrayList<String>();
+		} else {
+			this.ignoredElements = ignoredElements;
+		}
+	}
 
 	@Override
 	public T get(int index) {
@@ -20,7 +29,7 @@ public abstract class AbstractElementsList<T extends Element> extends ArrayList<
 	public boolean add(T element) {
 		String elementString = toString(element);
 
-		if (elements.contains(elementString)) {
+		if (ignoredElements.contains(elementString) || elements.contains(elementString)) {
 			return false;
 		}
 		elements.add(elementString);
@@ -31,7 +40,7 @@ public abstract class AbstractElementsList<T extends Element> extends ArrayList<
 	public void add(int index, T element) {
 		String elementString = toString(element);
 
-		if (elements.contains(elementString)) {
+		if (ignoredElements.contains(elementString) || elements.contains(elementString)) {
 			return;
 		}
 		elements.add(index, elementString);

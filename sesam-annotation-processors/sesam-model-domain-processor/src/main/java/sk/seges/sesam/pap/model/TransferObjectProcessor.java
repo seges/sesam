@@ -2,13 +2,12 @@ package sk.seges.sesam.pap.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import javax.annotation.Generated;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -25,7 +24,9 @@ import sk.seges.sesam.core.pap.printer.ConstantsPrinter;
 import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.pap.model.accessor.CopyAccessor;
+import sk.seges.sesam.pap.model.annotation.TransferObjectMapping;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
+import sk.seges.sesam.pap.model.model.ConfigurationContext;
 import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
 import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.accessors.AccessorsPrinter;
@@ -103,6 +104,23 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 		super.printContexts(configurationTypeElement, contexts, generated, printer);
 	}
 
+	protected String processMethodBody(String body) {
+		Set<? extends Element> configurations = processingEnv.getEnvironmentContext().getRoundEnv().getElementsAnnotatedWith(TransferObjectMapping.class);
+
+		for (Element configuration: configurations) {
+			if (configuration.getAnnotation(Generated.class) == null) {
+
+				ConfigurationContext configurationContext = new ConfigurationContext(processingEnv.getEnvironmentContext().getConfigurationEnv());
+				ConfigurationTypeElement configurationTypeElement = new ConfigurationTypeElement(configuration, processingEnv.getEnvironmentContext(), configurationContext);
+				configurationContext.addConfiguration(configurationTypeElement);
+
+				body = body.replaceAll("\\b" + configurationTypeElement.getInstantiableDomainSpecified().getSimpleName().toString() + "\\b", configurationTypeElement.getDto().getSimpleName());
+			}
+		}
+
+		return body;
+	}
+
 	@Override
 	protected void printAdditionalMethods(ProcessorContext context) {
 		
@@ -131,8 +149,8 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 						methodBody = methodBody.substring(0, methodBody.length() - 1);
 					}
 
-					methodBody = methodBody.trim();
-					
+					methodBody = processMethodBody(methodBody.trim());
+
 					MutableExecutableType copiedMethod = processingEnv.getElementUtils().toMutableElement(overridenMethod).asType();
 
 					List<MutableVariableElement> parameters = copiedMethod.getParameters();

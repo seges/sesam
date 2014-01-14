@@ -4,13 +4,19 @@ import sk.seges.sesam.pap.model.utils.TransferObjectHelper;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
 
 public class HistoryExecutableElementsList extends AbstractElementsList<ExecutableElement> {
 
-	private ExecutableElementsList removedElements = new ExecutableElementsList();
+	private ExecutableElementsList removedElements = new ExecutableElementsList(null);
 
 	public AbstractElementsList<ExecutableElement> getRemovedElements() {
 		return removedElements;
+	}
+
+	public HistoryExecutableElementsList(List<String> ignoredElements) {
+		super(ignoredElements);
 	}
 
 	@Override
@@ -20,8 +26,11 @@ public class HistoryExecutableElementsList extends AbstractElementsList<Executab
 
 	@Override
 	public boolean add(ExecutableElement element) {
-		removedElements.remove(element);
-		return super.add(element);
+		if (super.add(element)) {
+			removedElements.remove(element);
+			return true;
+		}
+		return false;
 	}
 
 	@Override
