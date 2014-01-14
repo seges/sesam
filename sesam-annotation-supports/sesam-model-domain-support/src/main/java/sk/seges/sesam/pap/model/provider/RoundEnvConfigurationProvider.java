@@ -1,5 +1,6 @@
 package sk.seges.sesam.pap.model.provider;
 
+import sk.seges.sesam.core.pap.model.InitializableValue;
 import sk.seges.sesam.core.pap.model.api.ClassSerializer;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
@@ -16,6 +17,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.util.ElementFilter;
 import java.util.*;
 
 public class RoundEnvConfigurationProvider implements ConfigurationProvider {
@@ -29,12 +31,17 @@ public class RoundEnvConfigurationProvider implements ConfigurationProvider {
 	protected boolean isSupportedType(MutableTypeMirror type) {
 		return (!type.getKind().equals(MutableTypeKind.PRIMITIVE));
 	}
-	
+
+	private InitializableValue<Set<? extends Element>> configurationElementsValue = new InitializableValue<Set<? extends Element>>();
+
 	protected Set<? extends Element> getConfigurationElements() {
-		return envContext.getRoundEnv().getElementsAnnotatedWith(TransferObjectMapping.class);
+		if (configurationElementsValue.isInitialized()) {
+			return configurationElementsValue.getValue();
+		}
+		return configurationElementsValue.setValue(envContext.getRoundEnv().getElementsAnnotatedWith(TransferObjectMapping.class));
 	}
 
-	protected boolean isConfigurationElement(Element element) {
+	protected boolean isConfigurationElement(TypeElement element) {
 		return element.getAnnotation(TransferObjectMapping.class) != null;
 	}
 	
@@ -231,9 +238,9 @@ public class RoundEnvConfigurationProvider implements ConfigurationProvider {
 		for (Element annotatedElement : elementsAnnotatedWith) {
 			handleConfiguration(targetType, type, annotatedElement, context, result);
 
-			List<? extends Element> nestedElements = annotatedElement.getEnclosedElements();
+			List<TypeElement> nestedElements = ElementFilter.typesIn(annotatedElement.getEnclosedElements());
 			
-			for (Element nestedElement: nestedElements) {
+			for (TypeElement nestedElement: nestedElements) {
 				if (isConfigurationElement(nestedElement)) {
 					handleConfiguration(targetType, type, nestedElement, context, result);
 				}

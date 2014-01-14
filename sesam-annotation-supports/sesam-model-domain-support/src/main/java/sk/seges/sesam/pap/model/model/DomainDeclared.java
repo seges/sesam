@@ -190,8 +190,6 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 	
 	private void findIdMethod(TypeElement processingElement, MappingType mappingType, ConfigurationTypeElement domainDefinitionConfiguration, EntityResolver entityResolver) {
 
-		//PojoElement pojoElement = new PojoElement(asConfigurationElement(), environmentContext.getProcessingEnv());
-
 		while (processingElement != null) {
 			
 			List<ExecutableElement> methods = ElementFilter.methodsIn(processingElement.getEnclosedElements());

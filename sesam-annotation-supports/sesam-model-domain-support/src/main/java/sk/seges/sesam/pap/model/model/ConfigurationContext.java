@@ -1,5 +1,7 @@
 package sk.seges.sesam.pap.model.model;
 
+import sk.seges.sesam.core.pap.model.InitializableValue;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,44 +56,60 @@ public class ConfigurationContext {
 		return null;
 	}
 
+	private InitializableValue<ConfigurationTypeElement> domainDefinitionConfigurationValue = new InitializableValue<ConfigurationTypeElement>();
+	private InitializableValue<ConfigurationTypeElement> converterDefinitionConfigurationValue = new InitializableValue<ConfigurationTypeElement>();
+	private InitializableValue<ConfigurationTypeElement> delegateDomainDefinitionConfigurationValue = new InitializableValue<ConfigurationTypeElement>();
+
 	public ConfigurationTypeElement getDelegateDomainDefinitionConfiguration() {
+
+		if (delegateDomainDefinitionConfigurationValue.isInitialized()) {
+			return delegateDomainDefinitionConfigurationValue.getValue();
+		}
+
 		ConfigurationTypeElement domainDefinitionConfiguration = getDomainDefinitionConfiguration();
 
 		if (domainDefinitionConfiguration != null && domainDefinitionConfiguration.getDelegateConfigurationTypeElement() != null) {
 			domainDefinitionConfiguration = domainDefinitionConfiguration.getDelegateConfigurationTypeElement();
 		}
 		
-		return domainDefinitionConfiguration;
+		return delegateDomainDefinitionConfigurationValue.setValue(domainDefinitionConfiguration);
 	}
 
 	ConfigurationTypeElement getDomainDefinitionConfiguration() {
+
+		if (domainDefinitionConfigurationValue.isInitialized()) {
+			return domainDefinitionConfigurationValue.getValue();
+		}
+
 		ConfigurationTypeElement configuration = getConfiguration(TomType.DOMAIN, TomType.DTO_NOT_DEFINED);
 		if (configuration != null) {
-			return configuration;
+			return domainDefinitionConfigurationValue.setValue(configuration);
 		}
-		return ensureConfiguration(TomType.DOMAIN);
+		return domainDefinitionConfigurationValue.setValue(ensureConfiguration(TomType.DOMAIN));
 	}
 
-//	ConfigurationTypeElement getDtoDefinitionConfiguration() {
-//		return ensureConfiguration(TomType.DTO_DEFINED);
-//	}
-
 	ConfigurationTypeElement getConverterDefinitionConfiguration() {
+
+		if (converterDefinitionConfigurationValue.isInitialized()) {
+			return converterDefinitionConfigurationValue.getValue();
+		}
+
 		ConfigurationTypeElement configuration = getConfiguration(TomType.CONVERTER_DEFINED);
 		if (configuration != null) {
-			return configuration;
+			return converterDefinitionConfigurationValue.setValue(configuration);
 		}
 		configuration = getConfiguration(TomType.CONVERTER_GENERATED);
 		if (configuration != null) {
-			return configuration;
+			return converterDefinitionConfigurationValue.setValue(configuration);
 		}
 
 		ConfigurationTypeElement delegateConfiguration = getConfiguration(TomType.DELEGATE);
 		
 		if (delegateConfiguration != null) {
-			return delegateConfiguration.getDelegateConfigurationTypeElement().configurationContext.getConverterDefinitionConfiguration();
+			return converterDefinitionConfigurationValue.setValue(
+					delegateConfiguration.getDelegateConfigurationTypeElement().configurationContext.getConverterDefinitionConfiguration());
 		}
 
-		return null;
+		return converterDefinitionConfigurationValue.setValue(null);
 	}
 }
