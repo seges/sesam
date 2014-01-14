@@ -88,7 +88,7 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 	
 							if (!contains(generated, fieldName)) {
 	
-								TransferObjectContext context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PUBLIC, method, null, getConfigurationProviders());
+								TransferObjectContext context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PUBLIC, method, null, false);
 								if (context == null) {
 									continue;
 								}

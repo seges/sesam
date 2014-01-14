@@ -19,13 +19,13 @@ import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
 
 public class TransferObjectConverterProcessorContext extends TransferObjectProcessorContext {
 
-	public TransferObjectConverterProcessorContext(ConfigurationTypeElement configurationTypeElement, Modifier modifier, ExecutableElement method) {
-		super(configurationTypeElement, modifier, method);
+	public TransferObjectConverterProcessorContext(ConfigurationTypeElement configurationTypeElement, Modifier modifier, ExecutableElement method, boolean isSuperClassMethod) {
+		super(configurationTypeElement, modifier, method, isSuperClassMethod);
 	}
 
 	public TransferObjectConverterProcessorContext(ConfigurationTypeElement configurationTypeElement, Modifier modifier, ExecutableElement method,
-			ExecutableElement domainMethod) {
-		super(configurationTypeElement, modifier, method, domainMethod);
+			ExecutableElement domainMethod, boolean isSuperClassMethod) {
+		super(configurationTypeElement, modifier, method, domainMethod, isSuperClassMethod);
 	}
 	
 	@Override

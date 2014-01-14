@@ -26,6 +26,10 @@ public class AccessorsPrinter extends CopyPrinter {
 	@Override
 	public void print(TransferObjectContext context) {
 
+		if (context.isSuperclassMethod()) {
+			return;
+		}
+
 		String modifier = Modifier.PUBLIC.toString() + " ";
 		
 		//modifier = context.getModifier() != null ? (context.getModifier().toString() + " ") : "";

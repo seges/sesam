@@ -22,14 +22,14 @@ public class TransferObjectProcessorContextProvider {
 	}
 
 	protected TransferObjectProcessorContext createContext(ConfigurationTypeElement configurationTypeElement, Modifier modifier, ExecutableElement method,
-			ExecutableElement domainMethod) {
-		return new TransferObjectProcessorContext(configurationTypeElement, modifier, method, domainMethod);
+			ExecutableElement domainMethod, boolean isSuperClassMethod) {
+		return new TransferObjectProcessorContext(configurationTypeElement, modifier, method, domainMethod, isSuperClassMethod);
 	}
 	
 	public TransferObjectContext get(ConfigurationTypeElement configurationTypeElement, Modifier modifier, ExecutableElement method,
-			ExecutableElement domainMethod, String path, ConfigurationProvider[] configurationProviders) {
+			ExecutableElement domainMethod, String path, boolean isSuperClassMethod) {
 
-		TransferObjectProcessorContext processorContext = createContext(configurationTypeElement, modifier, method, domainMethod);
+		TransferObjectProcessorContext processorContext = createContext(configurationTypeElement, modifier, method, domainMethod, isSuperClassMethod);
 		if (!processorContext.initialize(envContext, entityResolver, path)) {
 			return null;
 		}
@@ -38,9 +38,9 @@ public class TransferObjectProcessorContextProvider {
 	}
 	
 	public TransferObjectContext get(ConfigurationTypeElement configurationTypeElement, Modifier modifier, ExecutableElement method,
-			ExecutableElement domainMethod, ConfigurationProvider[] configurationProviders) {
+			ExecutableElement domainMethod, boolean isSuperClassMethod) {
 		TransferObjectProcessorContext processorContext = createContext(configurationTypeElement, 
-				modifier, method, domainMethod);
+				modifier, method, domainMethod, isSuperClassMethod);
 		if (!processorContext.initialize(envContext, entityResolver)) {
 			return null;
 		}

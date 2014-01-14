@@ -23,6 +23,10 @@ public class EmptyConstructorPrinter extends AbstractElementPrinter implements T
 
 	@Override
 	public void print(TransferObjectContext context) {
+		if (context.isSuperclassMethod()) {
+			return;
+		}
+
 		if (!initialized) {
 			pw.println("public " + context.getConfigurationTypeElement().getDto().getSimpleName() + "() {}");
 			pw.println();

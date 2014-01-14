@@ -27,6 +27,10 @@ public class EnumeratedConstructorDefinitionPrinter extends AbstractElementPrint
 
 	@Override
 	public void print(TransferObjectContext context) {
+		if (context.isSuperclassMethod()) {
+			return;
+		}
+
 		if (index > 0) {
 			pw.print(", ");
 		}

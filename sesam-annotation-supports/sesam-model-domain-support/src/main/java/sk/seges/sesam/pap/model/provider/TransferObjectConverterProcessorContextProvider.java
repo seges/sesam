@@ -18,7 +18,7 @@ public class TransferObjectConverterProcessorContextProvider extends TransferObj
 
 	@Override
 	protected TransferObjectProcessorContext createContext(ConfigurationTypeElement configurationTypeElement, Modifier modifier,
-			ExecutableElement method, ExecutableElement domainMethod) {
-		return new TransferObjectConverterProcessorContext(configurationTypeElement, modifier, method, domainMethod);
+			ExecutableElement method, ExecutableElement domainMethod, boolean isSuperClassMethod) {
+		return new TransferObjectConverterProcessorContext(configurationTypeElement, modifier, method, domainMethod, isSuperClassMethod);
 	}
 }

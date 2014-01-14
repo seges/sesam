@@ -52,18 +52,26 @@ public class TransferObjectProcessorContext implements TransferObjectContext {
 
 	protected ConverterTypeElement converterType;
 	protected boolean useConverter;
+
+	private boolean superClassMethod;
 	
-	public TransferObjectProcessorContext(ConfigurationTypeElement configurationTypeElement, Modifier modifier, ExecutableElement method) {
-		this(configurationTypeElement, modifier, method, method);
+	public TransferObjectProcessorContext(ConfigurationTypeElement configurationTypeElement, Modifier modifier, ExecutableElement method, boolean superClassMethod) {
+		this(configurationTypeElement, modifier, method, method, superClassMethod);
 	}
 
 	public TransferObjectProcessorContext(ConfigurationTypeElement configurationTypeElement, Modifier modifier, ExecutableElement method,
-			ExecutableElement domainMethod) {
+			ExecutableElement domainMethod, boolean superClassMethod) {
 		
 		this.configurationTypeElement = configurationTypeElement;
 		this.modifier = modifier;
 		this.method = method;
+		this.superClassMethod = superClassMethod;
 		this.domainMethod = domainMethod;
+	}
+
+	@Override
+	public boolean isSuperclassMethod() {
+		return superClassMethod;
 	}
 
 	protected TypeMirror erasure(TypeElement typeElement, TypeMirror param) {

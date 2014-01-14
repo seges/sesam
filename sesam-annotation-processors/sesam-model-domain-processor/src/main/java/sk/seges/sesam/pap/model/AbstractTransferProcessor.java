@@ -233,7 +233,7 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 					continue;
 				}
 
-				TransferObjectContext context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PUBLIC, overridenMethod, domainMethod, getConfigurationProviders());
+				TransferObjectContext context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PUBLIC, overridenMethod, domainMethod, false);
 				if (context == null) {
 					continue;
 				}
@@ -263,7 +263,7 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 									if (nestedIdMethod != null) {
 										String idPath = fullPath + "." + MethodHelper.toField(nestedIdMethod);
 										if (!contains(generated, idPath)) {
-											context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PROTECTED, nestedIdMethod, nestedIdMethod, fullPath, getConfigurationProviders());
+											context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PROTECTED, nestedIdMethod, nestedIdMethod, fullPath, false);
 											if (context == null) {
 												continue;
 											}
@@ -286,31 +286,20 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 			}
 		}
 
-		List<ExecutableElement> methodsFroProcessings = getMethodsFroProcessings(configurationTypeElement, mappingType, processingElement, domainTypeElement);
+		HistoryExecutableElementsList methodsForProcessings = getMethodsForProcessings(configurationTypeElement, mappingType, processingElement, domainTypeElement);
 
-		for (ExecutableElement method: methodsFroProcessings) {
-
-			String fieldName = TransferObjectHelper.getFieldPath(method);
-
-			if (contains(generated, fieldName)) {
-				continue;
+		for (ExecutableElement method: methodsForProcessings) {
+			TransferObjectContext context = createTOContext(method, domainTypeElement, false, configurationTypeElement, generated);
+			if (context != null) {
+				contexts.add(context);
 			}
+		}
 
-			TypeElement domainElement = environmentContext.getProcessingEnv().getElementUtils().getTypeElement(domainTypeElement.getCanonicalName());
-
-			ExecutableElement overrider = ProcessorUtils.getOverrider(domainElement, method, processingEnv);
-
-			if (overrider != null) {
-				method = overrider;
+		for (ExecutableElement superClassMethod: methodsForProcessings.getRemovedElements()) {
+			TransferObjectContext context = createTOContext(superClassMethod, domainTypeElement, true, configurationTypeElement, generated);
+			if (context != null) {
+				contexts.add(context);
 			}
-
-			TransferObjectContext context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PUBLIC, method, method, getConfigurationProviders());
-			if (context == null) {
-				continue;
-			}
-
-			contexts.add(context);
-			generated.add(fieldName);
 		}
 
 		ExecutableElement idMethod = domainTypeElement.getIdMethod(getEntityResolver());
@@ -320,7 +309,7 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 					Id.class.getSimpleName() + " annotation or just specify id as a method name.", configurationTypeElement.asConfigurationElement());
 			return;
 		} else if (idMethod != null && !contains(generated, MethodHelper.toField(idMethod))) {
-			TransferObjectContext context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PROTECTED, idMethod, idMethod, getConfigurationProviders());
+			TransferObjectContext context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PROTECTED, idMethod, idMethod, false);
 			if (context != null) {
 				contexts.add(context);
 				generated.add(TransferObjectHelper.getFieldPath(idMethod));
@@ -338,6 +327,30 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 		printContexts(configurationTypeElement, contexts, generated, printer);
 	}
 
+	private TransferObjectContext createTOContext(ExecutableElement method, DomainDeclaredType domainTypeElement, boolean superClassMethod, ConfigurationTypeElement configurationTypeElement, List<String> generated) {
+		String fieldName = TransferObjectHelper.getFieldPath(method);
+
+		if (contains(generated, fieldName)) {
+			return null;
+		}
+
+		TypeElement domainElement = environmentContext.getProcessingEnv().getElementUtils().getTypeElement(domainTypeElement.getCanonicalName());
+
+		ExecutableElement overrider = ProcessorUtils.getOverrider(domainElement, method, processingEnv);
+
+		if (overrider != null) {
+			method = overrider;
+		}
+
+		TransferObjectContext context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PUBLIC, method, method, superClassMethod);
+		if (context == null) {
+			return null;
+		}
+
+		generated.add(fieldName);
+		return context;
+	}
+
 	protected void printContexts(ConfigurationTypeElement configurationTypeElement, List<TransferObjectContext> contexts, List<String> generated, TransferObjectElementPrinter printer) {
 		for (TransferObjectContext context: contexts) {
 			printer.print(context);
@@ -346,9 +359,9 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 		printer.finish(configurationTypeElement);
 	}
 
-	private List<ExecutableElement> getMethodsFroProcessings(ConfigurationTypeElement configurationTypeElement, MappingType mappingType, final DomainDeclaredType processingElement, DomainDeclaredType domainTypeElement) {
+	private HistoryExecutableElementsList getMethodsForProcessings(ConfigurationTypeElement configurationTypeElement, MappingType mappingType, final DomainDeclaredType processingElement, DomainDeclaredType domainTypeElement) {
 
-		ExecutableElementsList result = new ExecutableElementsList();
+		HistoryExecutableElementsList result = new HistoryExecutableElementsList();
 
 		List<ExecutableElement> methods = ElementFilter.methodsIn(processingElement.asConfigurationElement().getEnclosedElements());
 
@@ -373,11 +386,11 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 		if (processingElement.getSuperClass() == null && processingElement.asConfigurationElement() != null) {
 			TypeMirror superclass = processingElement.asConfigurationElement().getSuperclass();
 			if (superclass.getKind().equals(TypeKind.DECLARED)) {
-				result.addAll(getMethodsFroProcessings(configurationTypeElement, mappingType, (DomainDeclaredType) processingEnv.getTransferObjectUtils().getDomainType(superclass), domainTypeElement));
+				result.addAll(getMethodsForProcessings(configurationTypeElement, mappingType, (DomainDeclaredType) processingEnv.getTransferObjectUtils().getDomainType(superclass), domainTypeElement));
 			}
 		} else if (processingElement.getSuperClass() != null) {
 
-			List<ExecutableElement> superClassMethods = getMethodsFroProcessings(configurationTypeElement, mappingType,
+			List<ExecutableElement> superClassMethods = getMethodsForProcessings(configurationTypeElement, mappingType,
 					processingElement.getSuperClass(), domainTypeElement);
 			result.addAll(superClassMethods);
 
@@ -392,7 +405,7 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 
 				MappingType superMappingType = getConfigurationMappingType(superClassConfigutation.asConfigurationElement());
 
-				superClassMethods = getMethodsFroProcessings(superClassConfigutation, superMappingType,
+				superClassMethods = getMethodsForProcessings(superClassConfigutation, superMappingType,
 						processingElement.getSuperClass(), processingElement.getSuperClass());
 
 				//TODO remove only those that are listed in explicit configuration - this assume, that configuation is AUTOMATIC

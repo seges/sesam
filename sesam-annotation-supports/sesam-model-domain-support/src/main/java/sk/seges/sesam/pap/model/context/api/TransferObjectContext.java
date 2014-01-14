@@ -12,6 +12,8 @@ public interface TransferObjectContext {
 
 	public static final String LOCAL_CONVERTER_NAME = "converter";
 
+	boolean isSuperclassMethod();
+
 	DomainType getDomainMethodReturnType();
 
 	String getDomainFieldPath();

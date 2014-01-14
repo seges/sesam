@@ -43,7 +43,7 @@ public class HashCodePrinter extends AbstractElementPrinter {
 	 */
 	@Override
 	public void initialize(ConfigurationTypeElement configurationTypeElement, MutableDeclaredType outputName) {
-	
+
 		active = new GenerateHashcodeAccessor(configurationTypeElement.asConfigurationElement(), processingEnv).generate();
 		
 		if (!active) {
@@ -79,6 +79,10 @@ public class HashCodePrinter extends AbstractElementPrinter {
 	public void print(TransferObjectContext context) {
 
 		if (!active) {
+			return;
+		}
+
+		if (context.isSuperclassMethod()) {
 			return;
 		}
 

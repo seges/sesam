@@ -99,6 +99,10 @@ public class EqualsPrinter extends AbstractElementPrinter {
 			return;
 		}
 
+		if (context.isSuperclassMethod()) {
+			return;
+		}
+
 		boolean idMethod = entityResolver.isIdMethod(context.getDtoMethod());
 		
 		if (idMethod) {

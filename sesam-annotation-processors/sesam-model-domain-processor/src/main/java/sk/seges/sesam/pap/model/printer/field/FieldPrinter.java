@@ -14,6 +14,10 @@ public class FieldPrinter extends AbstractElementPrinter {
 	}
 	
 	public void print(TransferObjectContext context) {
+
+		if (context.isSuperclassMethod()) {
+			return;
+		}
 		String convertedPropertyName = new PojoPropertyConverter().getConvertedPropertyName(context.getDtoFieldName());
 		//we do not use modifier from the param - fields should be always private
 		pw.println(Modifier.PUBLIC.toString() + " " + Modifier.STATIC.toString() + " " + Modifier.FINAL.toString() + " ", 
