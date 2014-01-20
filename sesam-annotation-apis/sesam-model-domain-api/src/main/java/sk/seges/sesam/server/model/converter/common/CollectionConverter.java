@@ -48,6 +48,7 @@ public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection
 
 	protected <T extends Collection<DOMAIN>> T createDomainInstance(Class<T> targetClass) {
 
+		//Support for Arrays.ArrayList - it cannot be instantiated because it's inner class. We'll use java.util.ArrayList instead
 		if (targetClass.getCanonicalName().equals("java.util.Arrays.ArrayList")) {
 			return (T) new ArrayList();
 		}
@@ -102,7 +103,7 @@ public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection
 		}
 		
 		while (iterator.hasNext()) {
-			DOMAIN domain = (DOMAIN)iterator.next();
+			DOMAIN domain = getDomainObject(iterator);
 			
 			DtoConverter<DTO, DOMAIN> converter = converterProviderContext.getConverterForDomain(domain);
 			
@@ -114,6 +115,10 @@ public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection
 		}
 		
 		return result;
+	}
+
+	protected DOMAIN getDomainObject(Iterator<?> iterator) {
+		return (DOMAIN) iterator.next();
 	}
 
 	@SuppressWarnings("unchecked")
