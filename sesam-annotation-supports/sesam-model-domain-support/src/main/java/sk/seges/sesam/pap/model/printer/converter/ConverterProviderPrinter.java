@@ -611,7 +611,7 @@ public class ConverterProviderPrinter extends AbstractConverterPrinter {
 		if (domainType instanceof MutableTypeVariable) {
 			dtoConverter = getDtoConverterType(domainType, true);
 		} else {
-			dtoConverter = domainType.getConverter();
+			dtoConverter = domainType.getConverter().getConverterBase();
 		}
 
 		if (castConverter) {

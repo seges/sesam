@@ -258,7 +258,7 @@ public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements C
 
 	protected void printCopyByConverter(TransferObjectContext context, PathResolver domainPathResolver, FormattedPrintWriter pw) {
 		String converterName = "converter" + MethodHelper.toMethod("", context.getDtoFieldName());
-		pw.print(context.getConverter(), " " + converterName + " = ");
+		pw.print(context.getConverter().getConverterBase(), " " + converterName + " = ");
 
 		Field field = new Field((context.getDomainMethodReturnType().getKind().equals(MutableTypeKind.TYPEVAR) ? "(" + context.getConverter().getDto() + ")"
 				: "") + TransferObjectElementPrinter.DTO_NAME + "." + MethodHelper.toGetter(context.getDtoFieldName()), context.getConverter().getDto());
