@@ -11,6 +11,8 @@ import sk.seges.sesam.shared.model.converter.ConvertedInstanceCache;
 import sk.seges.sesam.shared.model.converter.ConverterProviderContext;
 import sk.seges.sesam.shared.model.converter.api.DtoConverter;
 
+import java.io.Serializable;
+
 @TransferObjectMapping(dtoClass = ClientSecuredEntity.class, domainClass = AclSecuredEntity.class)
 public class SecuredEntityConverter extends BasicCachedConverter<ClientSecuredEntity<HasId<?>>, AclSecuredEntity<IDomainObject<?>>> {
 
@@ -37,7 +39,7 @@ public class SecuredEntityConverter extends BasicCachedConverter<ClientSecuredEn
 
 	@Override
 	public ClientSecuredEntity<HasId<?>> toDto(AclSecuredEntity<IDomainObject<?>> domain) {
-		return convertToDto(null, domain);
+		return convertToDto(createDtoInstance(null), domain);
 	}
 
 	@Override
@@ -66,5 +68,11 @@ public class SecuredEntityConverter extends BasicCachedConverter<ClientSecuredEn
 		}
 	
 		return dtoId.equals(dto.getEntity().getId());
+	}
+
+	@Override
+	public ClientSecuredEntity<HasId<?>> createDtoInstance(Serializable id) {
+		return new ClientSecuredEntity<HasId<?>>();
+
 	}
 }

@@ -6,6 +6,7 @@ import sk.seges.sesam.pap.converter.printer.AbstractObjectConverterProviderPrint
 import sk.seges.sesam.pap.converter.printer.model.ConverterProviderPrinterContext;
 import sk.seges.sesam.pap.model.model.ConverterTypeElement;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
+import sk.seges.sesam.pap.model.model.api.dto.DtoDeclaredType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterTargetType;
 import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
@@ -36,16 +37,21 @@ public abstract class AbstractDtoMethodConverterProviderPrinter extends Abstract
 		if (context.getConverterType() == null && context.getDomain().getConverter() == null) {
 			return;
 		}
-		
-		if (!types.contains(context.getRawDto().getCanonicalName())) {
+
+
+		DtoDeclaredType dto = context.getConfigurationType().getDto();
+
+		String dtoName = dto.getCanonicalName();
+
+		if (!types.contains(/*context.getRawDto()*/dtoName)) {
 			
 			if (types.size() == 0) {
 				initializeDtoConverterMethod();
 			}
 			
-			types.add(context.getRawDto().getCanonicalName());
+			types.add(dtoName);
 
-			pw.print("if (", context.getRawDto().clone().setTypeVariables(new MutableTypeVariable[] {}), ".class.");
+			pw.print("if (", dto.clone().setTypeVariables(new MutableTypeVariable[] {}), ".class.");
 			pw.print(getClassAssignmentOperator(context.getConverterType()));
 			pw.println("(" + DTO_CLASS_PARAMETER_NAME + ")) {");
 
