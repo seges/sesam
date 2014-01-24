@@ -5,6 +5,7 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.pap.model.accessor.GenerateEqualsAccessor;
+import sk.seges.sesam.pap.model.annotation.TraversalType;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
 import sk.seges.sesam.pap.model.printer.AbstractElementPrinter;
@@ -31,6 +32,8 @@ public class EqualsPrinter extends AbstractElementPrinter {
 	private final EntityResolver entityResolver;
 	
 	private boolean active = true;
+	private TraversalType equalsType;
+	private boolean hasKey = false;
 	
 	public EqualsPrinter(EntityResolver entityResolver, MutableProcessingEnvironment processingEnv, FormattedPrintWriter pw) {
 		super(pw);
@@ -39,18 +42,26 @@ public class EqualsPrinter extends AbstractElementPrinter {
 	}
 
 	/**
-	 * Prints the definition of the equals method with the initial prechecks
+	 * Prints the definition of the equals method with the initial pre-check
 	 */
 	@Override
 	public void initialize(ConfigurationTypeElement configurationTypeElement, MutableDeclaredType outputName) {
 
-		active = new GenerateEqualsAccessor(configurationTypeElement.asConfigurationElement(), processingEnv).generate();
-		
+		GenerateEqualsAccessor generateEqualsAccessor = new GenerateEqualsAccessor(configurationTypeElement.asConfigurationElement(), processingEnv);
+
+		active = generateEqualsAccessor.generate();
+		equalsType = generateEqualsAccessor.getType();
+
+		hasKey = configurationTypeElement.hasKey();
+
 		if (!active) {
 			return;
 		}
-		
-		pw.println("private boolean processingEquals = false;");
+
+		if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+			pw.println("private boolean processingEquals = false;");
+		}
+
 		pw.println("");
 		pw.println("@Override");
 		pw.println("public boolean equals(Object obj) {");
@@ -60,7 +71,9 @@ public class EqualsPrinter extends AbstractElementPrinter {
 		pw.println("	return false;");
 		pw.println("if (getClass() != obj.getClass())");
 		pw.println("	return false;");
-		
+
+		//TODO we should call also super.equals - but only when there is any superclass with implemented equals method
+
 		MutableDeclaredType targetClassName = getTargetClassNames(configurationTypeElement)[0];
 		
 		pw.println(targetClassName.toString(ClassSerializer.SIMPLE, true) + " other = (" + 
@@ -103,6 +116,10 @@ public class EqualsPrinter extends AbstractElementPrinter {
 			return;
 		}
 
+		if (hasKey && !context.hasKey()) {
+			return;
+		}
+
 		boolean idMethod = entityResolver.isIdMethod(context.getDtoMethod());
 		
 		if (idMethod) {
@@ -132,27 +149,39 @@ public class EqualsPrinter extends AbstractElementPrinter {
 				pw.println("if (other." + context.getDtoFieldName() + " != null)");
 				pw.println("	return false;");
 				pw.println("} else { ");
-				pw.println("if (!processingEquals) {");
-				pw.println("processingEquals = true;");
+				if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+					pw.println("if (!processingEquals) {");
+					pw.println("processingEquals = true;");
+				}
 				pw.println("if (!" + context.getDtoFieldName() + ".equals(other." + context.getDtoFieldName() + ")) {");
-				pw.println("processingEquals = false;");
+				if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+					pw.println("processingEquals = false;");
+				}
 				pw.println("return false;");
-				pw.println("} else {");
-				pw.println("processingEquals = false;");
-				pw.println("}");
+				if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+					pw.println("} else {");
+					pw.println("processingEquals = false;");
+					pw.println("}");
+				}
 				pw.println("}");
 				pw.println("}");
 			}
 			return;
 		case ARRAY:
-			pw.println("if (!processingEquals) {");
-			pw.println("processingEquals = true;");
+			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+				pw.println("if (!processingEquals) {");
+				pw.println("processingEquals = true;");
+			}
 			pw.println("if (!" + Arrays.class.getCanonicalName() + ".equals(" + context.getDtoFieldName() + ", other." + context.getDtoFieldName() + ")) {");
-			pw.println("processingEquals = false;");
+			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+				pw.println("processingEquals = false;");
+			}
 			pw.println("return false");
-			pw.println("} else {");
-			pw.println("processingEquals = false;");
-			pw.println("}");
+			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+				pw.println("} else {");
+				pw.println("processingEquals = false;");
+				pw.println("}");
+			}
 			pw.println("}");
 			return;
 		case WILDCARD:

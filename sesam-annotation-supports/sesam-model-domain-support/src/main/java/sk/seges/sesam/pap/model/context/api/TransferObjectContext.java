@@ -36,4 +36,6 @@ public interface TransferObjectContext {
 	ConverterTypeElement getConverter();
 
 	boolean useConverter();
+
+	boolean hasKey();
 }

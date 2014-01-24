@@ -19,6 +19,7 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableTypes;
 import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.core.pap.utils.ProcessorUtils;
+import sk.seges.sesam.pap.model.accessor.KeyAccessor;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConfigurationContext;
 import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
@@ -54,6 +55,7 @@ public class TransferObjectProcessorContext implements TransferObjectContext {
 	protected boolean useConverter;
 
 	private boolean superClassMethod;
+	private boolean hasKey;
 	
 	public TransferObjectProcessorContext(ConfigurationTypeElement configurationTypeElement, Modifier modifier, ExecutableElement method, boolean superClassMethod) {
 		this(configurationTypeElement, modifier, method, method, superClassMethod);
@@ -72,6 +74,11 @@ public class TransferObjectProcessorContext implements TransferObjectContext {
 	@Override
 	public boolean isSuperclassMethod() {
 		return superClassMethod;
+	}
+
+	@Override
+	public boolean hasKey() {
+		return hasKey;
 	}
 
 	protected TypeMirror erasure(TypeElement typeElement, TypeMirror param) {
@@ -130,7 +137,9 @@ public class TransferObjectProcessorContext implements TransferObjectContext {
 			getMessager().printMessage(Kind.ERROR, "[ERROR] Unable to find DTO method for property " + path, configurationTypeElement.asConfigurationElement());
 			return false;
 		}
-		
+
+		hasKey = new KeyAccessor(method, envContext.getProcessingEnv()).isValid();
+
 		if (path == null) {
 			this.domainFieldPath = TransferObjectHelper.getFieldPath(getDtoMethod());
 			this.fieldName = MethodHelper.toField(getDtoMethod());

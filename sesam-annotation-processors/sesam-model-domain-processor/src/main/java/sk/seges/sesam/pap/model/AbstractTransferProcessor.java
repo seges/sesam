@@ -367,12 +367,30 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 
 		HistoryExecutableElementsList result = new HistoryExecutableElementsList(ignored);
 
-		List<ExecutableElement> methods = ElementFilter.methodsIn(processingElement.asConfigurationElement().getEnclosedElements());
+		List<ExecutableElement> methods;
+
+		if (mappingType.equals(MappingType.AUTOMATIC)) {
+			methods = ElementFilter.methodsIn(processingElement.asConfigurationElement().getEnclosedElements());
+		} else {
+			methods = ElementFilter.methodsIn(configurationTypeElement.asConfigurationElement().getEnclosedElements());
+		}
 
 		PojoElement pojoElement = new PojoElement(domainTypeElement.asConfigurationElement(), processingEnv);
 
-		if (mappingType.equals(MappingType.AUTOMATIC)) {
-			for (ExecutableElement method: methods) {
+		for (ExecutableElement method: methods) {
+
+			Ignore ignoreAnnotation = method.getAnnotation(Ignore.class);
+			if (ignoreAnnotation == null) {
+
+				if (mappingType.equals(MappingType.EXPLICIT)) {
+					String fieldName = TransferObjectHelper.getFieldPath(method);
+					method = processingElement.getGetterMethod(fieldName);
+
+					if (method == null) {
+						//method is not defined in this type, probably is defined on the parent class
+						continue;
+					}
+				}
 
 				boolean isProcessed = result.contains(method);
 				boolean isGetter = MethodHelper.isGetterMethod(method);

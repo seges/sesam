@@ -8,6 +8,7 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.pap.model.accessor.GenerateHashcodeAccessor;
+import sk.seges.sesam.pap.model.annotation.TraversalType;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
 import sk.seges.sesam.pap.model.printer.AbstractElementPrinter;
@@ -31,7 +32,9 @@ public class HashCodePrinter extends AbstractElementPrinter {
 	private EntityResolver entityResolver;
 
 	private boolean active = true;
-	
+	private TraversalType equalsType;
+	private boolean hasKey = false;
+
 	public HashCodePrinter(EntityResolver entityResolver, MutableProcessingEnvironment processingEnv, FormattedPrintWriter pw) {
 		super(pw);
 		this.processingEnv = processingEnv;
@@ -44,18 +47,28 @@ public class HashCodePrinter extends AbstractElementPrinter {
 	@Override
 	public void initialize(ConfigurationTypeElement configurationTypeElement, MutableDeclaredType outputName) {
 
-		active = new GenerateHashcodeAccessor(configurationTypeElement.asConfigurationElement(), processingEnv).generate();
-		
+		GenerateHashcodeAccessor generateHashcodeAccessor = new GenerateHashcodeAccessor(configurationTypeElement.asConfigurationElement(), processingEnv);
+
+		active = generateHashcodeAccessor.generate();
+		equalsType = generateHashcodeAccessor.getType();
+
+		hasKey = configurationTypeElement.hasKey();
+
 		if (!active) {
 			return;
 		}
 
-		pw.println("private boolean processingHashCode = false;");
+		if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+			pw.println("private boolean processingHashCode = false;");
+		}
 		pw.println("");
 		pw.println("@Override");
 		pw.println("public int hashCode() {");
 		pw.println("final int prime = 31;");
 		pw.println("int result = 1;");
+
+		//TODO we should call also super.hashcode - but only when there is any superclass with implemented hashcode method
+
 	}
 
 	/**
@@ -86,6 +99,10 @@ public class HashCodePrinter extends AbstractElementPrinter {
 			return;
 		}
 
+		if (hasKey && !context.hasKey()) {
+			return;
+		}
+
 		if (entityResolver.isIdMethod(context.getDtoMethod())) {
 			//TODO Not true
 			//IDs are not part of the hashCode
@@ -106,18 +123,26 @@ public class HashCodePrinter extends AbstractElementPrinter {
 		case CLASS:
 		case INTERFACE:
 		case ANNOTATION_TYPE:
-			pw.println("if (!processingHashCode) {");
-			pw.println("processingHashCode = true;");
+			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+				pw.println("if (!processingHashCode) {");
+				pw.println("processingHashCode = true;");
+			}
 			pw.println("result = prime * result + ((" + context.getDtoFieldName() + " == null) ? 0 : " + context.getDtoFieldName() + ".hashCode());");
-			pw.println("processingHashCode = false;");
-			pw.println("}");
+			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+				pw.println("processingHashCode = false;");
+				pw.println("}");
+			}
 			return;
 		case ARRAY:
-			pw.println("if (!processingHashCode) {");
-			pw.println("processingHashCode = true;");
+			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+				pw.println("if (!processingHashCode) {");
+				pw.println("processingHashCode = true;");
+			}
 			pw.println("result = prime * result + ", Arrays.class, ".hashCode(" + context.getDtoFieldName() + ");");
-			pw.println("processingHashCode = false;");
-			pw.println("}");
+			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+				pw.println("processingHashCode = false;");
+				pw.println("}");
+			}
 			return;
 		case WILDCARD:
 		case VOID:

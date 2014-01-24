@@ -16,6 +16,7 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
 import sk.seges.sesam.core.pap.utils.MethodHelper;
+import sk.seges.sesam.pap.model.accessor.KeyAccessor;
 import sk.seges.sesam.pap.model.annotation.Ignore;
 import sk.seges.sesam.pap.model.annotation.Mapping;
 import sk.seges.sesam.pap.model.annotation.Mapping.MappingType;
@@ -53,6 +54,7 @@ public class ConfigurationTypeElement extends TomBaseType {
 	private final String canonicalName;
 
 	protected final ConfigurationContext configurationContext;
+	private final InitializableValue<Boolean> hasKey = new InitializableValue<Boolean>();
 	
 	public ConfigurationTypeElement(MutableDeclaredType domainType, MutableDeclaredType dtoType, Element configurationElement, EnvironmentContext<TransferObjectProcessingEnvironment> envContext, ConfigurationContext configurationContext) {
 		super(envContext);
@@ -143,6 +145,22 @@ public class ConfigurationTypeElement extends TomBaseType {
 		}
 
 		return getConverterTypeElement();
+	}
+
+	public boolean hasKey() {
+		if (hasKey.isInitialized()) {
+			return hasKey.getValue();
+		}
+
+		List<ExecutableElement> methods = ElementFilter.methodsIn(asConfigurationElement().getEnclosedElements());
+
+		for (ExecutableElement method: methods) {
+			if (new KeyAccessor(method, envContext.getProcessingEnv()).isValid()) {
+				return hasKey.setValue(true);
+			}
+		}
+
+		return hasKey.setValue(false);
 	}
 
 	protected ConverterTypeElement getConverterTypeElement() {
