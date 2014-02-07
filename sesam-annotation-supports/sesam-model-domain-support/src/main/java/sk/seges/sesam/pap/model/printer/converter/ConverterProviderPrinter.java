@@ -586,19 +586,32 @@ public class ConverterProviderPrinter extends AbstractConverterPrinter {
 		MutableTypes typeUtils = processingEnv.getTypeUtils();
 		MutableDeclaredType dtoConverter = typeUtils.toMutableType(DtoConverter.class);
 
-		MutableTypeVariable dtoTypeVariable = usage ? 
-				processingEnv.getTypeUtils().getTypeVariable(((MutableTypeVariable)domainType.getDto()).getVariable()) : (MutableTypeVariable)domainType.getDto();
-		MutableTypeVariable domainTypeVariable = (MutableTypeVariable)domainType;
-		
-		if (usage) {
-			domainTypeVariable = processingEnv.getTypeUtils().getTypeVariable(ConverterTypeElement.DOMAIN_TYPE_ARGUMENT_PREFIX + "_" + domainTypeVariable.getVariable());
-		} else {
-			domainTypeVariable = domainTypeVariable.clone().setVariable(ConverterTypeElement.DOMAIN_TYPE_ARGUMENT_PREFIX + "_" + domainTypeVariable.getVariable());
+		MutableTypeVariable dtoTypeVariable;
+		MutableTypeVariable domainTypeVariable;
+
+		switch (domainType.getDto().getKind()) {
+			case TYPEVAR:
+				dtoTypeVariable = usage ?
+						processingEnv.getTypeUtils().getTypeVariable(((MutableTypeVariable)domainType.getDto()).getVariable()) : (MutableTypeVariable)domainType.getDto();
+				domainTypeVariable = (MutableTypeVariable)domainType;
+
+				if (usage) {
+					domainTypeVariable = processingEnv.getTypeUtils().getTypeVariable(ConverterTypeElement.DOMAIN_TYPE_ARGUMENT_PREFIX + "_" + domainTypeVariable.getVariable());
+				} else {
+					domainTypeVariable = domainTypeVariable.clone().setVariable(ConverterTypeElement.DOMAIN_TYPE_ARGUMENT_PREFIX + "_" + domainTypeVariable.getVariable());
+				}
+
+				break;
+			case CLASS:
+			case INTERFACE:
+				domainTypeVariable = processingEnv.getTypeUtils().getTypeVariable(null, domainType);
+				dtoTypeVariable = processingEnv.getTypeUtils().getTypeVariable(null, domainType.getDto());
+				break;
+			default:
+				throw new RuntimeException("Unsupported type " + domainType.getDto() + " [kind = " + domainType.getDto().getKind() + "] while trying to resolve converter.");
 		}
-		
-		dtoConverter = dtoConverter.setTypeVariables(dtoTypeVariable, domainTypeVariable);
-		
-		return dtoConverter;
+
+		return dtoConverter.setTypeVariables(dtoTypeVariable, domainTypeVariable);
 	}
 	
 	public void printObtainConverterFromCache(FormattedPrintWriter pw, ConverterTargetType targetType, DomainType domainType, Field field, final ExecutableElement domainMethod,
@@ -611,7 +624,14 @@ public class ConverterProviderPrinter extends AbstractConverterPrinter {
 		if (domainType instanceof MutableTypeVariable) {
 			dtoConverter = getDtoConverterType(domainType, true);
 		} else {
-			dtoConverter = domainType.getConverter().getConverterBase();
+			if (domainType.getConverter() == null) {
+				dtoConverter = processingEnv.getTypeUtils().toMutableType(DtoConverter.class);
+				dtoConverter.setTypeVariables(
+						processingEnv.getTypeUtils().getTypeVariable(null, domainType.getDto()),
+						processingEnv.getTypeUtils().getTypeVariable(null, domainType));
+			} else {
+				dtoConverter = domainType.getConverter().getConverterBase();
+			}
 		}
 
 		if (castConverter) {

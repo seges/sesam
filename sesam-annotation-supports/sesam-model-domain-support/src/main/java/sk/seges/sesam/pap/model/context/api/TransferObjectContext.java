@@ -32,6 +32,9 @@ public interface TransferObjectContext {
 
 	ExecutableElement getDomainMethod();
 
+	boolean isCustomerConstructorParameter();
+	int getCustomerConstructorParameterIndex();
+
 	/** Converter stuff */
 	ConverterTypeElement getConverter();
 

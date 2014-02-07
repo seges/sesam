@@ -14,6 +14,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
 
+import sk.seges.sesam.core.pap.model.api.ClassSerializer;
 import sk.seges.sesam.core.pap.model.api.Source;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableExecutableType;
@@ -28,13 +29,13 @@ import sk.seges.sesam.pap.model.annotation.TransferObjectMapping;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConfigurationContext;
 import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
+import sk.seges.sesam.pap.model.model.api.dto.DtoDeclaredType;
 import sk.seges.sesam.pap.model.model.api.dto.DtoType;
+import sk.seges.sesam.pap.model.model.api.dto.DtoTypeVariable;
 import sk.seges.sesam.pap.model.printer.accessors.AccessorsPrinter;
 import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
 import sk.seges.sesam.pap.model.printer.clone.ClonePrinter;
-import sk.seges.sesam.pap.model.printer.constructor.EmptyConstructorPrinter;
-import sk.seges.sesam.pap.model.printer.constructor.EnumeratedConstructorBodyPrinter;
-import sk.seges.sesam.pap.model.printer.constructor.EnumeratedConstructorDefinitionPrinter;
+import sk.seges.sesam.pap.model.printer.constructor.*;
 import sk.seges.sesam.pap.model.printer.equals.EqualsPrinter;
 import sk.seges.sesam.pap.model.printer.field.FieldPrinter;
 import sk.seges.sesam.pap.model.printer.hashcode.HashCodePrinter;
@@ -108,13 +109,19 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 		Set<? extends Element> configurations = processingEnv.getEnvironmentContext().getRoundEnv().getElementsAnnotatedWith(TransferObjectMapping.class);
 
 		for (Element configuration: configurations) {
-			if (configuration.getAnnotation(Generated.class) == null) {
+			if (configuration.getAnnotation(Generated.class) == null && (configuration.getKind().isClass() || configuration.getKind().isInterface())) {
 
 				ConfigurationContext configurationContext = new ConfigurationContext(processingEnv.getEnvironmentContext().getConfigurationEnv());
 				ConfigurationTypeElement configurationTypeElement = new ConfigurationTypeElement(configuration, processingEnv.getEnvironmentContext(), configurationContext);
 				configurationContext.addConfiguration(configurationTypeElement);
 
-				body = body.replaceAll("\\b" + configurationTypeElement.getInstantiableDomainSpecified().getSimpleName().toString() + "\\b", configurationTypeElement.getDto().getSimpleName());
+				String domainElementName = configurationTypeElement.getInstantiableDomainSpecified() == null ? null  :
+						configurationTypeElement.getInstantiableDomainSpecified().getSimpleName().toString();
+
+				if (domainElementName == null) {
+					domainElementName = configurationTypeElement.getDomain().getSimpleName();
+				}
+				body = body.replaceAll("\\b" + domainElementName + "\\b", configurationTypeElement.getDto().getSimpleName());
 			}
 		}
 
@@ -133,14 +140,32 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 			CopyAccessor copyAccessor = new CopyAccessor(overridenMethod, processingEnv);
 			
 			if (copyAccessor.isMethodBodyCopied()) {
-				Source elementSourceFile = getClassPathSources().getElementSourceFile(configurationTypeElement.getInstantiableDomain().asElement());
+				TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(configurationTypeElement.getInstantiableDomain().getCanonicalName());
+				//TODO remove typeElement when bug with type parameters is fixed
+				Source elementSourceFile = getClassPathSources().getElementSourceFile(/*configurationTypeElement.getInstantiableDomain().asElement()*/typeElement);
 				
 				if (elementSourceFile == null) {
 					processingEnv.getMessager().printMessage(Kind.ERROR, "No source code available for class " + 
 								configurationTypeElement.getInstantiableDomain().getCanonicalName() + ". Please add source class on the classpath also.");
 				} else {
-					String methodBody = elementSourceFile.getMethodBody(overridenMethod);
-					
+					ExecutableElement domainMethod = configurationTypeElement.getInstantiableDomain().getMethodByName(overridenMethod.getSimpleName().toString());
+
+					if (domainMethod == null) {
+						processingEnv.getMessager().printMessage(Kind.ERROR, "No method '" + overridenMethod.getSimpleName().toString() + "' is available in the class " +
+									configurationTypeElement.getInstantiableDomain().getCanonicalName() + ". Please check your configuration " +
+									configurationTypeElement.toString(ClassSerializer.SIMPLE) + ".");
+						return;
+					}
+
+					String methodBody = elementSourceFile.getMethodBody(domainMethod);
+
+					if (methodBody == null) {
+						processingEnv.getMessager().printMessage(Kind.ERROR, "No method '" + overridenMethod.getSimpleName().toString() + "' is available in the class " +
+								configurationTypeElement.getInstantiableDomain().getCanonicalName() + ". Please check your configuration " +
+								configurationTypeElement.toString(ClassSerializer.SIMPLE) + ".");
+						return;
+					}
+
 					if (methodBody.trim().startsWith("{")) {
 						methodBody = methodBody.trim().substring(1);
 					}
@@ -151,23 +176,45 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 
 					methodBody = processMethodBody(methodBody.trim());
 
+
 					MutableExecutableType copiedMethod = processingEnv.getElementUtils().toMutableElement(overridenMethod).asType();
 
-					List<MutableVariableElement> parameters = copiedMethod.getParameters();
+					List<? extends VariableElement> parameters = domainMethod.getParameters();
 					List<MutableVariableElement> dtoParameters = new ArrayList<MutableVariableElement>();
-					
-					for (MutableVariableElement parameter: parameters) {
+
+					if (overridenMethod.getReturnType().getKind().equals(TypeKind.VOID)) {
+						copiedMethod.setReturnType(processingEnv.getTransferObjectUtils().getDomainType(domainMethod.getReturnType()).getDto());
+					}
+
+					int i = 0;
+					int parametersCount = copiedMethod.getParameters().size();
+
+					for (VariableElement methodParameter: parameters) {
 						//TODO copy parameters annotations
-						DtoType dto = processingEnv.getTransferObjectUtils().getDomainType(parameter.asType()).getDto();
-						
+
+						DtoType dto;
+
+						if (i < parametersCount) {
+							MutableVariableElement parameter = copiedMethod.getParameters().get(i);
+							dto = processingEnv.getTransferObjectUtils().getDomainType(parameter.asType()).getDto();
+
+							if (((MutableDeclaredType)parameter.asType()).hasTypeParameters()) {
+								((DtoDeclaredType)dto).setTypeVariables(((MutableDeclaredType)parameter.asType()).getTypeVariables().toArray(new MutableTypeVariable[] {}));
+							}
+
+						} else {
+							dto = processingEnv.getTransferObjectUtils().getDomainType(methodParameter.asType()).getDto();
+						}
+
+						i++;
+
 						List<? extends MutableTypeVariable> typeVariables = null;
 						
-						if (parameter.asType().getKind().equals(MutableTypeKind.CLASS) || parameter.asType().getKind().equals(MutableTypeKind.INTERFACE)) {
-							MutableDeclaredType typeParameter = (MutableDeclaredType)parameter.asType();
-							typeVariables = typeParameter.getTypeVariables();
+						if (dto.getKind().equals(MutableTypeKind.CLASS) || dto.getKind().equals(MutableTypeKind.INTERFACE)) {
+							typeVariables = ((DtoDeclaredType)dto).getTypeVariables();
 						}
 						
-						MutableVariableElement parameterElement = processingEnv.getElementUtils().getParameterElement(dto, parameter.getSimpleName());
+						MutableVariableElement parameterElement = processingEnv.getElementUtils().getParameterElement(dto, methodParameter.getSimpleName().toString());
 						
 						if (typeVariables != null) {
 							((MutableDeclaredType)parameterElement.asType()).setTypeVariables(typeVariables.toArray(new MutableTypeVariable[] {}));
@@ -193,8 +240,10 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 		return new TransferObjectElementPrinter[] {
 				new FieldPrinter(pw),
 				new EmptyConstructorPrinter(pw),
-				new EnumeratedConstructorDefinitionPrinter(pw),
-				new EnumeratedConstructorBodyPrinter(pw),
+				new EnumeratedConstructorDefinitionPrinter(processingEnv, pw),
+				new EnumeratedConstructorBodyPrinter(processingEnv, pw),
+				new ConstructorDefinitionPrinter(pw),
+				new ConstructorBodyPrinter(pw),
 				new AccessorsPrinter(processingEnv, pw),
 				new EqualsPrinter(getEntityResolver(), processingEnv, pw),
 				new HashCodePrinter(getEntityResolver(), processingEnv, pw),

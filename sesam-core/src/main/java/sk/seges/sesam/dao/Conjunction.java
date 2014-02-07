@@ -9,7 +9,7 @@ package sk.seges.sesam.dao;
 public class Conjunction extends Junction {
 	private static final long serialVersionUID = 7806771561676701600L;
 
-	protected Conjunction() {	}
+	public Conjunction() {	}
 	
 	public Junction and(Criterion criterion) {
 		return add(criterion);

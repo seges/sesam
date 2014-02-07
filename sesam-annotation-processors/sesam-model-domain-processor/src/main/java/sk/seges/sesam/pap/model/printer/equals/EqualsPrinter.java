@@ -8,6 +8,7 @@ import sk.seges.sesam.pap.model.accessor.GenerateEqualsAccessor;
 import sk.seges.sesam.pap.model.annotation.TraversalType;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
+import sk.seges.sesam.pap.model.model.api.domain.DomainDeclaredType;
 import sk.seges.sesam.pap.model.printer.AbstractElementPrinter;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
 
@@ -72,7 +73,12 @@ public class EqualsPrinter extends AbstractElementPrinter {
 		pw.println("if (getClass() != obj.getClass())");
 		pw.println("	return false;");
 
-		//TODO we should call also super.equals - but only when there is any superclass with implemented equals method
+		DomainDeclaredType superClass = configurationTypeElement.getInstantiableDomain().getSuperClass();
+		if (superClass != null && superClass.getDomainDefinitionConfiguration() != null &&
+				new GenerateEqualsAccessor(superClass.getDomainDefinitionConfiguration().asConfigurationElement(), processingEnv).generate()) {
+			pw.println("if (!super.equals(obj))");
+			pw.println("	return false;");
+		}
 
 		MutableDeclaredType targetClassName = getTargetClassNames(configurationTypeElement)[0];
 		

@@ -36,7 +36,7 @@ public class ServiceTypeElement extends DelegateMutableDeclaredType {
 	private List<LocalServiceTypeElement> getLocalServiceInterfaces(TypeElement element) {
 		List<LocalServiceTypeElement> result = new ArrayList<LocalServiceTypeElement>();
 		List<? extends TypeMirror> interfaces = element.getInterfaces();
-		
+
 		for (TypeMirror localServiceInterface: interfaces) {
 			if (localServiceInterface.getKind().equals(TypeKind.DECLARED)) {
 				TypeElement interfaceElement = (TypeElement)((DeclaredType)localServiceInterface).asElement();

@@ -1,29 +1,39 @@
 package sk.seges.sesam.pap.model.printer.constructor;
 
+import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
+import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
-import sk.seges.sesam.pap.model.printer.AbstractElementPrinter;
-import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
 
-public class EnumeratedConstructorBodyPrinter extends AbstractElementPrinter implements TransferObjectElementPrinter {
+public class EnumeratedConstructorBodyPrinter extends ConstructorBodyPrinter {
 
-	public EnumeratedConstructorBodyPrinter(FormattedPrintWriter pw) {
+	private final ConstructorParameterHelper constructorParameterHelper;
+
+	private boolean customConstructorDefined = false;
+
+	public EnumeratedConstructorBodyPrinter(MutableProcessingEnvironment processingEnv, FormattedPrintWriter pw) {
 		super(pw);
+		this.constructorParameterHelper = new ConstructorParameterHelper(processingEnv);
+	}
+
+	@Override
+	public void initialize(ConfigurationTypeElement configurationTypeElement, MutableDeclaredType outputName) {
+		customConstructorDefined = constructorParameterHelper.hasCustomerConstructorDefined(configurationTypeElement);
 	}
 
 	@Override
 	public void print(TransferObjectContext context) {
-		if (context.isSuperclassMethod()) {
-			return;
+		//TODO handle parameter indexes also
+		if (customConstructorDefined && context.isCustomerConstructorParameter()) {
+			super.print(context);
 		}
-
-		pw.println("this." + context.getDtoFieldName() + " = " + context.getDtoFieldName() + ";");
 	}
 
 	@Override
-	public void finish(ConfigurationTypeElement configuratioTypeElement) {
-		pw.println("}");
-		pw.println();
+	public void finish(ConfigurationTypeElement configurationTypeElement) {
+		if (customConstructorDefined) {
+			super.finish(configurationTypeElement);
+		}
 	}
 }

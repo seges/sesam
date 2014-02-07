@@ -85,14 +85,37 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 		return getConfigurationTypeElement(context.getTypeElement());
 	}
 
-	protected ConfigurationTypeElement getConfigurationTypeElement(TypeElement typeElement) {
+	private Map<String, ConfigurationTypeElement> configurationsCache = new HashMap<String, ConfigurationTypeElement>();
+
+	protected ConfigurationTypeElement getFromCache(String elementName) {
+		return configurationsCache.get(elementName);
+	}
+
+	protected ConfigurationTypeElement putToCache(String elementName, ConfigurationTypeElement configurationTypeElement) {
+		configurationsCache.put(elementName, configurationTypeElement);
+		return configurationTypeElement;
+	}
+
+	protected final ConfigurationTypeElement getConfigurationTypeElement(TypeElement typeElement) {
+		String elementName = typeElement.toString();
+
+		ConfigurationTypeElement result = getFromCache(elementName);
+
+		if (result != null) {
+			return result;
+		}
+
+		return putToCache(elementName, createTypeElement(typeElement));
+	}
+
+	protected ConfigurationTypeElement createTypeElement(TypeElement typeElement) {
 		ConfigurationContext configurationContext = new ConfigurationContext(environmentContext.getConfigurationEnv());
 		ConfigurationTypeElement configurationTypeElement = new ConfigurationTypeElement(typeElement, getEnvironmentContext(), configurationContext);
 		configurationContext.addConfiguration(configurationTypeElement);
-		
+
 		return configurationTypeElement;
 	}
-		
+
 	@Override
 	protected void printAnnotations(ProcessorContext context) {
 		
@@ -312,7 +335,7 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 			processingEnv.getMessager().printMessage(Kind.ERROR, "[ERROR] Identifier method could not be found in the automatic way. Please specify id method using " +
 					Id.class.getSimpleName() + " annotation or just specify id as a method name.", configurationTypeElement.asConfigurationElement());
 			return;
-		} else if (idMethod != null && !contains(generated, MethodHelper.toField(idMethod))) {
+		} else if (idMethod != null && !contains(generated, MethodHelper.toField(idMethod)) && !isInSuperclassConfiguration(idMethod, configurationTypeElement.getInstantiableDomain())) {
 			TransferObjectContext context = transferObjectContextProvider.get(configurationTypeElement, Modifier.PROTECTED, idMethod, idMethod, false);
 			if (context != null) {
 				contexts.add(context);
@@ -435,9 +458,9 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 				superClassMethods = getMethodsForProcessings(superClassConfigutation, superMappingType,
 						processingElement.getSuperClass(), processingElement.getSuperClass(), ignored);
 
-				for (ExecutableElement superClassMethod: superClassMethods) {
-					ignored.add(TransferObjectHelper.getFieldPath(superClassMethod));
-				}
+//				for (ExecutableElement superClassMethod: superClassMethods) {
+//					ignored.add(TransferObjectHelper.getFieldPath(superClassMethod));
+//				}
 
 				//TODO remove only those that are listed in explicit configuration - this assume, that configuation is AUTOMATIC
 				result.removeAll(superClassMethods);
@@ -450,5 +473,44 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 //		}
 
 		return result;
+	}
+
+	private boolean isInSuperclassConfiguration(ExecutableElement method, DomainDeclaredType processingElement) {
+
+		if (processingElement.getSuperClass() != null) {
+
+			List<ConfigurationTypeElement> configurationsForDomain = processingEnv.getEnvironmentContext().getConfigurationEnv().
+					getConfigurationsForDomain(processingElement.getSuperClass());
+			if (configurationsForDomain != null && configurationsForDomain.size() > 0) {
+				//there is any configuration fot DTO
+				//TODO but we have to choose first - choose that is not generated and does not delegate to other configuration
+				//But still no correct solution because there might be more configuration for one domain
+				// in order to produce multiple DTOs from one domain entity
+
+				ConfigurationTypeElement superClassConfigutation = configurationsForDomain.get(0);
+
+				if (superClassConfigutation.getDelegateConfigurationTypeElement() != null) {
+					superClassConfigutation = superClassConfigutation.getDelegateConfigurationTypeElement();
+				}
+
+				MappingType superMappingType = getConfigurationMappingType(superClassConfigutation.asConfigurationElement());
+
+				HistoryExecutableElementsList superclassMethods = getMethodsForProcessings(superClassConfigutation, superMappingType,
+						processingElement.getSuperClass(), processingElement.getSuperClass(), new ArrayList<String>());
+
+				for (ExecutableElement superClassMethod: superclassMethods) {
+					if (superClassMethod.getSimpleName().equals(method.getSimpleName())) {
+						return true;
+					}
+				}
+			}
+
+			if (isInSuperclassConfiguration(method, processingElement.getSuperClass())) {
+				return true;
+			}
+		}
+
+		return false;
+
 	}
 }

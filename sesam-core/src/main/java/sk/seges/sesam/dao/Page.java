@@ -3,6 +3,8 @@
  */
 package sk.seges.sesam.dao;
 
+import sk.seges.sesam.shared.model.dao.SortInfo;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;

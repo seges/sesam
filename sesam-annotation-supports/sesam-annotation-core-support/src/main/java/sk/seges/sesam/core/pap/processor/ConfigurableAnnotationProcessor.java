@@ -25,6 +25,7 @@ import sk.seges.sesam.core.pap.builder.ClassPathTypeUtils;
 import sk.seges.sesam.core.pap.builder.api.ClassPathSources;
 import sk.seges.sesam.core.pap.builder.api.ClassPathTypes;
 import sk.seges.sesam.core.pap.configuration.api.ProcessorConfigurer;
+import sk.seges.sesam.core.pap.model.api.ClassSerializer;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.utils.ListUtils;
 
@@ -114,7 +115,7 @@ public abstract class ConfigurableAnnotationProcessor extends PlugableAnnotation
 
 	    SupportedAnnotationTypes sat = this.getClass().getAnnotation(SupportedAnnotationTypes.class);
 
-		Set<String> result = null;
+		Set<String> result;
 		
 		if (sat != null) {
 			result = new HashSet<String>(super.getSupportedAnnotationTypes());
@@ -148,7 +149,7 @@ public abstract class ConfigurableAnnotationProcessor extends PlugableAnnotation
 	public final boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		this.roundEnv = roundEnv;
 		if (!roundEnv.processingOver()) {
-			Set<MutableDeclaredType> processingElements = null;
+			Set<MutableDeclaredType> processingElements;
 
 			if (configurer != null) {
 				configurer = getConfigurer();
@@ -164,7 +165,12 @@ public abstract class ConfigurableAnnotationProcessor extends PlugableAnnotation
 							Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(typeElement);
 							for (Element element: elementsAnnotatedWith) {
 								//TODO handle methods
-								processingElements.add((MutableDeclaredType) processingEnv.getTypeUtils().toMutableType(element.asType()));
+								MutableDeclaredType mutableDeclaredType = (MutableDeclaredType) processingEnv.getTypeUtils().toMutableType(element.asType());
+
+								if (mutableDeclaredType == null) {
+									processingEnv.getMessager().printMessage(Kind.ERROR, "Unable to create mutable element from " + element.toString());
+								}
+								processingElements.add(mutableDeclaredType);
 							}
 						}
 					}
@@ -219,21 +225,26 @@ public abstract class ConfigurableAnnotationProcessor extends PlugableAnnotation
 		Map<String, Element> els = new HashMap<String, Element>();
 
 		for (MutableDeclaredType element: elements) {
-			els.put(element.toString(), element.asElement());
+			els.put(element.getCanonicalName(), processingEnv.getElementUtils().getTypeElement(element.toString(ClassSerializer.CANONICAL, false)));
 		}
 		
 		int processedElementCount = 0;
 		
 		for (MutableDeclaredType element: elements) {
 			if (!ListUtils.containsElement(processedElements, element)) {
-				Element el = els.get(element.toString());
-				if (configurer == null || configurer.isSupportedKind(el.getKind())) {
-					
-					if (processedElements.size() == 0 || !getExecutionType().equals(ExecutionType.ONCE)) {
-						processedElements.add(element);
-						init(el, roundEnv);
-						processedElementCount += processElement(element, roundEnv);
-						configurer.flushMessages(processingEnv.getMessager(), el);
+				Element el = els.get(element.getCanonicalName());
+
+				if (el == null) {
+					processingEnv.getMessager().printMessage(Kind.ERROR, "Element " + element.toString() + " is not available for the processing!");
+				} else {
+					if (configurer == null || configurer.isSupportedKind(el.getKind())) {
+
+						if (processedElements.size() == 0 || !getExecutionType().equals(ExecutionType.ONCE)) {
+							processedElements.add(element);
+							init(el, roundEnv);
+							processedElementCount += processElement(element, roundEnv);
+							configurer.flushMessages(processingEnv.getMessager(), el);
+						}
 					}
 				}
 			}

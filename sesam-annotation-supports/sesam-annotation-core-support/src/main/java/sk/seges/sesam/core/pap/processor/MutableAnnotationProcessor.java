@@ -115,7 +115,7 @@ public abstract class MutableAnnotationProcessor extends ConfigurableAnnotationP
 	@Override
 	final protected int processElement(MutableDeclaredType el, RoundEnvironment roundEnv) {
 
-		TypeElement typeElement = (TypeElement) el.asElement();
+		TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(el.getCanonicalName());
 
 		RoundContext roundContext = new RoundContext();
 		roundContext.typeElement = typeElement;

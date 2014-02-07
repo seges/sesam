@@ -3,6 +3,8 @@
  */
 package sk.seges.sesam.dao;
 
+import sk.seges.sesam.shared.model.dao.HasCriterionProperty;
+
 import java.io.Serializable;
 
 /**

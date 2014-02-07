@@ -1,5 +1,7 @@
 package sk.seges.sesam.dao;
 
+import sk.seges.sesam.shared.model.dao.ICallback;
+
 /**
  * Interface defining how to load data in common way. Usually used for loading
  * data to constrained models of data (i.e. asynchronous paged list).

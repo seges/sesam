@@ -69,9 +69,9 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 
 		setKind(MutableTypeKind.CLASS);
 		setSuperClass(getTypeUtils().getDeclaredType(
-				(MutableDeclaredType) getTypeUtils().toMutableType(getGeneratedSuperClass()),
-					configurationTypeElement.getDto().stripTypeParametersTypes(), 
-					configurationTypeElement.getDomain().stripTypeParametersTypes()));
+				getTypeUtils().toMutableType(getGeneratedSuperClass()),
+					configurationTypeElement.getDto()/*.stripTypeParametersTypes()*/,
+					configurationTypeElement.getDomain()/*.stripTypeParametersTypes()*/));
 	}
 
 	protected Class<?> getGeneratedSuperClass() {
@@ -157,7 +157,8 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 	private void initialize() {
 		if (this.hasVariableParameterTypes() && configurationTypeElement.getDomain().hasTypeParameters()) {
 
-			MutableTypeVariable[] converterParameters = new MutableTypeVariable[configurationTypeElement.getDomain().getTypeVariables().size() * 2];
+			MutableTypeVariable[] converterParameters = new MutableTypeVariable[configurationTypeElement.getDomain().getTypeVariables().size() +
+					configurationTypeElement.getDto().getTypeVariables().size()];
 			
 			int i = 0;
 			
@@ -221,7 +222,12 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 		}
 
 		TypeElement domainType = transferObjectConfiguration.getDomain();
-		
+
+		if (domainType == null) {
+		    //there is no domain entity defined, so converter does not make any sense
+			return null;
+		}
+
 		//We are going to modify simple name, so clone is necessary
 		MutableDeclaredType configurationNameType = ((MutableDeclaredType)configurationTypeElement.ensureDelegateType()).clone();
 		

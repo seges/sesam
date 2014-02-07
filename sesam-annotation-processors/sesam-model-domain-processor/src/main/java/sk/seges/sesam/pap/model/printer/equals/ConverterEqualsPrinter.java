@@ -162,6 +162,7 @@ public class ConverterEqualsPrinter extends AbstractDtoPrinter implements Transf
 			
 			switch (context.getDtoFieldType().getKind()) {
 			case PRIMITIVE:
+				//TODO handle it properly when it is not getter but is-method
 				pw.println("if (" + DOMAIN_NAME + "." + context.getDomainFieldName() + " != " + DTO_NAME + "." + MethodHelper.toGetter(context.getDtoFieldName()) + ")");
 				pw.println("	return false;");
 				return;

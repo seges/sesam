@@ -11,7 +11,7 @@ public abstract class Junction implements Criterion {
 	
 	private List<Criterion> junctions = new ArrayList<Criterion>();
 	
-	protected Junction() {}
+	public Junction() {}
 	
 	public Junction add(Criterion criterion) {
 		junctions.add(criterion);
@@ -20,5 +20,9 @@ public abstract class Junction implements Criterion {
 	
 	public List<Criterion> getJunctions() {
 		return junctions;
+	}
+
+	public void setJunctions(List<Criterion> junctions) {
+		this.junctions = junctions;
 	}
 }

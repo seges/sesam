@@ -20,6 +20,7 @@ public interface DomainDeclaredType extends DomainType, MutableDeclaredType {
 	DomainType getDomainReference(EntityResolver entityResolver, String fieldName);
 
 	ExecutableElement getIdMethod(EntityResolver entityResolver);
+	ExecutableElement getMethodByName(String name);
 	ExecutableElement getGetterMethod(String fieldName);
 	//ExecutableElement getIsGetterMethod(String fieldName);
 	ExecutableElement getSetterMethod(String fieldName);

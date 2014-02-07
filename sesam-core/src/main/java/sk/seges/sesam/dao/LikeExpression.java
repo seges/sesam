@@ -3,6 +3,8 @@
  */
 package sk.seges.sesam.dao;
 
+import sk.seges.sesam.shared.model.dao.MatchMode;
+
 import java.io.Serializable;
 
 /**
@@ -74,7 +76,4 @@ public class LikeExpression<T extends Comparable<? extends Serializable>> extend
 		return this;
 	}
 
-	public static enum MatchMode {
-		EXACT, START, END, ANYWHERE
-	}
 }

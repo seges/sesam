@@ -23,6 +23,7 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
 import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.core.pap.utils.MethodHelper.MethodType;
+import sk.seges.sesam.core.pap.utils.ProcessorUtils;
 import sk.seges.sesam.pap.model.annotation.Mapping.MappingType;
 import sk.seges.sesam.pap.model.model.api.domain.DomainDeclaredType;
 import sk.seges.sesam.pap.model.model.api.domain.DomainType;
@@ -269,7 +270,11 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 	public ExecutableElement getMethod(String fieldName, MethodHelper.MethodType type) {
 		return getMethod(new PathResolver(fieldName), type, true);
 	}
-	
+
+	public ExecutableElement getMethodByName(String name) {
+		return getMethod(new PathResolver(name), null, true);
+	}
+
 	private ExecutableElement getMethod(PathResolver pathResolver, MethodHelper.MethodType type, boolean searchInstantiableType) {
 
 		if (!pathResolver.hasNext()) {
@@ -294,8 +299,8 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 
 		for (ExecutableElement elementMethod : methods) {
 
-			if (elementMethod.getModifiers().contains(Modifier.PUBLIC) && currentType.isMethodOfType(elementMethod) && 
-					MethodHelper.toField(elementMethod).equals(fieldName)) {
+			if ((currentType == null && elementMethod.getSimpleName().toString().equals(fieldName)) ||
+				(currentType != null && currentType.isMethodOfType(elementMethod) && MethodHelper.toField(elementMethod).equals(fieldName))) {
 
 				if (!pathResolver.hasNext()) {
 					return elementMethod;
@@ -315,7 +320,7 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 
 		if (asConfigurationElement().getKind().equals(ElementKind.CLASS) || asConfigurationElement().getKind().equals(ElementKind.INTERFACE)) {
 
-			TypeElement typeElement = (TypeElement) asConfigurationElement();
+			TypeElement typeElement = asConfigurationElement();
 			if (typeElement.getSuperclass() != null && typeElement.getSuperclass().getKind().equals(TypeKind.DECLARED)) {
 				pathResolver.reset();
 				DomainType domainType = getDomainForType(typeElement.getSuperclass());
@@ -380,7 +385,8 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 							if (configurationElement.hasInstantiableDomainSpecified() &&
 									!configurationElement.getInstantiableDomain().toString(ClassSerializer.CANONICAL, false).equals(
 											this.toString(ClassSerializer.CANONICAL, false)) &&
-								environmentContext.getProcessingEnv().getTypeUtils().isAssignable(domainSuperClass, configurationElement.getInstantiableDomain().asType())) {
+									ProcessorUtils.isAssignable(domainSuperClass, configurationElement.getInstantiableDomain())) {
+								//environmentContext.getProcessingEnv().getTypeUtils().isAssignable(domainSuperClass, configurationElement.getInstantiableDomain().asType())) {
 
 								//it can be the same if base class is the case as instance class
 								//usable for - when DTO is created from base class and converter from instance class

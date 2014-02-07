@@ -17,18 +17,8 @@ import sk.seges.sesam.pap.configuration.configurer.SettingsProcessorConfigurer;
 import sk.seges.sesam.pap.configuration.model.AbstractParameterHandler;
 import sk.seges.sesam.pap.configuration.model.setting.SettingsIterator;
 import sk.seges.sesam.pap.configuration.model.setting.SettingsTypeElement;
-import sk.seges.sesam.pap.configuration.printer.AbstractSettingsElementPrinter;
-import sk.seges.sesam.pap.configuration.printer.AccessorPrinter;
-import sk.seges.sesam.pap.configuration.printer.ConfigurationValueConstructorPrinter;
-import sk.seges.sesam.pap.configuration.printer.CopyConstructorDefinitionPrinter;
-import sk.seges.sesam.pap.configuration.printer.EnumeratedConstructorBodyPrinter;
-import sk.seges.sesam.pap.configuration.printer.EnumeratedConstructorDefinitionPrinter;
-import sk.seges.sesam.pap.configuration.printer.FieldPrinter;
-import sk.seges.sesam.pap.configuration.printer.GroupPrinter;
-import sk.seges.sesam.pap.configuration.printer.HelperPrinter;
-import sk.seges.sesam.pap.configuration.printer.JavaDocPrinter;
-import sk.seges.sesam.pap.configuration.printer.MergePrinter;
-import sk.seges.sesam.pap.configuration.printer.NestedParameterPrinter;
+import sk.seges.sesam.pap.configuration.printer.*;
+import sk.seges.sesam.pap.configuration.printer.ConstructorBodyPrinter;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class SettingsProcessor extends PojoAnnotationTransformerProcessor {
@@ -95,8 +85,8 @@ public class SettingsProcessor extends PojoAnnotationTransformerProcessor {
 						new JavaDocPrinter(pw, processingEnv),
 						new AccessorPrinter(pw, processingEnv)),
 			new ConfigurationValueConstructorPrinter(pw, processingEnv),
-			new EnumeratedConstructorDefinitionPrinter(pw, processingEnv),
-			new EnumeratedConstructorBodyPrinter(pw, processingEnv),
+			new ConstructorDefinitionPrinter(pw, processingEnv),
+			new ConstructorBodyPrinter(pw, processingEnv),
 			new CopyConstructorDefinitionPrinter(pw, processingEnv),
 			new MergePrinter(pw, processingEnv),
 			new HelperPrinter(pw, processingEnv) 

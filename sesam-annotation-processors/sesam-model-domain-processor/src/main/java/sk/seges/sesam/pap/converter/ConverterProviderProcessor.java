@@ -114,7 +114,7 @@ public class ConverterProviderProcessor extends AbstractTransferProcessingProces
 
 	protected ConverterProviderElementPrinter[] getNestedPrinters(FormattedPrintWriter pw) {
 		return new ConverterProviderElementPrinter[] {
-			//new DomainMethodConverterProviderPrinter(getParametersResolverProvider(), processingEnv, pw, ensureConverterProviderPrinter(processingEnv)),
+			new DomainMethodConverterProviderPrinter(getParametersResolverProvider(), processingEnv, pw, ensureConverterProviderPrinter(processingEnv)),
 			new DtoMethodConverterProviderPrinter(getParametersResolverProvider(), processingEnv, pw, ensureConverterProviderPrinter(processingEnv))
 		};
 	}
@@ -141,8 +141,11 @@ public class ConverterProviderProcessor extends AbstractTransferProcessingProces
 						for (ConfigurationTypeElement configurationForDomain: configurationsForDomain) {
 							if (!processedConfigurations.contains(configurationForDomain.getCanonicalName())) {
 								processedConfigurations.add(configurationForDomain.getCanonicalName());
-								ConverterProviderPrinterContext printerContext = new ConverterProviderPrinterContext(configurationForDomain.getDto(), configurationForDomain);
-								nestedElementPrinter.print(printerContext);
+
+								if (configurationForDomain.getConverter() != null) {
+									ConverterProviderPrinterContext printerContext = new ConverterProviderPrinterContext(configurationForDomain.getDto(), configurationForDomain);
+									nestedElementPrinter.print(printerContext);
+								}
 							}
 						}
 					}

@@ -592,12 +592,6 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 		return this;
 	}
 	
-//	@Override
-//	public MutableDeclaredType setTypeVariables(MutableTypeVariable... mutableTypeVariables) {
-//	//	dirty();
-//		return initializeTypeVariables(mutableTypeVariables);
-//	}
-
 	@Override
 	public MutableDeclaredType addTypeVariable(MutableTypeVariable typeVariable) {
 //		dirty();

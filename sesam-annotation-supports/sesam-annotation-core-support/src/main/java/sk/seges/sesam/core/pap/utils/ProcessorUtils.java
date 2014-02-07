@@ -290,7 +290,7 @@ public class ProcessorUtils {
 	}
 
 	public static boolean isOfType(TypeElement te, MutableDeclaredType type) {
-		return te.getQualifiedName().getClass().toString().equals(type.getQualifiedName());
+		return te.getQualifiedName().toString().equals(type.getQualifiedName());
 	}
 
 	public static ExecutableElement getMethod(String name, Element element) {

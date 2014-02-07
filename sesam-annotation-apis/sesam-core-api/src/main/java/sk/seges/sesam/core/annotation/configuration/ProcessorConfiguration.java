@@ -38,7 +38,7 @@ import javax.annotation.processing.AbstractProcessor;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface ProcessorConfiguration {
-	
+
 	Class<? extends AbstractProcessor> processor();
 
 }

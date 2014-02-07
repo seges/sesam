@@ -31,8 +31,6 @@ public class TransferObjectConverterProcessorContext extends TransferObjectProce
 	@Override
 	protected DtoType handleDomainTypeParameter(EntityResolver entityResolver) {
 		
-		TypeParametersSupport typeParametersSupport = new TypeParametersSupport(envContext.getProcessingEnv());
-
 		DomainDeclaredType domainTypeElement = configurationTypeElement.getDomain();
 
 		if (domainTypeElement.asType().getKind().equals(TypeKind.DECLARED) && ((DeclaredType)domainTypeElement.asType()).getTypeArguments().size() > 0) {
@@ -61,22 +59,24 @@ public class TransferObjectConverterProcessorContext extends TransferObjectProce
 						return type;
 					}
 					break;
-				case TYPEVAR:
-					
-					TypeVariable typeVariable = (TypeVariable)returnType;
-					
-					String variable = typeVariable.asElement().getSimpleName().toString();
-					
-					if (variable == null || variable.equals("?")) {
-						getMessager().printMessage(Kind.WARNING, "Method " + getDtoMethod().getSimpleName().toString() + 
-								" returns unsupported type variable " + typeVariable.toString(), configurationTypeElement.asConfigurationElement());
-						return null;
-					}
-			
-					if (typeParametersSupport.hasParameterByName(declaredDomainType, variable)) {
-						return getTransferObjectUtils().getDtoType(getTypeUtils().getTypeVariable(ConverterTypeElement.DOMAIN_TYPE_ARGUMENT_PREFIX + "_" + variable));
-					}
-					break;
+//				case TYPEVAR:
+//
+//					return super.handleDomainTypeParameter(entityResolver);
+//
+//					TypeVariable typeVariable = (TypeVariable)returnType;
+//
+//					String variable = typeVariable.asElement().getSimpleName().toString();
+//
+//					if (variable == null || variable.equals("?")) {
+//						getMessager().printMessage(Kind.WARNING, "Method " + getDtoMethod().getSimpleName().toString() +
+//								" returns unsupported type variable " + typeVariable.toString(), configurationTypeElement.asConfigurationElement());
+//						return null;
+//					}
+//
+//					if (typeParametersSupport.hasParameterByName(declaredDomainType, variable)) {
+//						return getTransferObjectUtils().getDtoType(getTypeUtils().getTypeVariable(ConverterTypeElement.DOMAIN_TYPE_ARGUMENT_PREFIX + "_" + variable));
+//					}
+//					break;
 			}
 		}
 

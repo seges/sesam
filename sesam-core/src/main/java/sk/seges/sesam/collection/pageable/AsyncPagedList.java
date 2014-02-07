@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import sk.seges.sesam.dao.IAsyncDataLoader;
-import sk.seges.sesam.dao.ICallback;
+import sk.seges.sesam.shared.model.dao.ICallback;
 import sk.seges.sesam.dao.Page;
 import sk.seges.sesam.dao.PagedResult;
 

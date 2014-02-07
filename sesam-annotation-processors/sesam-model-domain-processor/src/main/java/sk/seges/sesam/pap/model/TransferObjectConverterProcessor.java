@@ -11,7 +11,9 @@ import sk.seges.sesam.core.pap.structure.DefaultPackageValidatorProvider;
 import sk.seges.sesam.core.pap.structure.api.PackageValidatorProvider;
 import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
+import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
 import sk.seges.sesam.pap.model.model.ConverterTypeElement;
+import sk.seges.sesam.pap.model.model.TransferObjectMappingAccessor;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
 import sk.seges.sesam.pap.model.model.api.ElementHolderTypeConverter;
 import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
@@ -70,8 +72,14 @@ public class TransferObjectConverterProcessor extends AbstractTransferProcessor 
 
 	@Override
 	protected boolean checkPreconditions(ProcessorContext context, boolean alreadyExists) {
-		
-		ConverterTypeElement converter = getConfigurationElement(context).getConverter();
+
+		if (!ConverterProcessingHelper.isConverterGenerated(context.getTypeElement(), processingEnv)) {
+			return false;
+		}
+
+		ConfigurationTypeElement configurationElement = getConfigurationElement(context);
+
+		ConverterTypeElement converter = configurationElement.getConverter();
 		if (converter == null || !converter.isGenerated()) {
 			return false;
 		}
@@ -81,7 +89,18 @@ public class TransferObjectConverterProcessor extends AbstractTransferProcessor 
 	
 	@Override
 	protected MutableDeclaredType[] getOutputClasses(RoundContext context) {
-		
+
+		TypeElement domain = new TransferObjectMappingAccessor(context.getTypeElement(), processingEnv).getDomain();
+
+		if (domain == null) {
+			//if there no domain defined, converter does not make sense
+			return new MutableDeclaredType[] {};
+		}
+
+		if (domain.getModifiers().contains(Modifier.ABSTRACT)) {
+			return new MutableDeclaredType[] {};
+		}
+
 		ConverterTypeElement converter = getConfigurationElement(context).getConverter();
 		if (converter == null || !converter.isGenerated()) {
 			return new MutableDeclaredType[] {};

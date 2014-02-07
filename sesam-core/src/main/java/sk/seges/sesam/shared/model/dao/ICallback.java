@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sk.seges.sesam.dao;
+package sk.seges.sesam.shared.model.dao;
 
 /**
  * Support for asynchronous calls.

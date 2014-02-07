@@ -16,6 +16,7 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
 import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.core.pap.utils.ProcessorUtils;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
+import sk.seges.sesam.pap.model.ConverterProcessingHelper;
 import sk.seges.sesam.pap.model.accessor.ReadOnlyAccessor;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
@@ -51,7 +52,10 @@ public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements C
 		}
 
 		if (context.isSuperclassMethod()) {
-			return;
+			DomainDeclaredType superClass = context.getConfigurationTypeElement().getInstantiableDomain().getSuperClass();
+		 	if (superClass == null || ConverterProcessingHelper.isConverterGenerated(superClass.getDomainDefinitionConfiguration().asConfigurationElement(), processingEnv)) {
+				return;
+			}
 		}
 
 		if (new ReadOnlyAccessor(context.getDtoMethod(), processingEnv).isReadonly()) {

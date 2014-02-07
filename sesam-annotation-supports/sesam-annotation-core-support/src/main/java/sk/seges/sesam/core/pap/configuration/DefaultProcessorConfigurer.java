@@ -596,10 +596,16 @@ public abstract class DefaultProcessorConfigurer implements ProcessorConfigurer 
 				TypeElement typeElement = (TypeElement) element;
 				if (isSupportedByInterface(typeElement)) {
 					MutableDeclaredType mutableType = toMutableType(element);
+					if (mutableType == null) {
+						processingEnv.getMessager().printMessage(Kind.ERROR, "Unable to create mutable type from " + element.toString());
+					}
 					processingElements.add(mutableType);
 				} else {
 					if (hasSupportedAnnotation(typeElement) && isSupportedKind(element.getKind())) {
 						MutableDeclaredType mutableType = toMutableType(element);
+						if (mutableType == null) {
+							processingEnv.getMessager().printMessage(Kind.ERROR, "Unable to create mutable type from " + element.toString());
+						}
 						processingElements.add(mutableType);
 					}
 				}
@@ -623,6 +629,9 @@ public abstract class DefaultProcessorConfigurer implements ProcessorConfigurer 
 							for (AnnotationMirror annotationMirror: annotationMirrors) {
 								if (isSupportedAnnotation(annotationMirror)) {
 									MutableDeclaredType mutableType = toMutableType(element);
+									if (mutableType == null) {
+										processingEnv.getMessager().printMessage(Kind.ERROR, "Unable to create mutable type from " + element.toString());
+									}
 									processingElements.add(mutableType);
 								}
 							}

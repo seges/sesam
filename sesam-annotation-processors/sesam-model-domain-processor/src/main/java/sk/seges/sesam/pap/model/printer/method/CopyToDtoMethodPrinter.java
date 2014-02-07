@@ -13,12 +13,14 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
 import sk.seges.sesam.core.pap.utils.MethodHelper;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.core.pap.writer.TypeExtractor;
+import sk.seges.sesam.pap.model.ConverterProcessingHelper;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConverterTypeElement;
 import sk.seges.sesam.pap.model.model.Field;
 import sk.seges.sesam.pap.model.model.TransferObjectMappingAccessor;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
 import sk.seges.sesam.pap.model.model.api.ElementHolderTypeConverter;
+import sk.seges.sesam.pap.model.model.api.domain.DomainDeclaredType;
 import sk.seges.sesam.pap.model.model.api.domain.DomainType;
 import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
@@ -45,7 +47,10 @@ public class CopyToDtoMethodPrinter extends AbstractMethodPrinter implements Cop
 		}
 
 		if (context.isSuperclassMethod()) {
-			return;
+			DomainDeclaredType superClass = context.getConfigurationTypeElement().getInstantiableDomain().getSuperClass();
+			if (superClass == null || ConverterProcessingHelper.isConverterGenerated(superClass.getDomainDefinitionConfiguration().asConfigurationElement(), processingEnv)) {
+				return;
+			}
 		}
 
 		PathResolver pathResolver = new PathResolver(context.getDomainFieldPath());
@@ -189,7 +194,7 @@ public class CopyToDtoMethodPrinter extends AbstractMethodPrinter implements Cop
 		if (domainMethodReturnType.getKind().equals(MutableTypeKind.TYPEVAR)) {
 			pw.print("((" + ConverterTypeElement.DTO_TYPE_ARGUMENT_PREFIX + "_" + ((MutableTypeVariable)domainMethodReturnType).getVariable() + ")");
 		} else {
-			pw.print("((" + dtoField + ")");
+			pw.print("((", domainMethodReturnType.getDto(), ")");
 		}
 		pw.print(TransferObjectElementPrinter.DOMAIN_NAME  + "." + domainField);
 		pw.println(");");

@@ -12,7 +12,7 @@ import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResol
 import sk.seges.sesam.shared.model.converter.provider.AbstractConverterProvider;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
+import java.util.ArrayList;
 
 public class ConverterProviderType extends DelegateMutableDeclaredType implements HasConstructorParameters {
 
@@ -35,6 +35,8 @@ public class ConverterProviderType extends DelegateMutableDeclaredType implement
 
 		setKind(MutableTypeKind.CLASS);
 		setSuperClass(processingEnv.getTypeUtils().toMutableType(getProviderSuperClass()));
+		setInterfaces(new ArrayList());
+		setTypeVariables();
 	}
 
     protected Class<?> getProviderSuperClass() {

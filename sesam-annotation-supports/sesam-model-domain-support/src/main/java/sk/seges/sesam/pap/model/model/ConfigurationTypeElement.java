@@ -2,10 +2,7 @@ package sk.seges.sesam.pap.model.model;
 
 import java.util.*;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
@@ -141,6 +138,16 @@ public class ConfigurationTypeElement extends TomBaseType {
 		Element configurationElement = asConfigurationElement();
 		
 		if (!configurationElement.asType().getKind().equals(TypeKind.DECLARED) || !transferObjectConfiguration.isConverterGenerated()) {
+			return null;
+		}
+
+		TypeElement domain = transferObjectConfiguration.getDomain();
+
+		if (domain == null) {
+			return null;
+		}
+
+		if (domain.getModifiers().contains(Modifier.ABSTRACT)) {
 			return null;
 		}
 

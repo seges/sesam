@@ -1,8 +1,8 @@
 package sk.seges.sesam.dao;
 
-import java.io.Serializable;
+import sk.seges.sesam.shared.model.dao.MatchMode;
 
-import sk.seges.sesam.dao.LikeExpression.MatchMode;
+import java.io.Serializable;
 
 /**
  * @author ladislav.gazo

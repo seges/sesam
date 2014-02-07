@@ -226,16 +226,23 @@ class DtoDeclared extends TomDeclaredConfigurationHolder implements GeneratedCla
 		return new DefaultPackageValidatorProvider();
 	}
 
+	private InitializableValue<MutableDeclaredType> generatedDtoTypeFromConfiguration = new InitializableValue<MutableDeclaredType>();
+
 	private MutableDeclaredType getGeneratedDtoTypeFromConfiguration() {
 
-		MutableDeclaredType outputType = ((MutableDeclaredType) getDomainDefinitionConfiguration().ensureDelegateType()).clone();
-		
-		PackageValidator packageValidator = getPackageValidationProvider().get(outputType)
-				.moveTo(LocationType.SHARED).moveTo(LayerType.MODEL).clearType().moveTo(ImplementationType.DTO);
-		outputType = outputType.changePackage(packageValidator).setKind(MutableTypeKind.CLASS);
-		return outputType.getSimpleName().endsWith(TransferObjectHelper.DEFAULT_SUFFIX) ? outputType.setSimpleName(outputType
-				.getSimpleName().substring(0, outputType.getSimpleName().length() - TransferObjectHelper.DEFAULT_SUFFIX.length()))
-				: outputType.addClassSufix(TransferObjectHelper.DTO_SUFFIX);
+		if (this.generatedDtoTypeFromConfiguration.isInitialized()) {
+			return generatedDtoTypeFromConfiguration.getValue();
+		} else {
+
+			MutableDeclaredType outputType = ((MutableDeclaredType) getDomainDefinitionConfiguration().ensureDelegateType()).clone();
+
+			PackageValidator packageValidator = getPackageValidationProvider().get(outputType)
+					.moveTo(LocationType.SHARED).moveTo(LayerType.MODEL).clearType().moveTo(ImplementationType.DTO);
+			outputType = outputType.changePackage(packageValidator).setKind(MutableTypeKind.CLASS);
+			return generatedDtoTypeFromConfiguration.setValue(outputType.getSimpleName().endsWith(TransferObjectHelper.DEFAULT_SUFFIX) ? outputType.setSimpleName(outputType
+					.getSimpleName().substring(0, outputType.getSimpleName().length() - TransferObjectHelper.DEFAULT_SUFFIX.length()))
+					: outputType.addClassSufix(TransferObjectHelper.DTO_SUFFIX));
+		}
 	}
 
 	@Override

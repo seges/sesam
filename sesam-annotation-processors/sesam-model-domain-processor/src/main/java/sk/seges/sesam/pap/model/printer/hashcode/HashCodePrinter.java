@@ -7,10 +7,12 @@ import javax.tools.Diagnostic.Kind;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
+import sk.seges.sesam.pap.model.accessor.GenerateEqualsAccessor;
 import sk.seges.sesam.pap.model.accessor.GenerateHashcodeAccessor;
 import sk.seges.sesam.pap.model.annotation.TraversalType;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
+import sk.seges.sesam.pap.model.model.api.domain.DomainDeclaredType;
 import sk.seges.sesam.pap.model.printer.AbstractElementPrinter;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
 
@@ -65,10 +67,15 @@ public class HashCodePrinter extends AbstractElementPrinter {
 		pw.println("@Override");
 		pw.println("public int hashCode() {");
 		pw.println("final int prime = 31;");
-		pw.println("int result = 1;");
 
 		//TODO we should call also super.hashcode - but only when there is any superclass with implemented hashcode method
-
+		DomainDeclaredType superClass = configurationTypeElement.getInstantiableDomain().getSuperClass();
+		if (superClass != null && superClass.getDomainDefinitionConfiguration() != null &&
+				new GenerateEqualsAccessor(superClass.getDomainDefinitionConfiguration().asConfigurationElement(), processingEnv).generate()) {
+			pw.println("int result = super.hashCode();");
+		} else {
+			pw.println("int result = 1;");
+		}
 	}
 
 	/**

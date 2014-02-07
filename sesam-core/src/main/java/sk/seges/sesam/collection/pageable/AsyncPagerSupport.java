@@ -3,7 +3,7 @@
  */
 package sk.seges.sesam.collection.pageable;
 
-import sk.seges.sesam.dao.ICallback;
+import sk.seges.sesam.shared.model.dao.ICallback;
 import sk.seges.sesam.dao.Page;
 
 /**
@@ -27,7 +27,7 @@ public class AsyncPagerSupport<E> extends AbstractPagerSupport {
 	 */
 	@Override
 	protected void fetch(Page page) {
-		((AsyncPagedList<E>)list).get(page.getStartIndex(), callback);
+		list.get(page.getStartIndex(), callback);
 	}
 
 }

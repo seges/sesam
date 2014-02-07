@@ -1,8 +1,11 @@
 <module>
-	<source path='collection'/>
-	<source path='dao'/>
 	<source path='domain'/>
 	<source path='handler'/>
+	<source path='client'/>
 	<source path='shared/domain/api'/>
+	<source path='shared/model/api'/>
+	<source path='shared/model/dto'/>
+	<source path='shared/model/dao'/>
+	<source path='service/remote'/>
 	<source path="utils" includes="**/CastUtils**"></source>
 </module>
