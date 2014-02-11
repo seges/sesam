@@ -136,7 +136,7 @@ public enum ValueType {
 
 	public static ValueType valueFor(Object obj) {
 		if (obj == null) {
-			return ValueType.STRING;
+			return null;
 		}
 
 		for (ValueType valueType: ValueType.values()) {
