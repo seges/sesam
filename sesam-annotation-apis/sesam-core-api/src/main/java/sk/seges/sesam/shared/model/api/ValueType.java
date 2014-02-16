@@ -103,35 +103,23 @@ public enum ValueType {
 		}
 
 		@Override
-		public Class<?> appliesFor() {
+		protected Class<?> appliesFor() {
 			return Enum.class;
 		}
 
 		@Override
-		public Class<?>[] interfaceTypes() {
-			return new Class<?>[] {
-				TransferableEnum.class
-			};
+		public boolean isValidType(Object obj) {
+			return obj.getClass().isEnum() && obj instanceof TransferableEnum;
 		}
 	};
 
 	public abstract Object getValue(PropertyHolder propertyHolder);
 	public abstract ValueType setValue(PropertyHolder propertyHolder, Object value);
-	public abstract Class<?> appliesFor();
 
-	public Class<?>[] interfaceTypes() {
-		return new Class<?>[0];
-	}
+	protected abstract Class<?> appliesFor();
 
-	private static boolean implementTypes(Class<?> objClass, Class<?>[] interfaces) {
-
-		for (Class<?> interfaceClass: interfaces) {
-			if (!interfaceClass.equals(objClass)) {
-				return false;
-			}
-		}
-
-		return true;
+	public boolean isValidType(Object obj) {
+		return obj.getClass().equals(appliesFor());
 	}
 
 	public static ValueType valueFor(Object obj) {
@@ -140,13 +128,9 @@ public enum ValueType {
 		}
 
 		for (ValueType valueType: ValueType.values()) {
-			if (valueType.appliesFor().equals(obj.getClass()) && implementTypes(obj.getClass(), valueType.interfaceTypes())) {
+			if (valueType.isValidType(obj)) {
 				return valueType;
 			}
-		}
-
-		if (obj.getClass().isEnum() && implementTypes(obj.getClass(), ValueType.ENUM.interfaceTypes())) {
-			return ValueType.ENUM;
 		}
 
 		throw new RuntimeException("Not supported class " + obj.getClass().getName());
