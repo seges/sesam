@@ -104,8 +104,10 @@ public class PropertyHolder implements Serializable{
 	}
 
 	public PropertyHolder setValue(Object value) {
-		if(ValueType.valueFor(value) != null){
-			this.valueType = ValueType.valueFor(value).setValue(this, value);
+		ValueType valueType = ValueType.valueFor(value);
+
+		if (valueType != null) {
+			this.valueType = valueType.setValue(this, value);
 		}		
 		return this;
 	}

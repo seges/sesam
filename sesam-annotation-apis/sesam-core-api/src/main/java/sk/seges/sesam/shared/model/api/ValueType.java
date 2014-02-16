@@ -125,9 +125,15 @@ public enum ValueType {
 
 	private static boolean implementTypes(Class<?> objClass, Class<?>[] interfaces) {
 
+		if (objClass.getInterfaces().length == 0) {
+			return false;
+		}
+
 		for (Class<?> interfaceClass: interfaces) {
-			if (!interfaceClass.equals(objClass)) {
-				return false;
+			for (Class<?> objectInterfaceClass: objClass.getInterfaces()) {
+				if (!objectInterfaceClass.equals(interfaceClass)) {
+					return false;
+				}
 			}
 		}
 
