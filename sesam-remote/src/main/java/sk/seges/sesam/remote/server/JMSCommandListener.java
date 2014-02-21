@@ -206,9 +206,9 @@ public class JMSCommandListener<T> implements MessageListener, ExceptionListener
             response = new Response(returnValue, e);
             JMSUtils.logJMSException(log, "Cannot receive JMS message.", e);
         } catch (Exception e) {
-        	Exception invocationException = e;
+        	Throwable invocationException = e;
             if(invocationException instanceof InvocationTargetException) {
-                invocationException = (Exception)((InvocationTargetException) invocationException).getTargetException();
+                invocationException = ((InvocationTargetException) invocationException).getTargetException();
             }
             try {
                 response = sendResponse(message, null, invocationException);
