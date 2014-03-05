@@ -181,18 +181,30 @@ public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean equals(Collection<DOMAIN> domains, Collection<DTO> dtos) {
-		if (domains == null) {
-			if (dtos != null) {
+	public boolean equals(Object domainsArg, Object dtosArg) {
+		if (domainsArg == null) {
+			if (dtosArg != null) {
 				return false;
 			}
 			return true;
 		}
 		
-		if (dtos == null) {
+		if (dtosArg == null) {
 			return false;
 		}
-		
+
+		if (!(domainsArg instanceof Collection)) {
+			return false;
+		}
+
+		Collection<DOMAIN> domains = (Collection<DOMAIN>)domainsArg;
+
+		if (!(dtosArg instanceof Collection)) {
+			return false;
+		}
+
+		Collection<DTO> dtos = (Collection<DTO>)dtosArg;
+
 		if (domains.size() != dtos.size()) {
 			return false;
 		}

@@ -403,11 +403,11 @@ public class TransferObjectProcessorContext implements TransferObjectContext {
 		DtoDeclaredType dto = configurationTypeElement.getDto();
 
 		if (targetEntityType.asElement().getSimpleName() == null || targetEntityType.asElement().getSimpleName().toString().length() == 0) {
-		envContext.getProcessingEnv().getMessager().printMessage(Kind.ERROR, "[ERROR] Unable to find erasure for the " + 
-					targetEntityType.toString() + " in the method: " + getDtoFieldName(),
-				getConfigurationTypeElement().asConfigurationElement());
-		return null;
-	}
+			envContext.getProcessingEnv().getMessager().printMessage(Kind.ERROR, "[ERROR] Unable to find erasure for the " +
+						targetEntityType.toString() + " in the method: " + getDtoFieldName(),
+					getConfigurationTypeElement().asConfigurationElement());
+			return null;
+		}
 
 		TypeParametersSupport typeParametersSupport = new TypeParametersSupport(envContext.getProcessingEnv());
 

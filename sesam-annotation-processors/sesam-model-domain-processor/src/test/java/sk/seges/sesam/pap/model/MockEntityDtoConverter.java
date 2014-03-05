@@ -24,7 +24,27 @@ public class MockEntityDtoConverter extends BasicCachedConverter<MockEntityDto, 
 		this.converterProvider = converterProvider;
 	}
 
-	public boolean equals(DomainObject _domain, MockEntityDto _dto) {
+	public boolean equals(Object _domainArg, Object _dtoArg) {
+		if (_domainArg == null) {
+			return (_dtoArg == null);
+		}
+
+		if (_dtoArg == null) {
+			return false;
+		}
+
+		if (!(_domainArg instanceof DomainObject)) {
+			return false;
+		}
+
+		DomainObject _domain = (DomainObject)_domainArg;
+
+		if (!(_dtoArg instanceof MockEntityDto)) {
+			return false;
+		}
+
+		MockEntityDto _dto = (MockEntityDto)_dtoArg;
+
 		if (_domain.getField1() != _dto.getField1())
 			return false;
 		if (_domain.getField2() == null) {

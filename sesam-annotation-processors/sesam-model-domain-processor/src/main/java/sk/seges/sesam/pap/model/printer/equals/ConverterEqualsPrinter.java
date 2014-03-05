@@ -54,11 +54,41 @@ public class ConverterEqualsPrinter extends AbstractDtoPrinter implements Transf
 			pw.print(DOMAIN_NAME);
 		}
 	}
-	
+
+	private static final String ARGUMENT_SUFFIX = "Arg";
+
 	@Override
 	public void initialize(ConfigurationTypeElement configurationTypeElement, MutableDeclaredType outputName) {
-		pw.println("public boolean equals(", configurationTypeElement.getDomain().stripTypeParametersTypes(), " " + DOMAIN_NAME + ", ",
-											 configurationTypeElement.getDto().stripTypeParametersTypes(), " " + DTO_NAME + ") {");
+
+		MutableDeclaredType domainType = configurationTypeElement.getDomain().stripTypeParametersTypes().clone().stripTypeParameters();
+		MutableDeclaredType dtoType = configurationTypeElement.getDto().stripTypeParametersTypes().clone().stripTypeParameters();
+
+		pw.println("public boolean equals(", Object.class, " " + DOMAIN_NAME + ARGUMENT_SUFFIX +", ",
+											 Object.class, " " + DTO_NAME + ARGUMENT_SUFFIX + ") {");
+
+		pw.println("if (" + DOMAIN_NAME + ARGUMENT_SUFFIX + " == null) {");
+		pw.println("return (" + DTO_NAME + ARGUMENT_SUFFIX + " == null);");
+		pw.println("}");
+		pw.println();
+
+		pw.println("if (" + DTO_NAME + ARGUMENT_SUFFIX + " == null) {");
+		pw.println("return false;");
+		pw.println("}");
+		pw.println();
+
+		pw.println("if (!(" + DOMAIN_NAME + ARGUMENT_SUFFIX + " instanceof ", domainType, ")) {");
+		pw.println("return false;");
+		pw.println("}");
+		pw.println();
+		pw.println(domainType, " " + DOMAIN_NAME + " = (", domainType, ")" + DOMAIN_NAME + ARGUMENT_SUFFIX + ";");
+		pw.println();
+		pw.println("if (!(" + DTO_NAME + ARGUMENT_SUFFIX + " instanceof ", dtoType, ")) {");
+		pw.println("return false;");
+		pw.println("}");
+		pw.println();
+		pw.println(dtoType, " " + DTO_NAME + " = (", dtoType, ")" + DTO_NAME + ARGUMENT_SUFFIX + ";");
+		pw.println();
+
 		if (entityResolver.shouldHaveIdMethod(configurationTypeElement.getInstantiableDomain())) {
 
 			DomainType domainId = configurationTypeElement.getDomain().getId(entityResolver);

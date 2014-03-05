@@ -113,7 +113,7 @@ public class MapConverter<DTO_KEY, DTO_VALUE, DOMAIN_KEY, DOMAIN_VALUE> implemen
 	}
 
 	@Override
-	public boolean equals(Map<DOMAIN_KEY, DOMAIN_VALUE> domain, Map<DTO_KEY, DTO_VALUE> dto) {
+	public boolean equals(Object domain, Object dto) {
 		return false;
 	}
 }

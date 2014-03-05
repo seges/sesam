@@ -24,5 +24,5 @@ public interface DtoConverter<DTO, DOMAIN> {
 	DOMAIN convertFromDto(DOMAIN result, DTO dto);
 	DOMAIN fromDto(DTO dto);
 
-	boolean equals(DOMAIN domain, DTO dto);
+	boolean equals(Object domain, Object dto);
 }

@@ -20,7 +20,7 @@ import sk.seges.sesam.shared.model.converter.api.DtoConverter;
 public abstract class BasicConverter<DTO, DOMAIN> implements DtoConverter<DTO, DOMAIN> {
 
 	@Override
-	public boolean equals(DOMAIN domain,DTO dto) {
+	public boolean equals(Object domain, Object dto) {
 		if (domain == null) {
 			return (dto == null);
 		}

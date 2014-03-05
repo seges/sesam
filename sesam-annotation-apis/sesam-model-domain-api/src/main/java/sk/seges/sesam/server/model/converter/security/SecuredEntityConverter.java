@@ -61,12 +61,25 @@ public class SecuredEntityConverter extends BasicCachedConverter<ClientSecuredEn
 	}
 
 	@Override
-	public boolean equals(AclSecuredEntity<IDomainObject<?>> domain, ClientSecuredEntity<HasId<?>> dto) {
+	public boolean equals(Object domainArg, Object dtoArg) {
+
+		if (!(domainArg instanceof AclSecuredEntity)) {
+			return false;
+		}
+
+		AclSecuredEntity<IDomainObject<?>> domain = (AclSecuredEntity<IDomainObject<?>>)domainArg;
+
+		if (dtoArg == null || (!(dtoArg instanceof ClientSecuredEntity))) {
+			return false;
+		}
+
+		ClientSecuredEntity<HasId<?>> dto = (ClientSecuredEntity<HasId<?>>)dtoArg;
+
 		Object dtoId = domain.getEntity().getId();
 		if (dtoId == null) {
 			return false;
 		}
-	
+
 		return dtoId.equals(dto.getEntity().getId());
 	}
 

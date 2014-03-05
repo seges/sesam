@@ -50,7 +50,7 @@ public @interface TransferObjectMapping {
 		}
 
 		@Override
-		public boolean equals(Void domain, Void dto) {
+		public boolean equals(Object domain, Object dto) {
 			return false;
 		}
 	}
