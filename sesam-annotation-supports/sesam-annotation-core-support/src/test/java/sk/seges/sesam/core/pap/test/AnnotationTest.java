@@ -414,6 +414,19 @@ public abstract class AnnotationTest {
 
 	}
 
+	protected static void assertCompilationFailed(List<Diagnostic<? extends JavaFileObject>> diagnostics, String errorMessage) {
+		assert (diagnostics != null);
+
+		boolean hasError = false;
+		for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
+
+			if (diagnostic.getKind().equals(Kind.ERROR) && diagnostic.getMessage(null).contains(errorMessage)) {
+				hasError = true;
+			}
+		}
+		assertTrue("Expected error", hasError);
+	}
+
 	/**
 	 * Asserts that the compilation produced results of the following {@link Kind Kinds} at the given line numbers,
 	 * where the <em>n</em>th kind is expected at the <em>n</em>th line number.
