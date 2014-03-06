@@ -12,6 +12,8 @@ public interface ISecuredObject<T> extends Serializable, IDomainObject<T> {
 	public static final String ACL_OBJECT_ADMIN = "ACL_OBJECT_ADMIN";
 	
 	Long getIdForACL();
-	
+
+	Class<?> getSecuredClass();
+
 	ISecuredObject<?> getParent();
 }
