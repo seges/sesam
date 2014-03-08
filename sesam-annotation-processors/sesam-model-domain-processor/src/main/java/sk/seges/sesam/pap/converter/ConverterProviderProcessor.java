@@ -122,8 +122,8 @@ public class ConverterProviderProcessor extends AbstractTransferProcessingProces
 	@Override
 	protected void processElement(ProcessorContext context) {
 
-		ConverterProviderPrinterDelegate converterProviderPrinterDelegate = new ConverterProviderPrinterDelegate(getParametersResolverProvider());
-		converterProviderPrinterDelegate.initialize(environmentContext.getProcessingEnv(), (HasConstructorParameters) context.getOutputType(), UsageType.DEFINITION);
+//		ConverterProviderPrinterDelegate converterProviderPrinterDelegate = new ConverterProviderPrinterDelegate(getParametersResolverProvider());
+//		converterProviderPrinterDelegate.initialize(environmentContext.getProcessingEnv(), (HasConstructorParameters) context.getOutputType(), UsageType.DEFINITION);
 
 		for (ConverterProviderElementPrinter nestedElementPrinter: getNestedPrinters(context.getPrintWriter())) {
 
@@ -160,7 +160,7 @@ public class ConverterProviderProcessor extends AbstractTransferProcessingProces
 		UsageType previousUsage = converterProviderPrinter.changeUsage(UsageType.CONVERTER_PROVIDER_OUTSIDE_USAGE);
 		converterProviderPrinter.printConverterMethods(context.getOutputType(), false, ConverterInstancerType.REFERENCED_CONVERTER_INSTANCER);
 		converterProviderPrinter.changeUsage(previousUsage);
-		converterProviderPrinterDelegate.finish((HasConstructorParameters) context.getOutputType());
+//		converterProviderPrinterDelegate.finish((HasConstructorParameters) context.getOutputType());
 	}
 
 	@Override

@@ -193,19 +193,7 @@ class MutableMethod extends MutableType implements MutableExecutableType {
 	public String toString(ClassSerializer serializer, boolean typed) {
 		
 		String result = "";
-		
-		/*
-		for (Modifier modifier: getModifiers()) {
-			if (result.length() > 0) {
-				result += " ";
-			}
-			result += modifier;
-		}
 
-		if (result.length() > 0) {
-			result += " ";
-		}
-		*/
 		List<MutableTypeVariable> typeVariables = getTypeVariables();
 		
 		if (typeVariables.size() > 0) {
@@ -246,7 +234,7 @@ class MutableMethod extends MutableType implements MutableExecutableType {
 
 	@Override
 	public MutableExecutableType clone() {
-		MutableMethod result = null;
+		MutableMethod result;
 		
 		if (methodElement != null) {
 			result = new MutableMethod(processingEnv, methodElement);
@@ -331,6 +319,10 @@ class MutableMethod extends MutableType implements MutableExecutableType {
 	@Override
 	public boolean isDefault() {
 		return isDefault;
+	}
+
+	public void setDefault(boolean def) {
+		this.isDefault = def;
 	}
 
 	@Override

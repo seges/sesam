@@ -52,7 +52,8 @@ public class TypePrinter {
 			}
 		});
 		typePrintWriter.println(" {");
-		
+		typePrintWriter.println(" ");
+
 		HierarchyPrintWriter bodyPrinter = new HierarchyPrintWriter(processingEnv);
 		typePrintWriter.addNestedPrinter(bodyPrinter);
 		
@@ -64,7 +65,7 @@ public class TypePrinter {
 			}
 		});
 
-		final HierarchyPrintWriter constructorsPrinter = new HierarchyPrintWriter(processingEnv) {
+		final FormattedPrintWriter constructorsPrinter = new HierarchyPrintWriter(processingEnv) {
 			
 			boolean flushed = false;
 			
@@ -94,41 +95,52 @@ public class TypePrinter {
 			}
 		};
 
-		bodyPrinter.addNestedPrinter(new FormattedPrintWriter(processingEnv) {
-			
+		HierarchyPrintWriter fieldsPrinter = new HierarchyPrintWriter(processingEnv) {
+
+			boolean flushed = false;
+
 			@Override
 			public void flush() {
-				methodPrinter.flush();
-				constructorsPrinter.flush();
+				if (flushed) {
+					return;
+				}
+				flushed = true;
+
 				printFields(this, type);
 				super.flush();
 			}
-		});
-		
+		};
+
+		bodyPrinter.addNestedPrinter(fieldsPrinter);
 		bodyPrinter.addNestedPrinter(constructorsPrinter);
+		HierarchyPrintWriter bodyCurrentPrinter = bodyPrinter.addNestedPrinter(new HierarchyPrintWriter(processingEnv));
 		bodyPrinter.addNestedPrinter(methodPrinter);
-		
+
 		typePrintWriter.println("}");
 
-		typePrintWriter.setCurrentPrinter(bodyPrinter);
+		typePrintWriter.setCurrentPrinter(bodyCurrentPrinter);
 		
 		return this;
 	}
 
-	private void printConstructors(HierarchyPrintWriter printWriter, MutableDeclaredType type) {
+	private boolean printConstructors(HierarchyPrintWriter printWriter, MutableDeclaredType type) {
 		if (!type.getConstructor().isDefault()) {
 			type.getConstructor().setReturnType(null);
-			printWriter.println();
+
 			printWriter.addNestedPrinter(type.getConstructor().getPrintWriter());
-			printWriter.println();
+			printWriter.addNestedPrinter(new FormattedPrintWriter(processingEnv)).println("");
+
+			return true;
 		}
+
+		return false;
 	}
 	
 	private void printMethods(HierarchyPrintWriter printWriter, MutableDeclaredType type) {
 
 		for (MutableExecutableType method: type.getMethods()) {
 			printWriter.addNestedPrinter(method.getPrintWriter());
-			printWriter.println();
+			printWriter.println(" ");
 		}
 	}
 	
@@ -141,24 +153,24 @@ public class TypePrinter {
 		}
 	}
 
-	private void printNestedTypes(HierarchyPrintWriter pw, MutableDeclaredType type) {
+	private boolean printNestedTypes(HierarchyPrintWriter pw, MutableDeclaredType type) {
 		List<MutableDeclaredType> nestedTypes = type.getNestedTypes();
 		
 		for (MutableDeclaredType nestedType: nestedTypes) {
-			pw.println();
 			new TypePrinter(pw, processingEnv).print(nestedType);
+			pw.println(" ");
 		}
+
+		return nestedTypes.size() > 0;
 	}
 	
-	private void printFields(FormattedPrintWriter pw, MutableDeclaredType type) {
+	private boolean printFields(FormattedPrintWriter pw, MutableDeclaredType type) {
 		
 		List<MutableVariableElement> fields = type.getFields();
 		
 		if (fields != null) {
 
 			for (MutableVariableElement field: fields) {
-				pw.println();
-				
 				Set<MutableAnnotationMirror> mutableAnnotations = field.getMutableAnnotations();
 				
 				for (MutableAnnotationMirror mutableAnnotation: mutableAnnotations) {
@@ -174,12 +186,13 @@ public class TypePrinter {
 				}
 				
 				pw.println(field.asType(), " " + field.getSimpleName() + ";");
+				pw.println(" ");
 			}
-			
-			if (fields.size() > 0) {
-				pw.println();
-			}
+
+			return fields.size() > 0;
 		}
+
+		return false;
 	}
 
 	private void printTypeDefinition(FormattedPrintWriter pw, MutableDeclaredType type) {
@@ -252,16 +265,6 @@ public class TypePrinter {
 		if (mutableType.getKind().isDeclared()) {
 			MutableDeclaredType declaredType = (MutableDeclaredType)mutableType;
 			return declaredType.clone().stripTypeParametersTypes();
-//			List<? extends MutableTypeVariable> typeVariables = declaredType.getTypeVariables();
-//			List<MutableTypeVariable> strippedTypeVariables = new ArrayList<MutableTypeVariable>();
-//			for (MutableTypeVariable typeVariable: typeVariables) {
-//				if (typeVariable.getVariable() != null) {
-//					strippedTypeVariables.add(processingEnv.getTypeUtils().getTypeVariable(typeVariable.getVariable()));
-//				} else {
-//					strippedTypeVariables.add(typeVariable);
-//				}
-//			}
-//			return declaredType.clone().setTypeVariables(strippedTypeVariables.toArray(new MutableTypeVariable[] {}));
 		}
 		
 		return mutableType;

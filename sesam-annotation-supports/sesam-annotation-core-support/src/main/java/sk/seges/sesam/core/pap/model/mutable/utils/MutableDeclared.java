@@ -935,7 +935,10 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 	@Override
 	public MutableExecutableType getConstructor() {
 		if (constructor == null) {
-			constructor = new MutableMethod(processingEnv, getSimpleName()).addModifier(Modifier.PUBLIC);
+			MutableMethod constructorMethod = new MutableMethod(processingEnv, getSimpleName());
+			constructorMethod.addModifier(Modifier.PUBLIC);
+			constructorMethod.setDefault(true);
+			constructor =  constructorMethod;
 		}
 		
 		return constructor;

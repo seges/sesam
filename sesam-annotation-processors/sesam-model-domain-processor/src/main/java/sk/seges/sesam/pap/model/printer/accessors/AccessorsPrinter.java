@@ -58,6 +58,6 @@ public class AccessorsPrinter extends CopyPrinter {
 				"(", context.getDtoFieldType(), " " + context.getDtoFieldName() + ") {");
 		pw.println("this." + context.getDtoFieldName() + " = " + context.getDtoFieldName() + ";");
 		pw.println("}");
-		pw.println();
+		pw.println(" ");
 	}
 }

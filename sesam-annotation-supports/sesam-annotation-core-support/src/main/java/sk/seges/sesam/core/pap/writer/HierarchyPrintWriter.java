@@ -40,8 +40,6 @@ public class HierarchyPrintWriter extends FormattedPrintWriter {
 	@Override
 	public void flush() {
 
-		int i = 1;
-
 		List<String> nestedOutputs = new ArrayList<String>();
 		
 		for (FormattedPrintWriter printWriter: nestedPrinters) {
@@ -56,10 +54,11 @@ public class HierarchyPrintWriter extends FormattedPrintWriter {
 			}
 		}
 		
-		i = 0;
+		int i = 0;
 		
 		for (String output: nestedOutputs) {
-			String string = null;
+			String string;
+
 			if (nestedPrinters.get(i) instanceof ImportPrinter) {
 				nestedPrinters.get(i).flush();
 				string = nestedPrinters.get(i).getOutputStream().toString();
@@ -68,7 +67,7 @@ public class HierarchyPrintWriter extends FormattedPrintWriter {
 			}
 			try {
 				if (string == null) {
-					//Strange workaround for writing a new line ... without empty it does not work
+					//Strange workaround for writing a new line ... without empty character it does not work
 					getOutputStream().write((" " + lineSeparator).getBytes());
 				} else {
 					getOutputStream().write(string.getBytes());
@@ -170,14 +169,4 @@ public class HierarchyPrintWriter extends FormattedPrintWriter {
 		}
 		super.setAutoIndent(autoIndent);
 	}
-
-//	@Override
-//	public void setSerializer(ClassSerializer serializer) {
-//		getCurrentPrinter().setSerializer(serializer);
-//	}
-//
-//	@Override
-//	public void serializeTypeParameters(boolean typed) {
-//		getCurrentPrinter().serializeTypeParameters(typed);
-//	}
 }

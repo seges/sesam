@@ -43,10 +43,7 @@ public class MethodPrintWriter extends HierarchyPrintWriter {
 		});
 
 		println(" {");
-		
-		HierarchyPrintWriter bodyPrinter = new HierarchyPrintWriter(processingEnv);
-		addNestedPrinter(bodyPrinter);
-
+		HierarchyPrintWriter bodyPrinter = addNestedPrinter(new HierarchyPrintWriter(processingEnv));
 		println("}");
 		
 		setCurrentPrinter(bodyPrinter);
@@ -64,7 +61,11 @@ public class MethodPrintWriter extends HierarchyPrintWriter {
 	
 	@Override
 	public void flush() {
-		
+
+		if (getNestedPrinters() == null || getNestedPrinters().size() == 0) {
+			initializePrinter();
+		}
+
 		handleNestedPrinters(method.getPrintWriter().getNestedPrinters());
 		
 		super.flush();
