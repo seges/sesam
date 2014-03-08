@@ -228,8 +228,12 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 					copiedMethod.addModifier(Modifier.PUBLIC);
 					
 					context.getOutputType().addMethod(copiedMethod);
-					
-					copiedMethod.getPrintWriter().println(methodBody);
+
+					String[] lines = methodBody.split("\n");
+
+					for (String line: lines) {
+						copiedMethod.getPrintWriter().println(line.trim());
+					}
 				}
 			}
 		}

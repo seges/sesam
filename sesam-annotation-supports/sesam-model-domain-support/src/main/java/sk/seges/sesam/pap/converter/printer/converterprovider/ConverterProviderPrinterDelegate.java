@@ -19,7 +19,6 @@ import java.io.PrintWriter;
 public class ConverterProviderPrinterDelegate {
 
 	protected final ConverterConstructorParametersResolverProvider parametersResolverProvider;
-	protected static final String GET_METHOD_NAME = "get";
 
 	public ConverterProviderPrinterDelegate(ConverterConstructorParametersResolverProvider parametersResolverProvider) {
 		this.parametersResolverProvider = parametersResolverProvider;
@@ -29,16 +28,7 @@ public class ConverterProviderPrinterDelegate {
 		return ConverterProviderContext.class;
 	}
 
-	public HierarchyPrintWriter getPrintWriter(MutableDeclaredType type) {
-		return type.getMethod(GET_METHOD_NAME).getPrintWriter();
-	}
-
 	public void initialize(MutableProcessingEnvironment processingEnv, final HasConstructorParameters type, UsageType usageType) {
-
-		MutableExecutableType getMethod =
-				processingEnv.getTypeUtils().getExecutable(processingEnv.getTypeUtils().toMutableType(getResultClass()), GET_METHOD_NAME).addModifier(Modifier.PUBLIC);
-
-		type.addMethod(getMethod);
 
 		ParameterElement[] generatedParameters = type.getConverterParameters(parametersResolverProvider.getParameterResolver(usageType));
 

@@ -458,19 +458,10 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 				superClassMethods = getMethodsForProcessings(superClassConfigutation, superMappingType,
 						processingElement.getSuperClass(), processingElement.getSuperClass(), ignored);
 
-//				for (ExecutableElement superClassMethod: superClassMethods) {
-//					ignored.add(TransferObjectHelper.getFieldPath(superClassMethod));
-//				}
-
 				//TODO remove only those that are listed in explicit configuration - this assume, that configuation is AUTOMATIC
 				result.removeAll(superClassMethods);
 			}
 		}
-
-		//Do we need to iterate also interfaces?
-//		for (TypeMirror domainInterface: processingElement.asConfigurationElement().getInterfaces()) {
-//			getMethodsFroProcessings(configurationTypeElement, mappingType, (DomainDeclaredType) processingEnv.getTransferObjectUtils().getDomainType(domainInterface), domainTypeElement, generated, contexts);
-//		}
 
 		return result;
 	}
@@ -511,6 +502,5 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 		}
 
 		return false;
-
 	}
 }
