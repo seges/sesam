@@ -23,7 +23,7 @@ import sk.seges.sesam.shared.model.converter.api.DtoConverter;
 
 public class MapConverter<DTO_KEY, DTO_VALUE, DOMAIN_KEY, DOMAIN_VALUE> implements DtoConverter<Map<DTO_KEY, DTO_VALUE>, Map<DOMAIN_KEY, DOMAIN_VALUE>> {
 
-	private final ConverterProviderContext converterProviderContext;
+	protected final ConverterProviderContext converterProviderContext;
 
 	public MapConverter(ConverterProviderContext converterProviderContext) {
 		this.converterProviderContext = converterProviderContext;
@@ -76,6 +76,22 @@ public class MapConverter<DTO_KEY, DTO_VALUE, DOMAIN_KEY, DOMAIN_VALUE> implemen
 		return convertFromDto(result, dtos);
 	}
 
+	protected DtoConverter<DTO_VALUE, DOMAIN_VALUE> getDomainValueConverter(DOMAIN_VALUE domainValue) {
+		return converterProviderContext.getConverterForDomain(domainValue);
+	}
+
+	protected DtoConverter<DTO_KEY, DOMAIN_KEY> getDomainKeyConverter(DOMAIN_KEY domainKey) {
+		return converterProviderContext.getConverterForDomain(domainKey);
+	}
+
+	protected DtoConverter<DTO_VALUE, DOMAIN_VALUE> getDtoValueConverter(DTO_VALUE dtoValue) {
+		return converterProviderContext.getConverterForDto(dtoValue);
+	}
+
+	protected DtoConverter<DTO_KEY, DOMAIN_KEY> getDtoKeyConverter(DTO_KEY dtoKey) {
+		return converterProviderContext.getConverterForDto(dtoKey);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<DTO_KEY, DTO_VALUE> convertToDto(Map<DTO_KEY, DTO_VALUE> result, Map<DOMAIN_KEY, DOMAIN_VALUE> domains) {
@@ -83,8 +99,8 @@ public class MapConverter<DTO_KEY, DTO_VALUE, DOMAIN_KEY, DOMAIN_VALUE> implemen
 			DOMAIN_VALUE value = entry.getValue();
 			DOMAIN_KEY key = entry.getKey();
 			if (key != null) {
-				DtoConverter<DTO_KEY, DOMAIN_KEY> keyConverter = converterProviderContext.getConverterForDomain(key);
-				DtoConverter<DTO_VALUE, DOMAIN_VALUE> valueConverter = converterProviderContext.getConverterForDomain(value);
+				DtoConverter<DTO_KEY, DOMAIN_KEY> keyConverter = getDomainKeyConverter(key);
+				DtoConverter<DTO_VALUE, DOMAIN_VALUE> valueConverter = getDomainValueConverter(value);
 				
 				result.put(keyConverter == null ? (DTO_KEY)key : keyConverter.toDto(key), 
 						   valueConverter == null ? (DTO_VALUE)value : valueConverter.toDto(value));
@@ -101,8 +117,8 @@ public class MapConverter<DTO_KEY, DTO_VALUE, DOMAIN_KEY, DOMAIN_VALUE> implemen
 			DTO_VALUE value = entry.getValue();
 			DTO_KEY key = entry.getKey();
 			if (key != null) {
-				DtoConverter<DTO_KEY, DOMAIN_KEY> keyConverter = converterProviderContext.getConverterForDto(key);
-				DtoConverter<DTO_VALUE, DOMAIN_VALUE> valueConverter = converterProviderContext.getConverterForDto(value);
+				DtoConverter<DTO_KEY, DOMAIN_KEY> keyConverter = getDtoKeyConverter(key);
+				DtoConverter<DTO_VALUE, DOMAIN_VALUE> valueConverter = getDtoValueConverter(value);
 
 				result.put(keyConverter == null ? (DOMAIN_KEY)key : keyConverter.fromDto(key), 
 						   valueConverter == null ? (DOMAIN_VALUE)value : valueConverter.fromDto(value));

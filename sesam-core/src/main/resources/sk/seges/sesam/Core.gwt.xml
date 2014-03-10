@@ -2,10 +2,8 @@
 	<source path='domain'/>
 	<source path='handler'/>
 	<source path='client'/>
-	<source path='shared/domain/api'/>
-	<source path='shared/model/api'/>
-	<source path='shared/model/dto'/>
-	<source path='shared/model/dao'/>
+	<source path='shared'/>
+	<source path='security/shared'/>
 	<source path='service/remote'/>
 	<source path="utils" includes="**/CastUtils**"></source>
 </module>
