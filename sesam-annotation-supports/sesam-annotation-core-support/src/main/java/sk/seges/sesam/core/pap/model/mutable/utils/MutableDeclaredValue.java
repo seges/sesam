@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.type.TypeMirror;
 
 import sk.seges.sesam.core.pap.model.api.ClassSerializer;
@@ -58,6 +59,10 @@ class MutableDeclaredValue extends MutableValue implements MutableDeclaredTypeVa
 		//value is clazz
 		if (value instanceof MutableType) {
 			return ((MutableType)value).toString(serializer, typed);
+		}
+
+		if (value instanceof Class) {
+			return processingEnv.getTypeUtils().toMutableType(((Class) value)).toString(serializer, typed) + ".class";
 		}
 
 		//value is string

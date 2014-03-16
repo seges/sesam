@@ -1,40 +1,16 @@
 package sk.seges.sesam.core.pap.model.mutable.utils;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.*;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
-
-import sk.seges.sesam.core.pap.model.mutable.api.MutableAnnotationMirror;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableArrayType;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableArrayTypeValue;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredTypeValue;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableExecutableType;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableReferenceType;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableReferenceTypeValue;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeValue;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableWildcardType;
+import sk.seges.sesam.core.pap.model.mutable.api.*;
 import sk.seges.sesam.core.pap.model.mutable.api.element.MutableExecutableElement;
 import sk.seges.sesam.core.pap.model.mutable.api.reference.ExecutableElementReference;
 import sk.seges.sesam.core.pap.model.mutable.delegate.DelegateMutableDeclaredType;
+
+import javax.lang.model.element.*;
+import javax.lang.model.type.*;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
+import java.lang.reflect.Type;
+import java.util.*;
 
 public class MutableTypes implements Types {
 
@@ -401,7 +377,7 @@ public class MutableTypes implements Types {
 	}
 
 	public MutableDeclaredType toMutableType(DeclaredType declaredType) {
-		return (MutableDeclaredType) convertToMutableType(declaredType);
+		return convertToMutableType(declaredType);
 	}
 		
 	public MutableDeclaredType toMutableType(TypeElement typeElement) {
@@ -750,6 +726,10 @@ public class MutableTypes implements Types {
 		return mutableType;
 	}
 
+	public MutableAnnotationMirror toMutableAnnotation(AnnotationMirror annotation) {
+		return new MutableAnnotation(toMutableType(annotation.getAnnotationType()), processingEnv);
+	}
+
 	public MutableAnnotationMirror toMutableAnnotation(Class<?> clazz) {
 		return new MutableAnnotation(toMutableType(clazz), processingEnv);
 	}
@@ -775,19 +755,26 @@ public class MutableTypes implements Types {
 	public MutableReferenceTypeValue getReferenceValue(MutableDeclaredType declaredType, MutableReferenceType referenceType) {
 		return new MutableDeclaredReferenceValue(declaredType, referenceType);
 	}
-	
+
+	public MutableTypeValue getAnnotationTypeValue(Object value) {
+		if (value.getClass().isArray()) {
+			return getAnnotationArrayValue(getArrayType(toMutableType(value.getClass().getComponentType())), (Object[])value);
+		}
+		return getTypeValue(value);
+	}
+
 	public MutableTypeValue getTypeValue(Object value) {
 		if (value.getClass().isArray()) {
 			return getArrayValue(getArrayType(toMutableType(value.getClass().getComponentType())), (Object[])value);
 		}
-		
+
 		if (value.getClass().isEnum()) {
 			return getEnumValue(value);
 		}
 
 		return getTypeValue(toMutableType(value.getClass()), value);
 	}
-	
+
 	public MutableTypeValue getTypeValue(MutableTypeMirror type, Object value) {
 		
 		if (value != null && value.getClass().isEnum()) {
@@ -812,14 +799,23 @@ public class MutableTypes implements Types {
 	public MutableDeclaredTypeValue getDeclaredValue(MutableDeclaredType type, Object value) {
 		return new MutableDeclaredValue(type, value, processingEnv);
 	}
-	
-	public MutableArrayTypeValue getArrayValue(MutableArrayType array, Object... values) {
+
+	private MutableTypeValue[] toTypeValues(MutableTypeMirror componentType, Object... values) {
 		MutableTypeValue[] arrayValues = new MutableTypeValue[values.length];
 		int i = 0;
 		for (Object value: values) {
-			arrayValues[i++] = getTypeValue(array.getComponentType(), value);
+			arrayValues[i++] = getTypeValue(componentType, value);
 		}
-		
-		return new MutableArrayValue(array, arrayValues);
-	}	
+
+		return arrayValues;
+	}
+
+	public MutableArrayTypeValue getArrayValue(MutableArrayType array, Object... values) {
+		return new MutableArrayValue(array, toTypeValues(array.getComponentType(), values));
+	}
+
+	public MutableArrayTypeValue getAnnotationArrayValue(MutableArrayType array, Object... values) {
+		return new MutableAnnotationArrayValue(array, toTypeValues(array.getComponentType(), values));
+	}
+
 }

@@ -348,7 +348,7 @@ public class FormattedPrintWriter extends PrintWriter implements DelayedPrintWri
 				length += res.length();
 				super.write(res);
 			} else if (o instanceof MutableReferenceType) {
-				String name = ((MutableReferenceType) o).toString();
+				String name = o.toString();
 				if (name != null && name.length() > 0) {
 					super.write(name);
 				} else {
@@ -395,6 +395,11 @@ public class FormattedPrintWriter extends PrintWriter implements DelayedPrintWri
 				return types;
 			}
 
+			if (value.getValue() instanceof Class<?> ) {
+				types.add(processingEnv.getTypeUtils().toMutableType((Class<?>)value.getValue()));
+				return types;
+			}
+
 			MutableTypeMirror type = ((MutableDeclaredTypeValue) value).asType();
 
 			// primitive types
@@ -428,7 +433,9 @@ public class FormattedPrintWriter extends PrintWriter implements DelayedPrintWri
 			MutableTypeValue[] arrayValues = ((MutableArrayTypeValue) value).getValue();
 
 			if (arrayValues != null && arrayValues.length > 0) {
-				types.addAll(extractValueTypes(arrayValues[0]));
+				for (int i = 0; i < arrayValues.length; i++) {
+					types.addAll(extractValueTypes(arrayValues[i]));
+				}
 			}
 		}
 
