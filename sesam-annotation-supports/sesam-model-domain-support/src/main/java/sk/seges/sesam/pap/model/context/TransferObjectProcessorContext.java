@@ -41,6 +41,8 @@ public class TransferObjectProcessorContext implements TransferObjectContext {
 	protected final ExecutableElement method;
 	protected final ExecutableElement domainMethod;
 
+	protected ExecutableElement instantiableDomainMethod;
+
 	protected DomainType domainMethodReturnType;
 
 	protected DtoType fieldType;
@@ -69,6 +71,14 @@ public class TransferObjectProcessorContext implements TransferObjectContext {
 		this.superClassMethod = superClassMethod;
 		this.domainMethod = domainMethod;
 	}
+
+	protected ConfigurationContext ensureConfigurationContext(EnvironmentContext<TransferObjectProcessingEnvironment> envContext,
+															  List<ConfigurationTypeElement> configurations) {
+		ConfigurationContext configurationContext = new ConfigurationContext(envContext.getConfigurationEnv());
+		configurationContext.setConfigurations(configurations);
+		return configurationContext;
+	}
+
 
 	@Override
 	public boolean isSuperclassMethod() {
@@ -167,9 +177,12 @@ public class TransferObjectProcessorContext implements TransferObjectContext {
 
 		this.domainFieldName = MethodHelper.toGetter(getDomainFieldPath());
 
+		this.instantiableDomainMethod = new DomainDeclared(configurationTypeElement.getInstantiableDomain(), configurationTypeElement.getDto(), envContext,
+				ensureConfigurationContext(envContext, configurationTypeElement.getInstantiableDomain().getConfigurations())).getGetterMethod(fieldName);
+
 		DomainDeclaredType domainTypeElement = configurationTypeElement.getDomain();
 		
-		DtoType type = null;
+		DtoType type;
 		
 		if (entityResolver.getTargetEntityType(getDtoMethod()).getKind().equals(TypeKind.TYPEVAR)) {
 			TypeMirror returnType = erasure(domainTypeElement.asConfigurationElement(), entityResolver.getTargetEntityType(getDtoMethod()));
@@ -194,7 +207,7 @@ public class TransferObjectProcessorContext implements TransferObjectContext {
 			}
 		}
 
-		TypeMirror targetReturnType = null;
+		TypeMirror targetReturnType;
 		
 		if (getDomainMethod() != null) {
 			targetReturnType = entityResolver.getTargetEntityType(getDomainMethod());
@@ -453,6 +466,11 @@ public class TransferObjectProcessorContext implements TransferObjectContext {
 
 	public DomainType getDomainMethodReturnType() {
 		return domainMethodReturnType;
+	}
+
+	@Override
+	public ExecutableElement getInstantiableDomainMethod() {
+		return instantiableDomainMethod;
 	}
 
 	public String getDomainFieldPath() {

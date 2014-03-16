@@ -426,6 +426,25 @@ public abstract class AnnotationAccessor {
 		return null;
 	}
 
+	public MutableAnnotationMirror toMutable(AnnotationMirror annotation) {
+		return merge(processingEnv.getTypeUtils().toMutableAnnotation(annotation), annotation);
+	}
+
+	public MutableAnnotationMirror merge(MutableAnnotationMirror annotationMirror, AnnotationMirror annotation) {
+
+		for (Entry<? extends ExecutableElement, ? extends AnnotationValue> annotationMethod: annotation.getElementValues().entrySet()) {
+			AnnotationValue value = annotationMethod.getValue();
+			Object result = value.accept(new AnnotationValueVisitor(this.processingEnv, annotationMethod.getKey().getReturnType()), value);
+			if (result == null) {
+				result = value;
+			}
+
+			annotationMirror.setAnnotationValue(annotationMethod.getKey().getSimpleName().toString(), processingEnv.getTypeUtils().getAnnotationTypeValue(result));
+		}
+
+		return annotationMirror;
+	}
+
 	protected <T> T toPojo(Annotation annotation, Class<T> clazz) {
 		return toPojo(toAnnotationMirror(annotation), clazz);
 	}

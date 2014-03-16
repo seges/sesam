@@ -31,6 +31,7 @@ public interface TransferObjectContext {
 	ExecutableElement getDtoMethod();
 
 	ExecutableElement getDomainMethod();
+	ExecutableElement getInstantiableDomainMethod();
 
 	boolean isCustomerConstructorParameter();
 	int getCustomerConstructorParameterIndex();

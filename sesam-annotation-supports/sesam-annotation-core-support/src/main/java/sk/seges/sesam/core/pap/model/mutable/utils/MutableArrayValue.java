@@ -36,8 +36,11 @@ class MutableArrayValue extends MutableValue implements MutableArrayTypeValue {
 
 	@Override
 	public String toString(ClassSerializer serializer, boolean typed) {
-		String result = "new " + type.toString(serializer, typed) + " {";
-		
+		return paramsToString("new " + type.toString(serializer, typed) + " {", serializer, typed);
+	}
+
+	protected String paramsToString(String result, ClassSerializer serializer, boolean typed) {
+
 		int i = 0;
 		for (MutableTypeValue value: getValue()) {
 			if (i > 0) {

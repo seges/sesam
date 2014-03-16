@@ -32,6 +32,11 @@ class MutableAnnotation implements MutableAnnotationMirror {
 	@Override
 	public MutableAnnotationMirror setAnnotationValue(String methodName, MutableTypeValue value) {
 		MutableExecutableType methodType = processingEnv.getElementUtils().getExecutableElement(methodName).asType();
+
+		if (values.containsKey(methodName)) {
+			values.remove(methodName);
+		}
+
 		values.put(methodType, value);
 		return this;
 	}
