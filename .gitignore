@@ -46,6 +46,13 @@
 /sesam-annotation-apis/sesam-model-metadata-api/target
 /sesam-annotation-apis/sesam-model-metadata-api/*.iml
 
+# /sesam-annotation-apis/sesam-security-api/
+/sesam-annotation-apis/sesam-security-api/.classpath
+/sesam-annotation-apis/sesam-security-api/.project
+/sesam-annotation-apis/sesam-security-api/.settings
+/sesam-annotation-apis/sesam-security-api/target
+/sesam-annotation-apis/sesam-security-api/*.iml
+
 # /sesam-annotation-apis/sesam-selenium-api/
 /sesam-annotation-apis/sesam-selenium-api/target
 /sesam-annotation-apis/sesam-selenium-api/.classpath
