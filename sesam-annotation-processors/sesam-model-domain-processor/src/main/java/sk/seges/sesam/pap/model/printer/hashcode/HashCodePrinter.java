@@ -118,8 +118,13 @@ public class HashCodePrinter extends AbstractElementPrinter {
 
 		switch (context.getDtoFieldType().getKind()) {
 		case PRIMITIVE:
-			if (context.getDtoFieldType().toString().equals(boolean.class.getSimpleName())) {
+			String className = context.getDtoFieldType().toString();
+			if (className.equals(boolean.class.getSimpleName())) {
 				pw.println("result = prime * result + (((Boolean)" + context.getDtoFieldName() + ").hashCode());");
+				return;
+			} else if (className.equals(long.class.getSimpleName())) {
+				//(int) (contentId ^ (contentId >>> 32))
+				pw.println("result = prime * result + ((int)(" + context.getDtoFieldName() + ">>>32));");
 				return;
 			}
 			pw.println("result = prime * result + " + context.getDtoFieldName() + ";");

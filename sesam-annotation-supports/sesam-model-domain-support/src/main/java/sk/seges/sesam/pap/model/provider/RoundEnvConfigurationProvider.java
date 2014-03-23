@@ -185,6 +185,9 @@ public class RoundEnvConfigurationProvider implements ConfigurationProvider {
 		configurationContext.setConfigurations(result);
 		
 		Collections.sort(result, new ConfigurationComparator(targetType, type));
+
+
+
 		reindexDelegated(result);
 		
 		if (!type.getKind().isDeclared() || !((MutableDeclaredType)type).hasTypeParameters()) {

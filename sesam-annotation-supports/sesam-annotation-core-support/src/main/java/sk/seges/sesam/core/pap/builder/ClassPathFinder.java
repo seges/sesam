@@ -110,12 +110,14 @@ public abstract class ClassPathFinder {
 	
 	private Map<URL, String> getClasspathLocations(String classpath) {
 		Map<URL, String> map = new TreeMap<URL, String>(URL_COMPARATOR);
-		File file = null;
+		File file;
 
 		String pathSep = System.getProperty(PATH_SEPARATOR);
 		
 		List<String> classPathElements = new ArrayList<String>();
-		
+
+		System.out.println("Classpath: " + classpath);
+
 		if (classpath != null && pathSep != null) {
 			StringTokenizer st = new StringTokenizer(classpath, pathSep);
 			while (st.hasMoreTokens()) {
@@ -176,8 +178,8 @@ public abstract class ClassPathFinder {
 			return;
 		}
 
-		URL jarURL = null;
-		JarFile jar = null;
+		URL jarURL;
+		JarFile jar;
 		try {
 			if (isWindows()) {
 				jarURL = new URL("file:/" + file.getCanonicalPath());
@@ -201,6 +203,8 @@ public abstract class ClassPathFinder {
 		if (jar == null || jarURL == null) {
 			return;
 		}
+
+		System.out.println("Including jar: " + jarURL.getFile());
 
 		// include the jar's "default" package (i.e. jar's root)
 		map.put(jarURL, "");

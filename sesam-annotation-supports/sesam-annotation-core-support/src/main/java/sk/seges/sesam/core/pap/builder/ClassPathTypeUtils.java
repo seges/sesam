@@ -267,7 +267,7 @@ public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathType
 	private String getClasspathFromList(String classPath) {
 		if (classPath != null) {
 			if (classPath.startsWith("[")) {
-				classPath = classPath.substring(1, classPath.length() - 2);
+				classPath = classPath.substring(1, classPath.length() - 1);
 				classPath = classPath.replaceAll(",", System.getProperty(PATH_SEPARATOR));
 			}
 		}
