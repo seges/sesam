@@ -2,31 +2,15 @@ package sk.seges.sesam.core.pap.builder;
 
 import sk.seges.sesam.pap.model.TypeElementsList;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.tools.Diagnostic.Kind;
+import java.io.*;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
-import javax.tools.Diagnostic.Kind;
 
 public abstract class ClassPathFinder {
 
@@ -116,8 +100,6 @@ public abstract class ClassPathFinder {
 		
 		List<String> classPathElements = new ArrayList<String>();
 
-		System.out.println("Classpath: " + classpath);
-
 		if (classpath != null && pathSep != null) {
 			StringTokenizer st = new StringTokenizer(classpath, pathSep);
 			while (st.hasMoreTokens()) {
@@ -203,8 +185,6 @@ public abstract class ClassPathFinder {
 		if (jar == null || jarURL == null) {
 			return;
 		}
-
-		System.out.println("Including jar: " + jarURL.getFile());
 
 		// include the jar's "default" package (i.e. jar's root)
 		map.put(jarURL, "");

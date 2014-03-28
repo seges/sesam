@@ -1,21 +1,8 @@
 package sk.seges.sesam.core.pap.builder;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.lang.annotation.Annotation;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import sk.seges.sesam.core.pap.builder.api.ClassPathTypes;
+import sk.seges.sesam.core.pap.processor.ConfigurableAnnotationProcessor;
+import sk.seges.sesam.pap.model.TypeElementsList;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -27,16 +14,12 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import javax.xml.transform.stream.StreamSource;
-
-import sk.seges.sesam.core.pap.builder.api.ClassPathTypes;
-import sk.seges.sesam.core.pap.processor.ConfigurableAnnotationProcessor;
-import sk.seges.sesam.pap.model.TypeElementsList;
+import java.io.*;
+import java.lang.annotation.Annotation;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathTypes {
 
