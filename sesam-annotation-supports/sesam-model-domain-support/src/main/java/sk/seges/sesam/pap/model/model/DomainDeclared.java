@@ -437,8 +437,9 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 	}
 
 	private void initialize() {
-		if (dtoType != null && dtoType.getTypeVariables().size() > 0) {
-
+		if (dtoType != null && dtoType.getTypeVariables().size() > 0 &&
+                !configurationContext.getDomainDefinitionConfiguration().getKind().equals(MutableTypeKind.METHOD)) {
+            //if it is method, configuration and types are defined so there is no need to post process them
 			MutableTypeVariable[] typeVariables = new MutableTypeVariable[dtoType.getTypeVariables().size()];
 			
 			int i = 0;

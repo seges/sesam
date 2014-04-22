@@ -54,7 +54,12 @@ public abstract class AbstractMethodPrinter extends AbstractDtoPrinter {
 		}
 		return false;
 	}
-	
+
+    protected boolean isId(TransferObjectContext context) {
+        return (processingEnv.getTypeUtils().isAssignable(processingEnv.getElementUtils().getTypeElement(context.getConfigurationTypeElement().getInstantiableDomain().getCanonicalName()).asType(),
+                context.getDomainMethod().getEnclosingElement().asType()) && isIdField(context.getConfigurationTypeElement().getInstantiableDomain(), context.getDomainMethod().getSimpleName().toString()));
+    }
+
 	protected MutableTypeMirror getWildcardDelegate(MutableTypeMirror domainDelegate) {
 		if (domainDelegate.getKind().isDeclared() && ((MutableDeclaredType)domainDelegate).getTypeVariables().size() == 1) {
 			return ((MutableDeclaredType)domainDelegate).clone().setTypeVariables(processingEnv.getTypeUtils().getWildcardType((MutableTypeMirror)null, (MutableTypeMirror)null));

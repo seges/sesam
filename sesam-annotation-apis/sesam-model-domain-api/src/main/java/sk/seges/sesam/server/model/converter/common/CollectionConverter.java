@@ -22,7 +22,7 @@ import java.util.*;
 
 public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection<DTO>, Collection<DOMAIN>> {
 
-	private final ConverterProviderContext converterProviderContext;
+	protected final ConverterProviderContext converterProviderContext;
 	
 	public CollectionConverter(ConverterProviderContext converterProviderContext) {
 		this.converterProviderContext = converterProviderContext;
@@ -105,7 +105,7 @@ public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection
 		while (iterator.hasNext()) {
 			DOMAIN domain = getDomainObject(iterator);
 			
-			DtoConverter<DTO, DOMAIN> converter = converterProviderContext.getConverterForDomain(domain);
+			DtoConverter<DTO, DOMAIN> converter = getConverterForDomain(domain);
 			
 			if (converter == null) {
 				result.add((DTO)domain);
@@ -117,7 +117,15 @@ public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection
 		return result;
 	}
 
-	protected DOMAIN getDomainObject(Iterator<?> iterator) {
+    protected DtoConverter<DTO, DOMAIN> getConverterForDomain(DOMAIN domain) {
+        return converterProviderContext.getConverterForDomain(domain);
+    }
+
+    protected DtoConverter<DTO, DOMAIN> getConverterForDto(DTO dto) {
+        return converterProviderContext.getConverterForDto(dto);
+    }
+
+    protected DOMAIN getDomainObject(Iterator<?> iterator) {
 		return (DOMAIN) iterator.next();
 	}
 
@@ -139,7 +147,7 @@ public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection
 		while (dtoIterator.hasNext()) {
 			DTO dto = (DTO)dtoIterator.next();
 
-			DtoConverter<DTO, DOMAIN> converter = converterProviderContext.getConverterForDto(dto);
+			DtoConverter<DTO, DOMAIN> converter = getConverterForDto(dto);
 
 			if (converter == null) {
 				result.add((DOMAIN)dto);
@@ -167,7 +175,7 @@ public class CollectionConverter<DTO, DOMAIN> implements DtoConverter<Collection
 		while (iterator.hasNext()) {
 
 			DOMAIN domain = (DOMAIN)iterator.next();
-			DtoConverter<DTO, DOMAIN> converter = converterProviderContext.getConverterForDto(dto);
+			DtoConverter<DTO, DOMAIN> converter = getConverterForDto(dto);
 
 			if (converter == null && dto.equals(domain)) {
 				return domain;

@@ -206,7 +206,7 @@ public class ConfigurationTypeElement extends TomBaseType {
 		if (!this.domainTypeElementInitialized) {
 			MutableDeclaredType dtoType = getDtoType();
 			
-			if (dtoType != null) {
+			if (dtoType != null && (configurationElement == null || !configurationElement.getKind().equals(ElementKind.METHOD))) {
 				ConfigurationContext configurationContextForDto = getConfigurationContextForDto(dtoType);
 				if (configurationContextForDto != null) {
 					this.domainDeclaredType = getDomain(configurationContextForDto.getDelegateDomainDefinitionConfiguration(), DomainInstanceType.DEFINITION);

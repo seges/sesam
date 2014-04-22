@@ -1,12 +1,5 @@
 package sk.seges.sesam.pap.model.printer.method;
 
-import java.util.Set;
-
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
-import javax.tools.Diagnostic.Kind;
-
 import sk.seges.sesam.core.pap.model.PathResolver;
 import sk.seges.sesam.core.pap.model.api.ClassSerializer;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
@@ -19,11 +12,7 @@ import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.pap.model.ConverterProcessingHelper;
 import sk.seges.sesam.pap.model.accessor.ReadOnlyAccessor;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
-import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
-import sk.seges.sesam.pap.model.model.ConverterTypeElement;
-import sk.seges.sesam.pap.model.model.Field;
-import sk.seges.sesam.pap.model.model.TransferObjectMappingAccessor;
-import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
+import sk.seges.sesam.pap.model.model.*;
 import sk.seges.sesam.pap.model.model.api.domain.DomainDeclaredType;
 import sk.seges.sesam.pap.model.model.api.domain.DomainType;
 import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
@@ -32,6 +21,16 @@ import sk.seges.sesam.pap.model.printer.converter.ConverterTargetType;
 import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
 import sk.seges.sesam.utils.CastUtils;
+
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.tools.Diagnostic.Kind;
+import java.util.Set;
 
 public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements CopyMethodPrinter {
 
@@ -47,7 +46,7 @@ public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements C
 	@Override
 	public void printCopyMethod(TransferObjectContext context, FormattedPrintWriter pw) {
 
-		if (isIdField(context.getConfigurationTypeElement().getInstantiableDomain(), context.getDomainMethod().getSimpleName().toString())) {
+        if (isId(context)) {
 			return;
 		}
 
@@ -62,13 +61,13 @@ public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements C
 			return;
 		}
 
-		PathResolver pathResolver = new PathResolver(context.getDomainFieldPath());
+        PathResolver pathResolver = new PathResolver(context.getDomainFieldPath());
 
-		if (getSetterMethod(context, pathResolver) == null) {
+        if (getSetterMethod(context, pathResolver) == null) {
 			return;
 		}
-		
-		boolean nested = pathResolver.isNested();
+
+        boolean nested = pathResolver.isNested();
 
 		String currentPath = pathResolver.next();
 		String fullPath = currentPath;
@@ -119,11 +118,8 @@ public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements C
 						MutableDeclaredType fieldType = processingEnv.getTypeUtils().getDeclaredType(processingEnv.getTypeUtils().toMutableType(Class.class),
 								new MutableDeclaredType[] { referenceDomainType.getDto() });
 
-						Field field = new Field(null, fieldType);
-						field.setCastType(fieldType);
+						Field field = new Field("" + referenceDomainType.getDto().getSimpleName() + ".class", fieldType);
 
-						// String parameterName = "(" + Class.class.getSimpleName() + "<" +
-						// referenceDomainType.getDto().getSimpleName() + ">)null";
 						printCopyNested(pathResolver, fullPath, referenceDomainType, context.getDomainMethod(), pw, field, dtoName);
 						instances.add(fullPath);
 					}
@@ -175,32 +171,24 @@ public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements C
 
 	protected void printCopyNested(PathResolver domainPathResolver, String fullPath, DomainDeclaredType referenceDomainType, ExecutableElement method,
 			FormattedPrintWriter pw, Field field, String dtoName) {
-		if (referenceDomainType.getId(entityResolver) != null) {
-			pw.print(referenceDomainType, " " + domainPathResolver.getCurrent() + " = ");
+
+        DomainDeclaredType instantiableDomain = (DomainDeclaredType)referenceDomainType.getConverter().getInstantiableDomain();
+
+        pw.print(referenceDomainType, " " + domainPathResolver.getCurrent() + " = ");
+
+		if (instantiableDomain.getId(entityResolver) != null) {
 			if (referenceDomainType.getConverter() == null) {
-				processingEnv.getMessager()
-						.printMessage(
-								Kind.ERROR,
-								"[ERROR] No converter/configuration for " + referenceDomainType + " was found. Please, define configuration for "
-										+ referenceDomainType);
+				processingEnv.getMessager().printMessage(Kind.ERROR, "[ERROR] No converter/configuration for " + referenceDomainType + " was found. Please, define configuration for "
+                        + referenceDomainType);
 			}
-			// TODO add NPE check
-			// converterProviderPrinter.printDtoEnsuredConverterMethodName(referenceDomainType.getDto(), field, method,
-			// pw, false);
 			converterProviderPrinter.printObtainConverterFromCache(pw, ConverterTargetType.DTO, referenceDomainType, field, method, true);
 
 			pw.println(".createDomainInstance(" + dtoName + "."
-					+ MethodHelper.toGetter(fullPath + MethodHelper.toMethod(MethodHelper.toField(referenceDomainType.getIdMethod(entityResolver)))) + ");");
+					+ MethodHelper.toGetter(fullPath + MethodHelper.toMethod(MethodHelper.toField(instantiableDomain.getIdMethod(entityResolver)))) + ");");
 		} else {
-			pw.println(
-					referenceDomainType,
-					" " + domainPathResolver.getCurrent() + " = " + TransferObjectElementPrinter.RESULT_NAME + "."
-							+ MethodHelper.toGetter(domainPathResolver.getCurrent()) + ";");
-			pw.println("if (" + TransferObjectElementPrinter.RESULT_NAME + "." + MethodHelper.toGetter(domainPathResolver.getCurrent()) + " == null) {");
+			pw.println(TransferObjectElementPrinter.RESULT_NAME + "." + MethodHelper.toGetter(domainPathResolver.getCurrent()) + ";");
+			pw.println("if (" + domainPathResolver.getCurrent() + " == null) {");
 			pw.print(domainPathResolver.getCurrent() + " = ");
-			// TODO do not cast here
-			// converterProviderPrinter.printDtoEnsuredConverterMethodName(referenceDomainType.getDto(), field, method,
-			// pw, false);
 			// TODO add NPE check
 			converterProviderPrinter.printObtainConverterFromCache(pw, ConverterTargetType.DTO, referenceDomainType, field, method, true);
 			pw.println(".createDomainInstance(null);");
@@ -285,25 +273,25 @@ public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements C
 
 		MutableTypeMirror parameterType = getParameterType(context, domainPathResolver);
 		
-		if (isCastReuqired(parameterType)) {
+		if (isCastRequired(parameterType)) {
 			pw.print(CastUtils.class, ".cast(");
 		}
 		pw.print("(", getWildcardDelegate(context.getConverter().getDomain()), ")");
 		pw.print(converterName + ".fromDto(");
 		// TODO check for the nested
 		// TODO: only if necessary
-		if (isCastReuqired(parameterType)) {
+		if (isCastRequired(parameterType)) {
 			pw.print(CastUtils.class, ".cast(");
 		} else {
 			pw.print("(", context.getConverter().getDto() ,")");
 		}
 		pw.print(TransferObjectElementPrinter.DTO_NAME + "." + MethodHelper.toGetter(context.getDtoFieldName()));
-		if (isCastReuqired(parameterType)) {
+		if (isCastRequired(parameterType)) {
 			pw.print(", ", getTypeVariableDelegate(getDelegateCast(context.getConverter().getDto(), true)), ".class)");
 		}
 		
 		pw.print(")");
-		if (isCastReuqired(parameterType)) {
+		if (isCastRequired(parameterType)) {
 			pw.print(", ");
 			printCastDomainType(context, domainPathResolver, processingEnv.getTransferObjectUtils().getDomainType(parameterType), pw);
 			pw.print(".class)");
@@ -312,16 +300,78 @@ public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements C
 		pw.println("}");
 	}
 
-	protected boolean isCastReuqired(MutableTypeMirror type) {
+	protected boolean isCastRequired(MutableTypeMirror type) {
 		if (type.getKind().equals(MutableTypeKind.CLASS) || type.getKind().equals(MutableTypeKind.INTERFACE)) {
 			return ((MutableDeclaredType)type).hasTypeParameters() && ((MutableDeclaredType)type).getTypeVariables().size() == 1;
 		}
 		return false;
 	}
 
-	protected ExecutableElement getSetterMethod(TransferObjectContext context, PathResolver domainPathResolver) {
-		return ProcessorUtils.getMethod(MethodHelper.toSetter(domainPathResolver.getPath()), processingEnv.getElementUtils()
-				.getTypeElement(context.getConfigurationTypeElement().getDomain().getCanonicalName()));
+    protected ExecutableElement getSetterMethod(TypeElement typeElement, PathResolver domainPathResolver) {
+        ExecutableElement method = null;
+
+        domainPathResolver = new PathResolver(domainPathResolver.getPath());
+
+        while (domainPathResolver.hasNext()) {
+            String path = domainPathResolver.next();
+
+            method = ProcessorUtils.getMethod(MethodHelper.toSetter(path), typeElement);
+
+            if (method == null || method.getParameters().size() == 0) {
+                return null;
+            }
+
+            TypeMirror typeMirror = method.getParameters().get(0).asType();
+
+            switch (typeMirror.getKind()) {
+                case DECLARED:
+                    typeElement = (TypeElement) ((DeclaredType) typeMirror).asElement();
+                    break;
+                case TYPEVAR:
+                    TypeMirror erasure = ProcessorUtils.erasure(typeElement, typeMirror.toString());
+                    if (erasure == null) {
+                        for (TypeParameterElement parameter: typeElement.getTypeParameters()) {
+                            if (parameter.getSimpleName().toString().equals(typeMirror.toString())) {
+                                //TODO if there are more bounds?
+                                erasure = parameter.getBounds().get(0);
+                                break;
+                            }
+                        }
+
+                        if (erasure == null) {
+                            throw new RuntimeException("Unable to erasure " + typeMirror.toString() + " in " + typeElement.getQualifiedName());
+                        }
+                    }
+
+                    typeElement = (TypeElement) ((DeclaredType) erasure).asElement();
+                    break;
+                case ARRAY:
+                    throw new RuntimeException("Support for arrays is not implemented! Implement me");
+                case BOOLEAN:
+                case BYTE:
+                case CHAR:
+                case DOUBLE:
+                case FLOAT:
+                case INT:
+                case LONG:
+                case SHORT:
+                    if (domainPathResolver.hasNext()) {
+                        throw new RuntimeException("Basic types cannot be nested " + domainPathResolver.getPath() + " is invalid path");
+                    }
+                    break;
+                default:
+                    throw new RuntimeException("Unsupported parameter type " + typeMirror.getKind());
+            }
+        }
+
+        return method;
+    }
+
+    protected ExecutableElement getSetterMethod(TransferObjectContext context, PathResolver domainPathResolver) {
+        TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(context.getConfigurationTypeElement().getDomain().getCanonicalName());
+        return getSetterMethod(typeElement, domainPathResolver);
+
+        //return ProcessorUtils.getMethod(MethodHelper.toSetter(domainPathResolver.getPath()), typeElement));
 	}
 	
 	protected MutableTypeMirror getParameterType(TransferObjectContext context, PathResolver domainPathResolver) {
@@ -334,7 +384,7 @@ public class CopyFromDtoMethodPrinter extends AbstractMethodPrinter implements C
 		
 		MutableTypeMirror domainType = getTypeVariableDelegate(getDelegateCast(inputDomainType, true));
 
-		if (!isCastReuqired(parameterType)) {
+		if (!isCastRequired(parameterType)) {
 			pw.print(domainType);
 		} else {
 			MutableDeclaredType declaredParameter = (MutableDeclaredType) parameterType;

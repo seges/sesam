@@ -7,7 +7,6 @@ import sk.seges.sesam.security.server.model.acl.AclSecuredEntity;
 import sk.seges.sesam.security.shared.model.api.ClientSecuredEntity;
 import sk.seges.sesam.shared.domain.api.HasId;
 import sk.seges.sesam.shared.model.converter.BasicCachedConverter;
-import sk.seges.sesam.shared.model.converter.ConvertedInstanceCache;
 import sk.seges.sesam.shared.model.converter.ConverterProviderContext;
 import sk.seges.sesam.shared.model.converter.api.DtoConverter;
 
@@ -37,7 +36,12 @@ public class SecuredEntityConverter extends BasicCachedConverter<ClientSecuredEn
 		return result;
 	}
 
-	@Override
+    @Override
+    public AclSecuredEntity<IDomainObject<?>> createDomainInstance(Serializable dtoId) {
+        return new AclSecuredEntity<IDomainObject<?>>();
+    }
+
+    @Override
 	public ClientSecuredEntity<HasId<?>> toDto(AclSecuredEntity<IDomainObject<?>> domain) {
 		return convertToDto(createDtoInstance(null), domain);
 	}
@@ -57,7 +61,7 @@ public class SecuredEntityConverter extends BasicCachedConverter<ClientSecuredEn
 
 	@Override
 	public AclSecuredEntity<IDomainObject<?>> fromDto(ClientSecuredEntity<HasId<?>> dto) {
-		return convertFromDto(null, dto);
+		return convertFromDto(createDomainInstance(null), dto);
 	}
 
 	@Override

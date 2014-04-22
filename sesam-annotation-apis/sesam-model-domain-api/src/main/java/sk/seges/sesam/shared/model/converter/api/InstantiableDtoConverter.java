@@ -18,8 +18,9 @@ package sk.seges.sesam.shared.model.converter.api;
 import java.io.Serializable;
 
 public interface InstantiableDtoConverter<DTO, DOMAIN> extends DtoConverter<DTO, DOMAIN> {
-	
-	DOMAIN getDomainInstance(Object dtoSource, Serializable dtoId);
+
+    DOMAIN createDomainInstance(Serializable dtoId);
+    DOMAIN getDomainInstance(Object dtoSource, Serializable dtoId);
 
 	DTO createDtoInstance(Serializable id);
 	DTO getDtoInstance(Object domainSource, Serializable domainId);

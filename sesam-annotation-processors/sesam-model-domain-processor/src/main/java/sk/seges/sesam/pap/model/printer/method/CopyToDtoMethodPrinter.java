@@ -42,7 +42,7 @@ public class CopyToDtoMethodPrinter extends AbstractMethodPrinter implements Cop
 	@Override
 	public void printCopyMethod(TransferObjectContext context, FormattedPrintWriter pw) {
 
-		if (isIdField(context.getConfigurationTypeElement().getInstantiableDomain(), context.getDomainMethod().getSimpleName().toString())) {
+        if (isId(context)) {
 			return;
 		}
 
@@ -93,7 +93,7 @@ public class CopyToDtoMethodPrinter extends AbstractMethodPrinter implements Cop
 			
 			pw.print(context.getConverter().getConverterBase(), " " + converterName + " = ");
 
-			processingEnv.getUsedTypes().addAll(new TypeExtractor(true).extractDeclaredType(context.getConverter().getDomain()));
+			processingEnv.getUsedTypes().addAll(new TypeExtractor(true).extractDeclaredType(context.getConverter().getConfiguration().getDomain()));
 			Field field = new Field(
 					(context.getDomainMethodReturnType().getKind().equals(MutableTypeKind.TYPEVAR) ? "(" + context.getConverter().getDomain().toString(ClassSerializer.SIMPLE, true) + ")" : "") +
 					TransferObjectElementPrinter.DOMAIN_NAME  + "." + context.getDomainFieldName(), context.getConverter().getDomain());

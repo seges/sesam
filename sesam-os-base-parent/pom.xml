@@ -180,8 +180,6 @@
 		<maven-processor-plugin.version>2.0.5</maven-processor-plugin.version>
 		<build-helper-maven-plugin.version>1.3</build-helper-maven-plugin.version>
 		<maven-war-plugin.version>2.1.1</maven-war-plugin.version>
-		<maven-surefire-plugin.version>2.8.1</maven-surefire-plugin.version>
-		<maven-surefire-report-plugin.version>2.8.1</maven-surefire-report-plugin.version>
 		<maven-antrun-plugin.version>1.6</maven-antrun-plugin.version>
 		<maven-assembly-plugin.version>2.2.1</maven-assembly-plugin.version>
 		<javarebel-maven-plugin.version>1.0.5</javarebel-maven-plugin.version>
@@ -891,24 +889,6 @@
 					</executions>
 				</plugin>
 
-				<plugin>                                                                                                                                                    
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>${maven-surefire-plugin.version}</version>
-					<configuration>
-						<forkMode>pertest</forkMode>
-						<systemProperties>
-							<property>
-								<name>maven.class.path</name>
-								<value>${classpathElements}</value>
-							</property>
-							<property>
-								<name>maven.test.class.path</name>
-								<value>${project.testClasspathElements}</value>
-							</property>
-						</systemProperties>
-					</configuration>
-	            </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
@@ -1286,18 +1266,6 @@
 					<exists>${basedir}/.selenium</exists>
 				</file>
 			</activation>
-			<reporting>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-report-plugin</artifactId>
-						<version>${maven-surefire-report-plugin.version}</version>
-						<configuration>
-							<outputDirectory>${basedir}/target/site</outputDirectory>
-						</configuration>
-					</plugin>
-				</plugins>
-			</reporting>
 			<dependencies>
 				<dependency>
 					<groupId>org.seleniumhq.selenium</groupId>
