@@ -2,8 +2,11 @@ package sk.seges.sesam.pap.model.printer.equals;
 
 import sk.seges.sesam.core.pap.model.api.ClassSerializer;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
+import sk.seges.sesam.core.pap.model.mutable.api.MutableExecutableType;
+import sk.seges.sesam.core.pap.model.mutable.api.element.MutableExecutableElement;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
+import sk.seges.sesam.core.pap.writer.HierarchyPrintWriter;
 import sk.seges.sesam.pap.model.accessor.GenerateEqualsAccessor;
 import sk.seges.sesam.pap.model.annotation.TraversalType;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
@@ -12,6 +15,9 @@ import sk.seges.sesam.pap.model.model.api.domain.DomainDeclaredType;
 import sk.seges.sesam.pap.model.printer.AbstractElementPrinter;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
 
+import javax.lang.model.element.Modifier;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic.Kind;
 import java.util.Arrays;
 
@@ -31,7 +37,10 @@ public class EqualsPrinter extends AbstractElementPrinter {
 
 	private final MutableProcessingEnvironment processingEnv;
 	private final EntityResolver entityResolver;
-	
+
+	private MutableDeclaredType outputType;
+	private boolean supportMethodsPrinted = false;
+
 	private boolean active = true;
 	private TraversalType equalsType;
 	private boolean hasKey = false;
@@ -46,7 +55,9 @@ public class EqualsPrinter extends AbstractElementPrinter {
 	 * Prints the definition of the equals method with the initial pre-check
 	 */
 	@Override
-	public void initialize(ConfigurationTypeElement configurationTypeElement, MutableDeclaredType outputName) {
+	public void initialize(ConfigurationTypeElement configurationTypeElement, MutableDeclaredType outputType) {
+
+		this.outputType = outputType;
 
 		GenerateEqualsAccessor generateEqualsAccessor = new GenerateEqualsAccessor(configurationTypeElement.asConfigurationElement(), processingEnv);
 
@@ -138,11 +149,9 @@ public class EqualsPrinter extends AbstractElementPrinter {
 		case ENUM:
 		case PRIMITIVE:
 			if (idMethod) {
-				pw.println("if (" + context.getDtoFieldName() + " == other." + context.getDtoFieldName() + ")");
-				pw.println("	return true;");
+				pw.println("if (" + context.getDtoFieldName() + " == other." + context.getDtoFieldName() + ") return true;");
 			} else {
-				pw.println("if (" + context.getDtoFieldName() + " != other." + context.getDtoFieldName() + ")");
-				pw.println("	return false;");
+				pw.println("if (" + context.getDtoFieldName() + " != other." + context.getDtoFieldName() + ") return false;");
 			}
 			return;
 		case CLASS:
@@ -151,26 +160,8 @@ public class EqualsPrinter extends AbstractElementPrinter {
 				pw.println("if (" + context.getDtoFieldName() + " != null && other." + context.getDtoFieldName() + " != null && " + context.getDtoFieldName() + ".equals(other." + context.getDtoFieldName() + "))");
 				pw.println("	return true;");
 			} else {
-				pw.println("if (" + context.getDtoFieldName() + " == null) {");
-				pw.println("if (other." + context.getDtoFieldName() + " != null)");
-				pw.println("	return false;");
-				pw.println("} else { ");
-				if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
-					pw.println("if (!processingEquals) {");
-					pw.println("processingEquals = true;");
-				}
-				pw.println("if (!" + context.getDtoFieldName() + ".equals(other." + context.getDtoFieldName() + ")) {");
-				if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
-					pw.println("processingEquals = false;");
-				}
-				pw.println("return false;");
-				if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
-					pw.println("} else {");
-					pw.println("processingEquals = false;");
-					pw.println("}");
-				}
-				pw.println("}");
-				pw.println("}");
+				printEqualsSupportMethod();
+				pw.println("if (!_equalsSupport(" + context.getDtoFieldName() + ", other." + context.getDtoFieldName() + ")) return false;");
 			}
 			return;
 		case ARRAY:
@@ -182,7 +173,7 @@ public class EqualsPrinter extends AbstractElementPrinter {
 			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
 				pw.println("processingEquals = false;");
 			}
-			pw.println("return false");
+			pw.println("return false;");
 			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
 				pw.println("} else {");
 				pw.println("processingEquals = false;");
@@ -197,5 +188,39 @@ public class EqualsPrinter extends AbstractElementPrinter {
 					context.getConfigurationTypeElement().asConfigurationElement(), context.getConfigurationTypeElement().asConfigurationElement());
 			return;
 		}
-	}		
+	}
+
+	private void printEqualsSupportMethod() {
+
+		if (supportMethodsPrinted) {
+			return;
+		}
+
+		supportMethodsPrinted = true;
+
+		if (outputType.getMethod("_equalsSupport") != null) {
+			return;
+		}
+
+		MutableExecutableType equalsSupportMethod = processingEnv.getTypeUtils().getExecutable(
+				processingEnv.getTypeUtils().toMutableType(processingEnv.getTypeUtils().getPrimitiveType(TypeKind.BOOLEAN)), "_equalsSupport").
+					addParameter(processingEnv.getElementUtils().getParameterElement(Object.class, "o1")).
+					addParameter(processingEnv.getElementUtils().getParameterElement(Object.class, "o2")).addModifier(Modifier.PRIVATE);
+
+		outputType.addMethod(equalsSupportMethod);
+		HierarchyPrintWriter printWriter = equalsSupportMethod.getPrintWriter();
+
+		printWriter.println("if (o1 == null) {");
+		printWriter.println("if (o2 != null) return false;");
+		if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+			printWriter.println("} else if (!processingEquals) {");
+			printWriter.println("processingEquals = true;");
+			printWriter.println("if (!o1.equals(o2)) return processingEquals = false;");
+			printWriter.println("else processingEquals = false;");
+			printWriter.println("}");
+		} else {
+			printWriter.println("} else if (!o1.equals(o2)) return false;");
+		}
+		printWriter.println("return true;");
+	}
 }

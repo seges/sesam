@@ -2,11 +2,15 @@ package sk.seges.sesam.pap.model.printer.hashcode;
 
 import java.util.Arrays;
 
+import javax.lang.model.element.Modifier;
+import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic.Kind;
 
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
+import sk.seges.sesam.core.pap.model.mutable.api.MutableExecutableType;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
+import sk.seges.sesam.core.pap.writer.HierarchyPrintWriter;
 import sk.seges.sesam.pap.model.accessor.GenerateEqualsAccessor;
 import sk.seges.sesam.pap.model.accessor.GenerateHashcodeAccessor;
 import sk.seges.sesam.pap.model.annotation.TraversalType;
@@ -33,6 +37,9 @@ public class HashCodePrinter extends AbstractElementPrinter {
 	private MutableProcessingEnvironment processingEnv;
 	private EntityResolver entityResolver;
 
+	private MutableDeclaredType outputType;
+	private boolean supportMethodsPrinted = false;
+
 	private boolean active = true;
 	private TraversalType equalsType;
 	private boolean hasKey = false;
@@ -47,7 +54,9 @@ public class HashCodePrinter extends AbstractElementPrinter {
 	 * Prints the definition of the hashCode method with the initial prechecks
 	 */
 	@Override
-	public void initialize(ConfigurationTypeElement configurationTypeElement, MutableDeclaredType outputName) {
+	public void initialize(ConfigurationTypeElement configurationTypeElement, MutableDeclaredType outputType) {
+
+		this.outputType = outputType;
 
 		GenerateHashcodeAccessor generateHashcodeAccessor = new GenerateHashcodeAccessor(configurationTypeElement.asConfigurationElement(), processingEnv);
 
@@ -135,15 +144,8 @@ public class HashCodePrinter extends AbstractElementPrinter {
 		case CLASS:
 		case INTERFACE:
 		case ANNOTATION_TYPE:
-			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
-				pw.println("if (!processingHashCode) {");
-				pw.println("processingHashCode = true;");
-			}
-			pw.println("result = prime * result + ((" + context.getDtoFieldName() + " == null) ? 0 : " + context.getDtoFieldName() + ".hashCode());");
-			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
-				pw.println("processingHashCode = false;");
-				pw.println("}");
-			}
+			printEqualsSupportMethod();
+			pw.println("result = _hashCodeSupport(" + context.getDtoFieldName() + ", prime, result);");
 			return;
 		case ARRAY:
 			if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
@@ -163,5 +165,45 @@ public class HashCodePrinter extends AbstractElementPrinter {
 					context.getConfigurationTypeElement().asConfigurationElement(), context.getConfigurationTypeElement().asConfigurationElement());
 			return;
 		}
-	}		
+	}
+
+	private void printEqualsSupportMethod() {
+
+		if (supportMethodsPrinted) {
+			return;
+		}
+
+		supportMethodsPrinted = true;
+
+		if (outputType.getMethod("_hashCodeSupport") != null) {
+			return;
+		}
+
+		MutableExecutableType hashCodeSupportMethod = processingEnv.getTypeUtils().getExecutable(
+				processingEnv.getTypeUtils().toMutableType(processingEnv.getTypeUtils().getPrimitiveType(TypeKind.INT)), "_hashCodeSupport").
+				addParameter(processingEnv.getElementUtils().getParameterElement(Object.class, "o1")).
+				addParameter(processingEnv.getElementUtils().getParameterElement(
+						processingEnv.getTypeUtils().toMutableType(processingEnv.getTypeUtils().getPrimitiveType(TypeKind.INT)), "prime")).
+				addParameter(processingEnv.getElementUtils().getParameterElement(
+						processingEnv.getTypeUtils().toMutableType(processingEnv.getTypeUtils().getPrimitiveType(TypeKind.INT)), "result")).
+				addModifier(Modifier.PRIVATE);
+
+		outputType.addMethod(hashCodeSupportMethod);
+		HierarchyPrintWriter printWriter = hashCodeSupportMethod.getPrintWriter();
+
+		if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+			printWriter.println("if (!processingHashCode) {");
+			printWriter.println("processingHashCode = true;");
+			printWriter.println("result = ");
+		} else {
+			printWriter.println("return ");
+		}
+		printWriter.print("prime * result + ((o1 == null) ? 0 : o1.hashCode());");
+		if (equalsType.equals(TraversalType.CYCLIC_SAFE)) {
+			printWriter.println("processingHashCode = false;");
+			printWriter.println("}");
+			printWriter.println("return result;");
+		}
+	}
+
 }
