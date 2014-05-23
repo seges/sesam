@@ -7,7 +7,12 @@ import java.util.Set;
 import javax.annotation.Generated;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -29,13 +34,17 @@ import sk.seges.sesam.pap.model.annotation.TransferObjectMapping;
 import sk.seges.sesam.pap.model.context.api.TransferObjectContext;
 import sk.seges.sesam.pap.model.model.ConfigurationContext;
 import sk.seges.sesam.pap.model.model.ConfigurationTypeElement;
+import sk.seges.sesam.pap.model.model.DomainDeclared.MethodOwner;
 import sk.seges.sesam.pap.model.model.api.dto.DtoDeclaredType;
 import sk.seges.sesam.pap.model.model.api.dto.DtoType;
-import sk.seges.sesam.pap.model.model.api.dto.DtoTypeVariable;
 import sk.seges.sesam.pap.model.printer.accessors.AccessorsPrinter;
 import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
 import sk.seges.sesam.pap.model.printer.clone.ClonePrinter;
-import sk.seges.sesam.pap.model.printer.constructor.*;
+import sk.seges.sesam.pap.model.printer.constructor.ConstructorBodyPrinter;
+import sk.seges.sesam.pap.model.printer.constructor.ConstructorDefinitionPrinter;
+import sk.seges.sesam.pap.model.printer.constructor.EmptyConstructorPrinter;
+import sk.seges.sesam.pap.model.printer.constructor.EnumeratedConstructorBodyPrinter;
+import sk.seges.sesam.pap.model.printer.constructor.EnumeratedConstructorDefinitionPrinter;
 import sk.seges.sesam.pap.model.printer.equals.EqualsPrinter;
 import sk.seges.sesam.pap.model.printer.field.FieldPrinter;
 import sk.seges.sesam.pap.model.printer.hashcode.HashCodePrinter;
@@ -106,8 +115,8 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 	}
 
 	protected String processMethodBody(String body) {
-		Set<? extends Element> configurations = processingEnv.getEnvironmentContext().getRoundEnv().getElementsAnnotatedWith(TransferObjectMapping.class);
-
+		Set<? extends Element> configurations = getClassPathTypes().getElementsAnnotatedWith(TransferObjectMapping.class, roundEnv);//processingEnv.getEnvironmentContext().getRoundEnv().getElementsAnnotatedWith(TransferObjectMapping.class);
+		
 		for (Element configuration: configurations) {
 			if (configuration.getAnnotation(Generated.class) == null && (configuration.getKind().isClass() || configuration.getKind().isInterface())) {
 
@@ -118,16 +127,26 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 				String domainElementName = configurationTypeElement.getInstantiableDomainSpecified() == null ? null  :
 						configurationTypeElement.getInstantiableDomainSpecified().getSimpleName().toString();
 
-				if (domainElementName == null) {
-					domainElementName = configurationTypeElement.getDomain().getSimpleName();
+				if (domainElementName != null) {
+					body = replaceDomainType(domainElementName, configurationTypeElement.getDto(), body);
 				}
-				body = body.replaceAll("\\b" + domainElementName + "\\b", configurationTypeElement.getDto().getSimpleName());
+				domainElementName = configurationTypeElement.getDomain().getSimpleName();
+				body = replaceDomainType(domainElementName, configurationTypeElement.getDto(), body);
 			}
 		}
 
 		return body;
 	}
 
+	private String replaceDomainType(String domainElementName, DtoDeclaredType dto, String source) {
+		String result = source.replaceAll("\\b" + domainElementName + "\\b", dto.getSimpleName());
+		if (!result.equals(source)) {
+			processingEnv.getUsedTypes().add(dto);
+		}
+		
+		return result;
+	}
+	
 	@Override
 	protected void printAdditionalMethods(ProcessorContext context) {
 		
@@ -148,91 +167,101 @@ public class TransferObjectProcessor extends AbstractTransferProcessor {
 					processingEnv.getMessager().printMessage(Kind.ERROR, "No source code available for class " + 
 								configurationTypeElement.getInstantiableDomain().getCanonicalName() + ". Please add source class on the classpath also.");
 				} else {
-					ExecutableElement domainMethod = configurationTypeElement.getInstantiableDomain().getMethodByName(overridenMethod.getSimpleName().toString());
+					MethodOwner domainMethodOwner = configurationTypeElement.getInstantiableDomain().getMethodOwnerByName(overridenMethod.getSimpleName().toString());
 
-					if (domainMethod == null) {
+					if (domainMethodOwner.getMethod() == null) {
 						processingEnv.getMessager().printMessage(Kind.ERROR, "No method '" + overridenMethod.getSimpleName().toString() + "' is available in the class " +
 									configurationTypeElement.getInstantiableDomain().getCanonicalName() + ". Please check your configuration " +
 									configurationTypeElement.toString(ClassSerializer.SIMPLE) + ".");
 						return;
 					}
 
-					String methodBody = elementSourceFile.getMethodBody(domainMethod);
-
-					if (methodBody == null) {
-						processingEnv.getMessager().printMessage(Kind.ERROR, "No method '" + overridenMethod.getSimpleName().toString() + "' is available in the class " +
-								configurationTypeElement.getInstantiableDomain().getCanonicalName() + ". Please check your configuration " +
-								configurationTypeElement.toString(ClassSerializer.SIMPLE) + ".");
-						return;
+					if (!typeElement.getQualifiedName().equals(domainMethodOwner.getOwner().getQualifiedName())) {
+						elementSourceFile = getClassPathSources().getElementSourceFile(domainMethodOwner.getOwner());
 					}
-
-					if (methodBody.trim().startsWith("{")) {
-						methodBody = methodBody.trim().substring(1);
-					}
-
-					if (methodBody.endsWith("}")) {
-						methodBody = methodBody.substring(0, methodBody.length() - 1);
-					}
-
-					methodBody = processMethodBody(methodBody.trim());
-
-
-					MutableExecutableType copiedMethod = processingEnv.getElementUtils().toMutableElement(overridenMethod).asType();
-
-					List<? extends VariableElement> parameters = domainMethod.getParameters();
-					List<MutableVariableElement> dtoParameters = new ArrayList<MutableVariableElement>();
-
-					if (overridenMethod.getReturnType().getKind().equals(TypeKind.VOID)) {
-						copiedMethod.setReturnType(processingEnv.getTransferObjectUtils().getDomainType(domainMethod.getReturnType()).getDto());
-					}
-
-					int i = 0;
-					int parametersCount = copiedMethod.getParameters().size();
-
-					for (VariableElement methodParameter: parameters) {
-						//TODO copy parameters annotations
-
-						DtoType dto;
-
-						if (i < parametersCount) {
-							MutableVariableElement parameter = copiedMethod.getParameters().get(i);
-							dto = processingEnv.getTransferObjectUtils().getDomainType(parameter.asType()).getDto();
-
-							if (((MutableDeclaredType)parameter.asType()).hasTypeParameters()) {
-								((DtoDeclaredType)dto).setTypeVariables(((MutableDeclaredType)parameter.asType()).getTypeVariables().toArray(new MutableTypeVariable[] {}));
+					
+					if (elementSourceFile == null) {
+						processingEnv.getMessager().printMessage(Kind.ERROR, "No source code available for class " + 
+									configurationTypeElement.getInstantiableDomain().getCanonicalName() + ". Please add source class on the classpath also.");
+					} else {
+						
+						String methodBody = elementSourceFile.getMethodBody(domainMethodOwner.getMethod());
+	
+						if (methodBody == null) {
+							processingEnv.getMessager().printMessage(Kind.ERROR, "No method '" + overridenMethod.getSimpleName().toString() + "' is available in the class " +
+									configurationTypeElement.getInstantiableDomain().getCanonicalName() + ". Please check your configuration " +
+									configurationTypeElement.toString(ClassSerializer.SIMPLE) + ".");
+							return;
+						}
+	
+						if (methodBody.trim().startsWith("{")) {
+							methodBody = methodBody.trim().substring(1);
+						}
+	
+						if (methodBody.endsWith("}")) {
+							methodBody = methodBody.substring(0, methodBody.length() - 1);
+						}
+	
+						methodBody = processMethodBody(methodBody.trim());
+	
+	
+						MutableExecutableType copiedMethod = processingEnv.getElementUtils().toMutableElement(overridenMethod).asType();
+	
+						List<? extends VariableElement> parameters = domainMethodOwner.getMethod().getParameters();
+						List<MutableVariableElement> dtoParameters = new ArrayList<MutableVariableElement>();
+	
+						if (overridenMethod.getReturnType().getKind().equals(TypeKind.VOID)) {
+							copiedMethod.setReturnType(processingEnv.getTransferObjectUtils().getDomainType(domainMethodOwner.getMethod().getReturnType()).getDto());
+						}
+	
+						int i = 0;
+						int parametersCount = copiedMethod.getParameters().size();
+	
+						for (VariableElement methodParameter: parameters) {
+							//TODO copy parameters annotations
+	
+							DtoType dto;
+	
+							if (i < parametersCount) {
+								MutableVariableElement parameter = copiedMethod.getParameters().get(i);
+								dto = processingEnv.getTransferObjectUtils().getDomainType(parameter.asType()).getDto();
+	
+								if (((MutableDeclaredType)parameter.asType()).hasTypeParameters()) {
+									((DtoDeclaredType)dto).setTypeVariables(((MutableDeclaredType)parameter.asType()).getTypeVariables().toArray(new MutableTypeVariable[] {}));
+								}
+	
+							} else {
+								dto = processingEnv.getTransferObjectUtils().getDomainType(methodParameter.asType()).getDto();
 							}
-
-						} else {
-							dto = processingEnv.getTransferObjectUtils().getDomainType(methodParameter.asType()).getDto();
+	
+							i++;
+	
+							List<? extends MutableTypeVariable> typeVariables = null;
+							
+							if (dto.getKind().equals(MutableTypeKind.CLASS) || dto.getKind().equals(MutableTypeKind.INTERFACE)) {
+								typeVariables = ((DtoDeclaredType)dto).getTypeVariables();
+							}
+							
+							MutableVariableElement parameterElement = processingEnv.getElementUtils().getParameterElement(dto, methodParameter.getSimpleName().toString());
+							
+							if (typeVariables != null) {
+								((MutableDeclaredType)parameterElement.asType()).setTypeVariables(typeVariables.toArray(new MutableTypeVariable[] {}));
+							}
+							
+							dtoParameters.add(parameterElement);
 						}
-
-						i++;
-
-						List<? extends MutableTypeVariable> typeVariables = null;
 						
-						if (dto.getKind().equals(MutableTypeKind.CLASS) || dto.getKind().equals(MutableTypeKind.INTERFACE)) {
-							typeVariables = ((DtoDeclaredType)dto).getTypeVariables();
+						copiedMethod.setParameters(dtoParameters);
+						copiedMethod.setAnnotations((AnnotationMirror)null);
+						copiedMethod.addModifier(Modifier.PUBLIC);
+						
+						context.getOutputType().addMethod(copiedMethod);
+	
+						String[] lines = methodBody.split("\n");
+	
+						for (String line: lines) {
+							copiedMethod.getPrintWriter().println(line.trim());
 						}
-						
-						MutableVariableElement parameterElement = processingEnv.getElementUtils().getParameterElement(dto, methodParameter.getSimpleName().toString());
-						
-						if (typeVariables != null) {
-							((MutableDeclaredType)parameterElement.asType()).setTypeVariables(typeVariables.toArray(new MutableTypeVariable[] {}));
-						}
-						
-						dtoParameters.add(parameterElement);
-					}
-					
-					copiedMethod.setParameters(dtoParameters);
-					copiedMethod.setAnnotations((AnnotationMirror)null);
-					copiedMethod.addModifier(Modifier.PUBLIC);
-					
-					context.getOutputType().addMethod(copiedMethod);
-
-					String[] lines = methodBody.split("\n");
-
-					for (String line: lines) {
-						copiedMethod.getPrintWriter().println(line.trim());
 					}
 				}
 			}

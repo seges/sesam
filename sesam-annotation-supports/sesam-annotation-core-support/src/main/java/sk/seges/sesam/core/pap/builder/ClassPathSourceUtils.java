@@ -2,7 +2,6 @@ package sk.seges.sesam.core.pap.builder;
 
 import java.io.InputStream;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;

@@ -1,25 +1,43 @@
 package sk.seges.sesam.core.pap.builder;
 
-import sk.seges.sesam.core.pap.builder.api.ClassPathTypes;
-import sk.seges.sesam.core.pap.processor.ConfigurableAnnotationProcessor;
-import sk.seges.sesam.pap.model.TypeElementsList;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.lang.annotation.Annotation;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
-import java.lang.annotation.Annotation;
-import java.util.*;
-import java.util.Map.Entry;
+
+import sk.seges.sesam.core.pap.builder.api.ClassPathTypes;
+import sk.seges.sesam.core.pap.processor.ConfigurableAnnotationProcessor;
+import sk.seges.sesam.pap.model.TypeElementsList;
 
 public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathTypes {
 
@@ -359,6 +377,12 @@ public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathType
 			}
 
 			types.add(type);
+			
+			List<TypeElement> typesIn = ElementFilter.typesIn(type.getEnclosedElements());
+
+			for (TypeElement typeIn: typesIn) {
+				types.add(typeIn);
+			}
 		}
 	}
 	
@@ -395,7 +419,7 @@ public class ClassPathTypeUtils extends ClassPathFinder implements ClassPathType
 		if (annotatedClassNames != null) {
 			for (TypeElement typeElement: annotatedClassNames) {
 				if (typeElement == null) {
-					processingEnv.getMessager().printMessage(Kind.ERROR, "Unable to find " + typeElement.toString() + " in the processing environment!");
+					processingEnv.getMessager().printMessage(Kind.ERROR, "Unable to find annotated element " + a.getQualifiedName().toString() + " in the processing environment!");
 				} else {
 					annotatedClassSet.add(typeElement);
 				}

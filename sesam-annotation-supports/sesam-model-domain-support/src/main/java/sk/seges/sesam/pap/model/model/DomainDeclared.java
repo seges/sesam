@@ -256,7 +256,7 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 	}
 	
 	public ExecutableElement getGetterMethod(String fieldName) {
-		return getMethod(new PathResolver(fieldName), MethodType.GETTER, true);
+		return getMethod(new PathResolver(fieldName), MethodType.GETTER, true).method;
 	}
 	
 //	public ExecutableElement getIsGetterMethod(String fieldName) {
@@ -264,31 +264,56 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 //	}
 
 	public ExecutableElement getSetterMethod(String fieldName) {
-		return getMethod(new PathResolver(fieldName), MethodType.SETTER, true);
+		return getMethod(new PathResolver(fieldName), MethodType.SETTER, true).method;
 	}
 
 	public ExecutableElement getMethod(String fieldName, MethodHelper.MethodType type) {
-		return getMethod(new PathResolver(fieldName), type, true);
+		return getMethodOwner(fieldName, type).method;
 	}
 
-	public ExecutableElement getMethodByName(String name) {
+	private MethodOwner getMethodOwner(String fieldName, MethodHelper.MethodType type) {
+		return getMethod(new PathResolver(fieldName), type, true);
+	}
+	
+	public MethodOwner getMethodOwnerByName(String name) {
 		return getMethod(new PathResolver(name), null, true);
 	}
 
-	private ExecutableElement getMethod(PathResolver pathResolver, MethodHelper.MethodType type, boolean searchInstantiableType) {
+	public static class MethodOwner {
+		ExecutableElement method;
+		TypeElement owner;
+		
+		public MethodOwner(ExecutableElement method, TypeElement owner) {
+			this.method = method;
+			this.owner = owner;
+		}
+		
+		public ExecutableElement getMethod() {
+			return method;
+		}
+		
+		public TypeElement getOwner() {
+			return owner;
+		}
+	}
+	
+	private MethodOwner getMethod(PathResolver pathResolver, MethodHelper.MethodType type, boolean searchInstantiableType) {
 
 		if (!pathResolver.hasNext()) {
-			return null;
+			return new MethodOwner(null, null);
 		}
 
 		List<ExecutableElement> methods;
 		
+		Element element; 
+		
 		if (getDomainDefinitionConfiguration() != null && searchInstantiableType) {
-			methods = ElementFilter.methodsIn(getDomainDefinitionConfiguration().getInstantiableDomain().asConfigurationElement().getEnclosedElements());
+			element = getDomainDefinitionConfiguration().getInstantiableDomain().asConfigurationElement();
 		} else {
-			methods = ElementFilter.methodsIn(asConfigurationElement().getEnclosedElements());
+			element = asConfigurationElement();
 		}
-
+		methods = ElementFilter.methodsIn(element.getEnclosedElements());
+				
 		String fieldName = pathResolver.next();
 
 		MethodType currentType = MethodType.GETTER;
@@ -303,11 +328,12 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 				(currentType != null && currentType.isMethodOfType(elementMethod) && MethodHelper.toField(elementMethod).equals(fieldName))) {
 
 				if (!pathResolver.hasNext()) {
-					return elementMethod;
+					return new MethodOwner(elementMethod, (TypeElement)element);
 				}
 
 				if (elementMethod.getReturnType().getKind().equals(TypeKind.DECLARED)) {
-					return ((DomainDeclared)getDomainForType(elementMethod.getReturnType())).getMethod(pathResolver.next(), type);
+					DomainDeclared domainDeclared = ((DomainDeclared)getDomainForType(elementMethod.getReturnType()));
+					return domainDeclared.getMethodOwner(pathResolver.next(), type);
 				}
 
 				// incompatible types - nested path is expected, but declared
@@ -318,15 +344,35 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 			}
 		}
 
-		if (asConfigurationElement().getKind().equals(ElementKind.CLASS) || asConfigurationElement().getKind().equals(ElementKind.INTERFACE)) {
+		if (element.getKind().equals(ElementKind.CLASS) || element.getKind().equals(ElementKind.INTERFACE)) {
 
-			TypeElement typeElement = asConfigurationElement();
-			if (typeElement.getSuperclass() != null && typeElement.getSuperclass().getKind().equals(TypeKind.DECLARED)) {
+			TypeElement typeElement = (TypeElement)element;
+			if (typeElement.getSuperclass().getKind().equals(TypeKind.DECLARED)) {
 				pathResolver.reset();
+				
 				DomainType domainType = getDomainForType(typeElement.getSuperclass());
-				ExecutableElement method = ((DomainDeclared)domainType).getMethod(pathResolver, type, false);
-				if (method != null) {
-					return method;
+				if (domainType.getDomainDefinitionConfiguration() == null) {
+					domainType = new DomainDeclared((DeclaredType)typeElement.getSuperclass(), environmentContext, configurationContext);
+					searchInstantiableType = false;
+				} else {
+					searchInstantiableType = searchInstantiableType & (((TypeElement)((DeclaredType)typeElement.getSuperclass()).asElement()).getQualifiedName().toString().equals(
+							domainType.getDomainDefinitionConfiguration().getInstantiableDomain().asConfigurationElement().getQualifiedName().toString()));					
+				}
+				
+				Element el = null;
+				if (domainType.getDomainDefinitionConfiguration() != null && searchInstantiableType) {
+					el = domainType.getDomainDefinitionConfiguration().getInstantiableDomain().asConfigurationElement();
+				} else {
+					el = ((DomainDeclared)domainType).asConfigurationElement();
+				}
+				if (((TypeElement)el).getQualifiedName().toString().equals(((TypeElement)element).getQualifiedName().toString())) {
+					environmentContext.getProcessingEnv().getMessager().printMessage(Kind.WARNING, "Cyclic configuration dependency for type: " + ((TypeElement)element).getQualifiedName().toString());
+					searchInstantiableType = false;
+				}
+				
+				MethodOwner result = ((DomainDeclared)domainType).getMethod(pathResolver, type, searchInstantiableType);
+				if (result.method != null) {
+					return result;
 				}
 			}
 			
@@ -334,14 +380,14 @@ public class DomainDeclared extends TomDeclaredConfigurationHolder implements Do
 			for (TypeMirror interfaceType: interfaces) {
 				pathResolver.reset();
 				DomainType domainType = getDomainForType(interfaceType);
-				ExecutableElement method = ((DomainDeclared)domainType).getMethod(pathResolver, type, false);
-				if (method != null) {
-					return method;
+				MethodOwner result = ((DomainDeclared)domainType).getMethod(pathResolver, type, false);
+				if (result.method != null) {
+					return result;
 				}
 			}
 		}
 
-		return null;
+		return new MethodOwner(null, null);
 	}
 
 	public DomainType getId(EntityResolver entityResolver) {

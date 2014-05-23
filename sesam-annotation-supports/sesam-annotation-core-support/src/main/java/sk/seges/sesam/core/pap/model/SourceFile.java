@@ -49,7 +49,11 @@ public class SourceFile implements Source {
         public void visit(MethodDeclaration n, ExecutableElement element) {
         	if (element.getSimpleName().toString().equals(n.getName()) &&
 					(n.getParameters() == null ? 0 : n.getParameters().size()) - (element.getParameters() == null ? 0 : element.getParameters().size()) == 0) {
-        		this.methodBody = n.getBody().toString();
+        		if (n.getBody() == null) {
+        			this.methodBody = null;
+        		} else {
+        			this.methodBody = n.getBody().toString();
+        		}
         	}
         }
         
