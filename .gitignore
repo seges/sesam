@@ -374,3 +374,10 @@
 /sesam-spring/.settings
 /sesam-spring/target
 /sesam-spring/sesam-spring.iml
+
+# /sesam-jndi/
+/sesam-jndi/.classpath
+/sesam-jndi/.project
+/sesam-jndi/.settings
+/sesam-jndi/target
+

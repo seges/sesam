@@ -12,10 +12,4 @@
 		<relativePath>../sesam-os/pom.xml</relativePath> 
 	</parent>
 	
-	<dependencies>	
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-		</dependency>
-	</dependencies>
 </project>
