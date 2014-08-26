@@ -39,7 +39,7 @@
 	<scm>
 		<url>http://acris.googlecode.com</url>
 		<connection>scm:git:https://code.google.com/p/acris.sesam</connection>
-		<developerConnection>scm:svn:https://code.google.com/p/acris.sesam</developerConnection>
+		<developerConnection>scm:git:https://code.google.com/p/acris.sesam</developerConnection>
 	</scm>
 
 	<distributionManagement>
