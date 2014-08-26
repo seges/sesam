@@ -1015,6 +1015,21 @@
 						</tagBase>
 					</configuration>
 				</plugin>
+
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>versions-maven-plugin</artifactId>
+					<version>2.1</version>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-scm-plugin</artifactId>
+					<version>1.8.1</version>
+					<configuration>
+						<tag>${project.artifactId}-${project.version}</tag>
+					</configuration>
+				</plugin>
+
 				<!-- End of Common customized plugin section -->
 				
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
