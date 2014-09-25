@@ -5,7 +5,7 @@
 	<!-- The Basics -->
 	<groupId>sk.seges.sesam</groupId>
 	<artifactId>sesam-os</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
+	<version>2.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<parent>
@@ -186,4 +186,17 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+<reporting>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+		<version>2.9.1</version>
+		<configuration>
+			<excludePackageNames>sk.*</excludePackageNames>
+		</configuration>
+        </plugin>
+    </plugins>
+</reporting>
 </project>
