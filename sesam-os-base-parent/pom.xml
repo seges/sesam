@@ -111,7 +111,7 @@
 		<jpa-2.0.version>1.0.0.Final</jpa-2.0.version>
 		<validation-api.version>1.0.0.GA</validation-api.version>
 
-		<ehcache.version>1.5.0</ehcache.version>
+		<ehcache.version>2.2.0</ehcache.version>
 
 		<servlet-api.version>2.5</servlet-api.version>
 		
@@ -429,6 +429,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-ehcache</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>			
+			<dependency>
+				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-entitymanager</artifactId>
 				<version>${hibernate-entitymanager.version}</version>
 			</dependency>
@@ -546,7 +551,7 @@
 			<!-- Caching -->
 			<dependency>
 				<groupId>net.sf.ehcache</groupId>
-				<artifactId>ehcache</artifactId>
+				<artifactId>ehcache-core</artifactId>
 				<version>${ehcache.version}</version>
 			</dependency>
 
