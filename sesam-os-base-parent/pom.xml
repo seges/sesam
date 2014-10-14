@@ -112,7 +112,7 @@
 		<validation-api.version>1.0.0.GA</validation-api.version>
 
 		<ehcache.version>2.2.0</ehcache.version>
-
+		<ehcache-web.version>2.0.1</ehcache-web.version>
 		<servlet-api.version>2.5</servlet-api.version>
 		
 		<!--
@@ -554,7 +554,11 @@
 				<artifactId>ehcache-core</artifactId>
 				<version>${ehcache.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>net.sf.ehcache</groupId>
+				<artifactId>ehcache-web</artifactId>
+				<version>${ehcache-web.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>servlet-api</artifactId>
