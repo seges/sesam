@@ -4,6 +4,7 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
+import java.lang.annotation.Annotation;
 
 public class TestArrayType extends TestTypeMirror implements ArrayType {
 
@@ -23,4 +24,19 @@ public class TestArrayType extends TestTypeMirror implements ArrayType {
 	public TypeMirror getComponentType() {
 		return componentType;
 	}
+
+    @Override
+    protected Annotation[] getAnnotations() {
+        return new Annotation[0];
+    }
+
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+        return null;
+    }
+
+    @Override
+    public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationType) {
+        return null;
+    }
 }

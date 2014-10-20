@@ -109,8 +109,13 @@ public class MutableElements implements Elements {
 	public Name getName(CharSequence cs) {
 		return this.elements.getName(cs);
 	}
-	
-	public MutableExecutableElement toMutableElement(ExecutableElement executableElement) {
+
+    @Override
+    public boolean isFunctionalInterface(TypeElement type) {
+        return this.elements.isFunctionalInterface(type);
+    }
+
+    public MutableExecutableElement toMutableElement(ExecutableElement executableElement) {
 		return new MutableExecutable(executableElement, processingEnv);
 	}
 }

@@ -106,4 +106,10 @@ public class TestElements implements Elements {
 	public Name getName(CharSequence cs) {
 		return new TestName(cs.toString());
 	}
+
+    @Override
+    public boolean isFunctionalInterface(TypeElement type) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

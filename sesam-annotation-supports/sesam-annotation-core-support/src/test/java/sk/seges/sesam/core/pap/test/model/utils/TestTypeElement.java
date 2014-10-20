@@ -23,8 +23,7 @@ class TestTypeElement extends TestElement implements TypeElement {
 
 	private final String simpleName;
 	private final String packageName;
-	
-	private List<AnnotationMirror> annotationMirrors;
+
 	private Annotation[] annotations;
 
 	private Class<?>[] interfaces;
@@ -51,31 +50,7 @@ class TestTypeElement extends TestElement implements TypeElement {
 		return new TestDeclaredType(this);
 	}
 
-	@Override
-	public List<? extends AnnotationMirror> getAnnotationMirrors() {
-		if (annotationMirrors == null) {
-			annotationMirrors = new LinkedList<AnnotationMirror>();
-			
-			for (Annotation annotation: annotations) {
-				TestAnnotationMirror testAnnotationMirror = new TestAnnotationMirror(new TestDeclaredType(new TestTypeElement(annotation.annotationType())), annotation);
-				annotationMirrors.add(testAnnotationMirror);
-			}
-		}
-		return annotationMirrors;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
-		for (Annotation annotation: annotations) {
-			if (annotation.annotationType().getName().toString().equals(annotationType.getName())) {
-				return (A) annotation;
-			}
-		}
-		return null;
-	}
-
-	@Override
+    @Override
 	public Set<Modifier> getModifiers() {
 		// TODO Auto-generated method stub
 		return null;
@@ -101,7 +76,7 @@ class TestTypeElement extends TestElement implements TypeElement {
 		return new ArrayList<Element>();
 	}
 
-	@Override
+    @Override
 	public <R, P> R accept(ElementVisitor<R, P> v, P p) {
 		return v.visitType(this, p);
 	}
@@ -152,4 +127,9 @@ class TestTypeElement extends TestElement implements TypeElement {
 	TestPackageElement getPackage() {
 		return new TestPackageElement(packageName);
 	}
+
+    @Override
+    protected Annotation[] getAnnotations() {
+        return annotations;
+    }
 }

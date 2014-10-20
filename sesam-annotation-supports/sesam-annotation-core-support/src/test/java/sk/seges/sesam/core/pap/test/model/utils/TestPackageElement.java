@@ -30,16 +30,6 @@ public class TestPackageElement extends TestElement implements PackageElement {
 	}
 
 	@Override
-	public List<? extends AnnotationMirror> getAnnotationMirrors() {
-		return new ArrayList<AnnotationMirror>();
-	}
-
-	@Override
-	public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
-		return null;
-	}
-
-	@Override
 	public Set<Modifier> getModifiers() {
 		return new HashSet<Modifier>();
 	}
@@ -73,4 +63,9 @@ public class TestPackageElement extends TestElement implements PackageElement {
 	public boolean isUnnamed() {
 		return false;
 	}
+
+    @Override
+    protected Annotation[] getAnnotations() {
+        return new Annotation[0];
+    }
 }

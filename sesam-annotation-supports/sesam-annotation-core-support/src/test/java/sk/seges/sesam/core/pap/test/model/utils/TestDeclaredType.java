@@ -1,5 +1,6 @@
 package sk.seges.sesam.core.pap.test.model.utils;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,4 +75,19 @@ public class TestDeclaredType extends TestTypeMirror implements DeclaredType {
 
 		return parameters;
 	}
+
+    @Override
+    protected Annotation[] getAnnotations() {
+        return ((TestElement)element).getAnnotations();
+    }
+
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+        return ((TestElement)element).getAnnotation(annotationType);
+    }
+
+    @Override
+    public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationType) {
+        return ((TestElement)element).getAnnotationsByType(annotationType);
+    }
 }

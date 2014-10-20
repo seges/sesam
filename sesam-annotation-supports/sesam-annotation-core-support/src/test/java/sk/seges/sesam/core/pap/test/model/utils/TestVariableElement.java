@@ -1,5 +1,4 @@
 package sk.seges.sesam.core.pap.test.model.utils;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
@@ -37,18 +36,6 @@ public class TestVariableElement extends TestElement implements VariableElement 
 	}
 
 	@Override
-	public List<? extends AnnotationMirror> getAnnotationMirrors() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Set<Modifier> getModifiers() {
 		// TODO Auto-generated method stub
 		return new HashSet<Modifier>();
@@ -82,4 +69,8 @@ public class TestVariableElement extends TestElement implements VariableElement 
 		return null;
 	}
 
+    @Override
+    protected Annotation[] getAnnotations() {
+        return new Annotation[0];
+    }
 }

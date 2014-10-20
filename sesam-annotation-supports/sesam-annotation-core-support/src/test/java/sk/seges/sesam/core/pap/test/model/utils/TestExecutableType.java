@@ -1,5 +1,6 @@
 package sk.seges.sesam.core.pap.test.model.utils;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,8 +51,19 @@ public class TestExecutableType extends TestTypeMirror implements ExecutableType
 		return this.typeParameters;
 	}
 
-	@Override
+    @Override
+    public TypeMirror getReceiverType() {
+        //TODO implement me
+        return null;
+    }
+
+    @Override
 	public List<? extends TypeMirror> getThrownTypes() {
 		return null;
 	}
+
+    @Override
+    protected Annotation[] getAnnotations() {
+        return ((TestElement)element).getAnnotations();
+    }
 }

@@ -43,7 +43,13 @@ public class TestExecutableElement extends TestElement implements ExecutableElem
 		return type;
 	}
 
-	@Override
+    @Override
+    protected Annotation[] getAnnotations() {
+        //TODO implement me
+        return new Annotation[0];
+    }
+
+    @Override
 	public List<? extends AnnotationMirror> getAnnotationMirrors() {
 		// TODO Auto-generated method stub
 		return null;
@@ -120,12 +126,24 @@ public class TestExecutableElement extends TestElement implements ExecutableElem
 		return parameters;
 	}
 
-	@Override
+    @Override
+    public TypeMirror getReceiverType() {
+        //TODO implement me
+        return null;
+    }
+
+    @Override
 	public boolean isVarArgs() {
 		return method.isVarArgs();
 	}
 
-	@Override
+    @Override
+    public boolean isDefault() {
+        //TODO implement me
+        return false;
+    }
+
+    @Override
 	public List<? extends TypeMirror> getThrownTypes() {
 		// TODO Auto-generated method stub
 		return null;
