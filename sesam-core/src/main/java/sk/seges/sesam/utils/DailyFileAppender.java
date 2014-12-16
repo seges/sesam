@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package sk.seges.sesam.remote.util;
+package sk.seges.sesam.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
