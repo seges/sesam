@@ -1,24 +1,18 @@
 package sk.seges.sesam.pap.converter.printer.converterprovider;
 
-import sk.seges.sesam.core.pap.model.mutable.utils.MutableTypes;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
-import sk.seges.sesam.pap.converter.printer.model.ConverterProviderPrinterContext;
-import sk.seges.sesam.pap.model.model.ConverterTypeElement;
+import sk.seges.sesam.pap.converter.printer.model.AbstractProviderPrinterContext;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
-import sk.seges.sesam.pap.model.printer.converter.ConverterTargetType;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
-import sk.seges.sesam.shared.model.converter.api.DtoConverter;
 
 public class DomainMethodConverterProviderPrinter extends AbstractDomainMethodConverterProviderPrinter {
 
-	public DomainMethodConverterProviderPrinter(ConverterConstructorParametersResolverProvider parametersResolverProvider, 
-			TransferObjectProcessingEnvironment processingEnv, FormattedPrintWriter pw, ConverterProviderPrinter converterProviderPrinter) {
-		super(parametersResolverProvider, processingEnv, pw, converterProviderPrinter);
+	public DomainMethodConverterProviderPrinter(TransferObjectProcessingEnvironment processingEnv, FormattedPrintWriter pw, ConverterProviderPrinter converterProviderPrinter) {
+		super(processingEnv, pw, converterProviderPrinter);
 	}
 
 	@Override
-	protected void printResultConverter(ConverterProviderPrinterContext context) {
+	protected void printResult(AbstractProviderPrinterContext context) {
 		pw.print("return (", getTypedDtoConverter(), ")");
 		converterProviderPrinter.printDomainGetConverterMethodName(context.getRawDomain(), null, null, pw, false);
 	}

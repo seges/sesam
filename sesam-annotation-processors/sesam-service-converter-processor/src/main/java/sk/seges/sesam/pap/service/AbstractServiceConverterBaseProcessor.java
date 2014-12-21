@@ -10,8 +10,8 @@ import sk.seges.sesam.pap.model.printer.converter.ConverterInstancerType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.provider.api.ConfigurationProvider;
 import sk.seges.sesam.pap.model.resolver.CacheableConverterConstructorParametersResolverProvider;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider.UsageType;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider.UsageType;
 import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
 import sk.seges.sesam.pap.service.model.LocalServiceTypeElement;
 import sk.seges.sesam.pap.service.model.ServiceConverterTypeElement;
@@ -34,7 +34,7 @@ public abstract class AbstractServiceConverterBaseProcessor extends AbstractTran
 		@Override
 		public ConverterConstructorParametersResolver constructParameterResolver(UsageType usageType) {
 			switch (usageType) {
-				case CONVERTER_PROVIDER_OUTSIDE_USAGE:
+				case PROVIDER_OUTSIDE_USAGE:
 					return new ServiceConverterConstructorParametersResolver(processingEnv) {
 						
 						@Override
@@ -61,7 +61,7 @@ public abstract class AbstractServiceConverterBaseProcessor extends AbstractTran
 	protected abstract ServiceConverterElementPrinter[] getElementPrinters(ServiceTypeElement serviceTypeElement);
 
 	protected ConverterProviderPrinter getConverterProviderPrinter(ServiceTypeElement serviceTypeElement) {
-		return new ConverterProviderPrinter(processingEnv, getParametersResolverProvider(serviceTypeElement), UsageType.CONVERTER_PROVIDER_OUTSIDE_USAGE);
+		return new ConverterProviderPrinter(processingEnv, getParametersResolverProvider(serviceTypeElement), UsageType.PROVIDER_OUTSIDE_USAGE);
 	}
 	
 	@Override
@@ -87,7 +87,7 @@ public abstract class AbstractServiceConverterBaseProcessor extends AbstractTran
 		this.converterProviderPrinter.printConverterMethods(context.getOutputType(), true, ConverterInstancerType.SERVICE_CONVERETR_INSTANCER);
 	}
 
-	protected ConverterConstructorParametersResolverProvider getParametersResolverProvider(ServiceTypeElement serviceTypeElement) {
+	protected ProviderConstructorParametersResolverProvider getParametersResolverProvider(ServiceTypeElement serviceTypeElement) {
 		return new ServiceConverterProcessorParameterResolverProvider();
 	}
 }

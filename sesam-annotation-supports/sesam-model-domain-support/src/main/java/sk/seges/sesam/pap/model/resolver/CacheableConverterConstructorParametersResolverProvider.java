@@ -5,9 +5,9 @@ import java.util.Map;
 
 import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
 
-public abstract class CacheableConverterConstructorParametersResolverProvider implements ConverterConstructorParametersResolverProvider {
+public abstract class CacheableConverterConstructorParametersResolverProvider implements ProviderConstructorParametersResolverProvider {
 
-	private Map<UsageType, ConverterConstructorParametersResolver> cache = new HashMap<ConverterConstructorParametersResolverProvider.UsageType, ConverterConstructorParametersResolver>();
+	private Map<UsageType, ConverterConstructorParametersResolver> cache = new HashMap<ProviderConstructorParametersResolverProvider.UsageType, ConverterConstructorParametersResolver>();
 	
 	@Override
 	public final ConverterConstructorParametersResolver getParameterResolver(UsageType usageType) {

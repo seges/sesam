@@ -43,5 +43,5 @@
 			<groupId>sk.seges.sesam</groupId>
 			<artifactId>sesam-core</artifactId>
 		</dependency>
-	</dependencies>
+    </dependencies>
 </project>

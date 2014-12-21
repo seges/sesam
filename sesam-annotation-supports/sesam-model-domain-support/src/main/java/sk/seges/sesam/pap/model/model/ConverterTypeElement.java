@@ -224,7 +224,7 @@ public class ConverterTypeElement extends TomBaseDeclaredType implements Generat
 		TypeElement domainType = transferObjectConfiguration.getDomain();
 
 		if (domainType == null) {
-		    //there is no domain entity defined, so converter does not make any sense
+		    //there is no domain entityprovider defined, so converter does not make any sense
 			return null;
 		}
 

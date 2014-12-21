@@ -24,7 +24,7 @@ import sk.seges.sesam.pap.model.printer.AbstractDtoPrinter;
 import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterTargetType;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
 
 public class ConverterEqualsPrinter extends AbstractDtoPrinter implements TransferObjectElementPrinter {
@@ -35,7 +35,7 @@ public class ConverterEqualsPrinter extends AbstractDtoPrinter implements Transf
 	private final EntityResolver entityResolver;
 	private final FormattedPrintWriter pw;
 
-	public ConverterEqualsPrinter(ConverterProviderPrinter converterProviderPrinter, EntityResolver entityResolver, ConverterConstructorParametersResolverProvider parametersResolverProvider, 
+	public ConverterEqualsPrinter(ConverterProviderPrinter converterProviderPrinter, EntityResolver entityResolver, ProviderConstructorParametersResolverProvider parametersResolverProvider,
 			TransferObjectProcessingEnvironment processingEnv, FormattedPrintWriter pw) {
 		super(parametersResolverProvider, processingEnv);
 		this.entityResolver = entityResolver;
@@ -98,7 +98,7 @@ public class ConverterEqualsPrinter extends AbstractDtoPrinter implements Transf
 				
 				MutableDeclaredType mutableSerializableType = processingEnv.getTypeUtils().toMutableType(Serializable.class);
 				
-				//In the data interface there is no ID defined (or defined using type variables), and is specified only id entity - so use object instead (or serializable, we'll see)
+				//In the data interface there is no ID defined (or defined using type variables), and is specified only id entityprovider - so use object instead (or serializable, we'll see)
 				domainId = processingEnv.getTransferObjectUtils().getDomainType(mutableSerializableType);
 			}
 			

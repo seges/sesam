@@ -13,7 +13,7 @@ import javax.tools.Diagnostic.Kind;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.service.model.LocalServiceTypeElement;
 import sk.seges.sesam.pap.service.model.RemoteServiceTypeElement;
 import sk.seges.sesam.pap.service.model.ServiceTypeElement;
@@ -24,7 +24,7 @@ public abstract class AbstractServiceMethodPrinter extends AbstractServicePrinte
 
 	protected final ConverterProviderPrinter converterProviderPrinter;
 	
-	public AbstractServiceMethodPrinter(TransferObjectProcessingEnvironment processingEnv, ConverterConstructorParametersResolverProvider parametersResolverProvider, 
+	public AbstractServiceMethodPrinter(TransferObjectProcessingEnvironment processingEnv, ProviderConstructorParametersResolverProvider parametersResolverProvider,
 			ConverterProviderPrinter converterProviderPrinter) {
 		super(processingEnv, parametersResolverProvider);
 		this.converterProviderPrinter = converterProviderPrinter;

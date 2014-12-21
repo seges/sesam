@@ -19,7 +19,7 @@ import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterTargetType;
 import sk.seges.sesam.pap.model.printer.converter.ParameterUsagePrinter;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.model.resolver.DefaultConverterConstructorParametersResolver;
 import sk.seges.sesam.pap.service.printer.model.ServiceConverterPrinterContext;
 
@@ -35,7 +35,7 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 	public static final String RESULT_VARIABLE_NAME = "result";
 
 	public ServiceMethodConverterPrinter(TransferObjectProcessingEnvironment processingEnv,
-			ConverterConstructorParametersResolverProvider parametersResolverProvider, ConverterProviderPrinter converterProviderPrinter) {
+			ProviderConstructorParametersResolverProvider parametersResolverProvider, ConverterProviderPrinter converterProviderPrinter) {
 		super(processingEnv, parametersResolverProvider, converterProviderPrinter);
 	}
 
@@ -182,7 +182,7 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 				}
 			});
 
-			ParameterElement[] converterParameters = parametersResolverProvider.getParameterResolver(ConverterConstructorParametersResolverProvider.UsageType.DEFINITION).getConstructorAditionalParameters();
+			ParameterElement[] converterParameters = parametersResolverProvider.getParameterResolver(ProviderConstructorParametersResolverProvider.UsageType.DEFINITION).getConstructorAditionalParameters();
 
 			ParameterUsagePrinter parameterUsagePrinter = new ParameterUsagePrinter(pw);
 

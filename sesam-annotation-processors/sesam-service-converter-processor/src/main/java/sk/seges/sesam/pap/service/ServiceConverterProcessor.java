@@ -19,8 +19,8 @@ import sk.seges.sesam.pap.model.printer.converter.ConverterInstancerType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.provider.api.ConfigurationProvider;
 import sk.seges.sesam.pap.model.resolver.CacheableConverterConstructorParametersResolverProvider;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider.UsageType;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider.UsageType;
 import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
 import sk.seges.sesam.pap.service.annotation.LocalServiceConverter;
 import sk.seges.sesam.pap.service.configurer.ServiceConverterProcessorConfigurer;
@@ -35,7 +35,6 @@ import sk.seges.sesam.pap.service.printer.ServiceConstructorBodyPrinter;
 import sk.seges.sesam.pap.service.printer.ServiceConstructorDefinitionPrinter;
 import sk.seges.sesam.pap.service.printer.ServiceMethodConverterPrinter;
 import sk.seges.sesam.pap.service.printer.api.ServiceConverterElementPrinter;
-import sk.seges.sesam.pap.service.printer.converterprovider.ServiceConverterProviderContextPrinter;
 import sk.seges.sesam.pap.service.printer.model.ServiceConverterPrinterContext;
 import sk.seges.sesam.pap.service.provider.ServiceCollectorConfigurationProvider;
 import sk.seges.sesam.pap.service.resolver.ServiceConverterConstructorParametersResolver;
@@ -50,7 +49,7 @@ public class ServiceConverterProcessor extends AbstractTransferProcessingProcess
 		@Override
 		public ConverterConstructorParametersResolver constructParameterResolver(UsageType usageType) {
 			switch (usageType) {
-				case CONVERTER_PROVIDER_OUTSIDE_USAGE:
+				case PROVIDER_OUTSIDE_USAGE:
 					return new ServiceConverterConstructorParametersResolver(processingEnv) {
 						
 						@Override
@@ -134,7 +133,7 @@ public class ServiceConverterProcessor extends AbstractTransferProcessingProcess
 	}
 
 	protected ConverterProviderPrinter getConverterProviderPrinter(ServiceTypeElement serviceTypeElement) {
-		return new ConverterProviderPrinter(processingEnv, getParametersResolverProvider(serviceTypeElement), UsageType.CONVERTER_PROVIDER_OUTSIDE_USAGE);
+		return new ConverterProviderPrinter(processingEnv, getParametersResolverProvider(serviceTypeElement), UsageType.PROVIDER_OUTSIDE_USAGE);
 	}
 	
 	@Override
@@ -165,7 +164,7 @@ public class ServiceConverterProcessor extends AbstractTransferProcessingProcess
 		return new ServiceTypeElement(element, processingEnv);
 	}
 
-	protected ConverterConstructorParametersResolverProvider getParametersResolverProvider(ServiceTypeElement serviceTypeElement) {
+	protected ProviderConstructorParametersResolverProvider getParametersResolverProvider(ServiceTypeElement serviceTypeElement) {
 		return new ServiceConverterProcessorParameterResolverProvider();
 	}
 	

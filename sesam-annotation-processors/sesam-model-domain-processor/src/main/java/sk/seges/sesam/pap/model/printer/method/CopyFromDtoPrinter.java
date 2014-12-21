@@ -25,7 +25,7 @@ import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.api.TransferObjectElementPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterTargetType;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
 
 public class CopyFromDtoPrinter extends AbstractMethodPrinter implements TransferObjectElementPrinter {
@@ -34,7 +34,7 @@ public class CopyFromDtoPrinter extends AbstractMethodPrinter implements Transfe
 	protected final Set<String> nestedInstances;
 	
 	public CopyFromDtoPrinter(Set<String> nestedInstances, ConverterProviderPrinter converterProviderPrinter, EntityResolver entityResolver, 
-			ConverterConstructorParametersResolverProvider parametersResolverProvider, RoundEnvironment roundEnv, TransferObjectProcessingEnvironment processingEnv, FormattedPrintWriter pw) {
+			ProviderConstructorParametersResolverProvider parametersResolverProvider, RoundEnvironment roundEnv, TransferObjectProcessingEnvironment processingEnv, FormattedPrintWriter pw) {
 		super(converterProviderPrinter, parametersResolverProvider, entityResolver, roundEnv, processingEnv);
 		this.nestedInstances = nestedInstances;
 		this.pw = pw;
@@ -186,7 +186,7 @@ public class CopyFromDtoPrinter extends AbstractMethodPrinter implements Transfe
 				pw.println(RESULT_NAME + "." + MethodHelper.toSetter(domainTypeElement.getIdMethod(entityResolver)) + "((", domainTypeElement.getId(entityResolver), ")" + "id);");
 			} else {
 				pw.println("if (id != null) {");
-				pw.println("throw new ", RuntimeException.class, "(\"Unable to define ID for imutable entity. Please define " + setterMethod + " method for ", domainTypeElement, "!\");");
+				pw.println("throw new ", RuntimeException.class, "(\"Unable to define ID for imutable entityprovider. Please define " + setterMethod + " method for ", domainTypeElement, "!\");");
 				pw.println("}");
 			}
 			pw.println("return " + RESULT_NAME + ";");

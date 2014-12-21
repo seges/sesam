@@ -37,9 +37,9 @@ public interface IFinderDAO<E> extends IDataAccessObject {
 	E findUnique(Page requestedPage);
 
 	/**
-	 * Defines a way how to find entity in data source based on some entity information provided.
+	 * Defines a way how to find entityprovider in data source based on some entityprovider information provided.
 	 * 
-	 * @param entity Filled with necessary information to find entity.
+	 * @param entity Filled with necessary information to find entityprovider.
 	 * @return Entity in data source.
 	 */
 	E findEntity(E entity);

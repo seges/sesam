@@ -11,16 +11,16 @@ import sk.seges.sesam.core.pap.model.ParameterElement;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
 import sk.seges.sesam.core.pap.model.mutable.utils.MutableTypes;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider.UsageType;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider.UsageType;
 import sk.seges.sesam.shared.model.converter.BasicCachedConverter;
 
 public class AbstractConverterPrinter {
 
 	protected final TransferObjectProcessingEnvironment processingEnv;
-	protected final ConverterConstructorParametersResolverProvider parametersResolverProvider;
+	protected final ProviderConstructorParametersResolverProvider parametersResolverProvider;
 	
-	protected AbstractConverterPrinter(ConverterConstructorParametersResolverProvider parametersResolverProvider, TransferObjectProcessingEnvironment processingEnv) {
+	protected AbstractConverterPrinter(ProviderConstructorParametersResolverProvider parametersResolverProvider, TransferObjectProcessingEnvironment processingEnv) {
 		this.processingEnv = processingEnv;
 		this.parametersResolverProvider = parametersResolverProvider;
 	}

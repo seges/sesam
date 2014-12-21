@@ -4,24 +4,23 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
 import sk.seges.sesam.core.pap.writer.FormattedPrintWriter;
 import sk.seges.sesam.pap.converter.printer.converterprovider.AbstractDomainMethodConverterProviderPrinter;
-import sk.seges.sesam.pap.converter.printer.model.ConverterProviderPrinterContext;
+import sk.seges.sesam.pap.converter.printer.model.AbstractProviderPrinterContext;
 import sk.seges.sesam.pap.model.model.ConverterTypeElement;
 import sk.seges.sesam.pap.model.model.Field;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
 import sk.seges.sesam.pap.model.model.api.domain.DomainDeclaredType;
 import sk.seges.sesam.pap.model.model.api.domain.DomainType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.service.printer.model.ServiceConverterProviderPrinterContext;
 
 public class ServiceMethodDomainConverterProviderPrinter extends AbstractDomainMethodConverterProviderPrinter {
 
-	public ServiceMethodDomainConverterProviderPrinter(ConverterConstructorParametersResolverProvider parametersResolverProvider,
-			TransferObjectProcessingEnvironment processingEnv, FormattedPrintWriter pw, ConverterProviderPrinter converterProviderPrinter) {
-		super(parametersResolverProvider, processingEnv, pw, converterProviderPrinter);
+	public ServiceMethodDomainConverterProviderPrinter(TransferObjectProcessingEnvironment processingEnv, FormattedPrintWriter pw, ConverterProviderPrinter converterProviderPrinter) {
+		super(processingEnv, pw, converterProviderPrinter);
 	}
 
-	protected void printResultConverter(ConverterProviderPrinterContext context) {
+    @Override
+	protected void printResult(AbstractProviderPrinterContext context) {
 		pw.print("return (", getTypedDtoConverter(), ") ");
 		
 		MutableDeclaredType fieldType = processingEnv.getTypeUtils().getDeclaredType(processingEnv.getTypeUtils().toMutableType(Class.class), 
@@ -35,7 +34,7 @@ public class ServiceMethodDomainConverterProviderPrinter extends AbstractDomainM
 	}
 	
 	@Override
-	protected void printType(MutableTypeMirror type, ConverterProviderPrinterContext context) {
+	protected void printType(MutableTypeMirror type, AbstractProviderPrinterContext context) {
 
 		DomainType domainType = processingEnv.getTransferObjectUtils().getDomainType(type);
 		if (domainType.getKind().isDeclared() && domainType.getConverter() != null) {
@@ -45,10 +44,10 @@ public class ServiceMethodDomainConverterProviderPrinter extends AbstractDomainM
 	}
 	
 	@Override
-	public void print(ConverterProviderPrinterContext context) {
+	public void print(AbstractProviderPrinterContext context) {
 
 		if (types.size() == 0) {
-			initializeDomainConverterMethod();
+			initializeProviderMethod();
 		}
 
 		if (!types.contains(context.getRawDomain().getCanonicalName())) {

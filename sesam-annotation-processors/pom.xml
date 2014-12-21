@@ -19,6 +19,8 @@
 		<module>sesam-service-converter-processor</module>
 		<module>sesam-service-exporter-processor</module>
 		<module>sesam-service-local-interface-processor</module>
+		<module>sesam-entity-provider-processor</module>
+		<module>sesam-provider-context-processor</module>
 	</modules>
 
 	<dependencyManagement>

@@ -25,7 +25,7 @@ import sk.seges.sesam.pap.model.model.api.dto.DtoDeclaredType;
 import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.AbstractDtoPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
 import sk.seges.sesam.utils.CastUtils;
 
@@ -37,7 +37,7 @@ public abstract class AbstractMethodPrinter extends AbstractDtoPrinter {
 	
 	protected ConverterProviderPrinter converterProviderPrinter;
 	
-	protected AbstractMethodPrinter(ConverterProviderPrinter converterProviderPrinter, ConverterConstructorParametersResolverProvider parametersResolverProvider, EntityResolver entityResolver, RoundEnvironment roundEnv, TransferObjectProcessingEnvironment processingEnv) {
+	protected AbstractMethodPrinter(ConverterProviderPrinter converterProviderPrinter, ProviderConstructorParametersResolverProvider parametersResolverProvider, EntityResolver entityResolver, RoundEnvironment roundEnv, TransferObjectProcessingEnvironment processingEnv) {
 		super(parametersResolverProvider, processingEnv);
 		this.roundEnv = roundEnv;
 		this.converterProviderPrinter = converterProviderPrinter;

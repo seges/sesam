@@ -27,7 +27,7 @@ import java.util.Arrays;
  * already processed by setting a <i>processingEquals</i> flag. When infinite loops is detected
  * no referenced entities are processed for equals purposes.
  * <pre>
- * This is used when entity A has reference to the entity B and entity B has reference to the entity A.
+ * This is used when entityprovider A has reference to the entityprovider B and entityprovider B has reference to the entityprovider A.
  * Then infinite loops can occur in the equals method.
  * </pre>
  * @author Peter Simun

@@ -27,8 +27,8 @@ import sk.seges.sesam.pap.model.provider.TransferObjectConverterProcessorContext
 import sk.seges.sesam.pap.model.provider.TransferObjectProcessorContextProvider;
 import sk.seges.sesam.pap.model.provider.api.ConfigurationProvider;
 import sk.seges.sesam.pap.model.resolver.CacheableConverterConstructorParametersResolverProvider;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider.UsageType;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider.UsageType;
 import sk.seges.sesam.pap.model.resolver.DefaultConverterConstructorParametersResolver;
 import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
 import sk.seges.sesam.shared.model.converter.BasicCachedConverter;
@@ -36,7 +36,6 @@ import sk.seges.sesam.shared.model.converter.BasicCachedConverter;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -126,7 +125,7 @@ public class TransferObjectConverterProcessor extends AbstractTransferProcessor 
 		return new TransferObjectConverterProcessorContextProvider(getEnvironmentContext(), getEntityResolver());
 	}
 
-	protected ConverterConstructorParametersResolverProvider getParametersResolverProvider() {
+	protected ProviderConstructorParametersResolverProvider getParametersResolverProvider() {
 		return new CacheableConverterConstructorParametersResolverProvider() {
 			
 			@Override
@@ -137,7 +136,7 @@ public class TransferObjectConverterProcessor extends AbstractTransferProcessor 
 	}
 	
 	protected ConverterProviderPrinter getConverterProviderPrinter(FormattedPrintWriter pw) {
-		return new ConverterProviderPrinter(processingEnv, getParametersResolverProvider(), UsageType.CONVERTER_PROVIDER_OUTSIDE_USAGE);
+		return new ConverterProviderPrinter(processingEnv, getParametersResolverProvider(), UsageType.PROVIDER_OUTSIDE_USAGE);
 	}
 	
 	@Override

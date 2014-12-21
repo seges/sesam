@@ -445,7 +445,7 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 				//there is any configuration fot DTO
 				//TODO but we have to choose first - choose that is not generated and does not delegate to other configuration
 				//But still no correct solution because there might be more configuration for one domain
-				// in order to produce multiple DTOs from one domain entity
+				// in order to produce multiple DTOs from one domain entityprovider
 
 				ConfigurationTypeElement superClassConfigutation = configurationsForDomain.get(0);
 
@@ -476,7 +476,7 @@ public abstract class AbstractTransferProcessor extends MutableAnnotationProcess
 				//there is any configuration fot DTO
 				//TODO but we have to choose first - choose that is not generated and does not delegate to other configuration
 				//But still no correct solution because there might be more configuration for one domain
-				// in order to produce multiple DTOs from one domain entity
+				// in order to produce multiple DTOs from one domain entityprovider
 
 				ConfigurationTypeElement superClassConfigutation = configurationsForDomain.get(0);
 

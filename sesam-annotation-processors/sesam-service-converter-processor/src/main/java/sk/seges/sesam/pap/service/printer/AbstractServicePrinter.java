@@ -10,7 +10,6 @@ import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
 
 import sk.seges.sesam.core.pap.model.ConverterConstructorParameter;
-import sk.seges.sesam.core.pap.model.api.ClassSerializer;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror.MutableTypeKind;
@@ -22,8 +21,8 @@ import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
 import sk.seges.sesam.pap.model.model.api.domain.DomainType;
 import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterInstancerType;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider.UsageType;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider.UsageType;
 import sk.seges.sesam.pap.service.model.LocalServiceTypeElement;
 import sk.seges.sesam.pap.service.model.RemoteServiceTypeElement;
 import sk.seges.sesam.pap.service.model.ServiceTypeElement;
@@ -31,9 +30,9 @@ import sk.seges.sesam.pap.service.model.ServiceTypeElement;
 public class AbstractServicePrinter {
 
 	protected final TransferObjectProcessingEnvironment processingEnv;
-	protected final ConverterConstructorParametersResolverProvider parametersResolverProvider;
+	protected final ProviderConstructorParametersResolverProvider parametersResolverProvider;
 	
-	protected AbstractServicePrinter(TransferObjectProcessingEnvironment processingEnv, ConverterConstructorParametersResolverProvider parametersResolverProvider) {
+	protected AbstractServicePrinter(TransferObjectProcessingEnvironment processingEnv, ProviderConstructorParametersResolverProvider parametersResolverProvider) {
 		this.processingEnv = processingEnv;
 		this.parametersResolverProvider = parametersResolverProvider;
 	}

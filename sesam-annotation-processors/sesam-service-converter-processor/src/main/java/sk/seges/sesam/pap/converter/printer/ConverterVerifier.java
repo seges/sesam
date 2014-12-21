@@ -1,9 +1,9 @@
 package sk.seges.sesam.pap.converter.printer;
 
-import sk.seges.sesam.pap.converter.printer.api.ConverterProviderElementPrinter;
-import sk.seges.sesam.pap.converter.printer.model.ConverterProviderPrinterContext;
+import sk.seges.sesam.pap.converter.printer.api.ProviderElementPrinter;
+import sk.seges.sesam.pap.converter.printer.model.AbstractProviderPrinterContext;
 
-public class ConverterVerifier implements ConverterProviderElementPrinter {
+public class ConverterVerifier implements ProviderElementPrinter {
 
 	private boolean containsConverters = false;
 	
@@ -12,7 +12,7 @@ public class ConverterVerifier implements ConverterProviderElementPrinter {
 	}
 
 	@Override
-	public void print(ConverterProviderPrinterContext context) {
+	public void print(AbstractProviderPrinterContext context) {
 		containsConverters = true;
 	}
 

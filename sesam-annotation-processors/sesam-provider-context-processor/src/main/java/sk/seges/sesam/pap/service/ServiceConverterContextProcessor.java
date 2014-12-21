@@ -2,29 +2,21 @@ package sk.seges.sesam.pap.service;
 
 import sk.seges.sesam.core.pap.configuration.api.ProcessorConfigurer;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableReferenceType;
 import sk.seges.sesam.pap.AbstractTransferProcessingProcessor;
+import sk.seges.sesam.pap.converter.model.ConverterProviderContextType;
 import sk.seges.sesam.pap.converter.model.ConverterProviderType;
 import sk.seges.sesam.pap.model.annotation.ConverterProviderDefinition;
 import sk.seges.sesam.pap.model.model.EnvironmentContext;
 import sk.seges.sesam.pap.model.model.TransferObjectProcessingEnvironment;
-import sk.seges.sesam.pap.model.printer.converter.ConverterInstancerType;
-import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.provider.ClasspathConfigurationProvider;
 import sk.seges.sesam.pap.model.provider.api.ConfigurationProvider;
 import sk.seges.sesam.pap.model.resolver.CacheableConverterConstructorParametersResolverProvider;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider;
-import sk.seges.sesam.pap.model.resolver.ConverterConstructorParametersResolverProvider.UsageType;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.model.resolver.DefaultConverterConstructorParametersResolver;
 import sk.seges.sesam.pap.model.resolver.api.ConverterConstructorParametersResolver;
 import sk.seges.sesam.pap.service.configurer.ServiceConverterContextProcessorConfigurer;
-import sk.seges.sesam.pap.service.model.ConverterProviderContextType;
-import sk.seges.sesam.pap.service.model.ServiceConverterTypeElement;
-import sk.seges.sesam.pap.service.model.ServiceTypeElement;
-import sk.seges.sesam.pap.service.printer.api.ConverterContextElementPrinter;
-import sk.seges.sesam.pap.service.printer.converterprovider.ServiceConverterProviderContextPrinter;
-import sk.seges.sesam.pap.service.provider.ServiceCollectorConfigurationProvider;
-import sk.seges.sesam.pap.service.resolver.ServiceConverterConstructorParametersResolver;
+import sk.seges.sesam.pap.service.printer.api.ProviderContextElementPrinter;
+import sk.seges.sesam.pap.service.printer.converterprovider.ConverterProviderContextPrinterDelegate;
 
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
@@ -51,7 +43,7 @@ public class ServiceConverterContextProcessor extends AbstractTransferProcessing
 
         ConverterProviderContextType contextType = (ConverterProviderContextType)context.getOutputType();
 
-        for (ConverterContextElementPrinter elementPrinter: getElementPrinters(contextType)) {
+        for (ProviderContextElementPrinter elementPrinter: getElementPrinters(contextType)) {
             elementPrinter.initialize(contextType);
 
             Set<? extends Element> converterProviders = getClassPathTypes().getElementsAnnotatedWith(ConverterProviderDefinition.class);
@@ -64,13 +56,13 @@ public class ServiceConverterContextProcessor extends AbstractTransferProcessing
         }
     }
 
-    protected ConverterContextElementPrinter[] getElementPrinters(MutableDeclaredType contextType) {
-		return new ConverterContextElementPrinter[] {
-				new ServiceConverterProviderContextPrinter(processingEnv, getParametersResolverProvider(contextType), getClassPathTypes())
+    protected ProviderContextElementPrinter[] getElementPrinters(MutableDeclaredType contextType) {
+		return new ProviderContextElementPrinter[] {
+				new ConverterProviderContextPrinterDelegate(processingEnv, getParametersResolverProvider(contextType), getClassPathTypes())
 		};
 	}
 
-    protected ConverterConstructorParametersResolverProvider getParametersResolverProvider(MutableDeclaredType contextType) {
+    protected ProviderConstructorParametersResolverProvider getParametersResolverProvider(MutableDeclaredType contextType) {
         return new CacheableConverterConstructorParametersResolverProvider() {
             @Override
             public ConverterConstructorParametersResolver constructParameterResolver(UsageType usageType) {
