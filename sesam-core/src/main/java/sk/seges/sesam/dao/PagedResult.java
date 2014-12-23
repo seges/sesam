@@ -13,8 +13,8 @@ import java.io.Serializable;
  * @author ladislav.gazo
  */
 public class PagedResult<T> implements Serializable {
-	private static final long serialVersionUID = 7913070730470043908L;
-
+	private static final long serialVersionUID = -2005696442375148830L;
+	
 	/** Page definition for returned results. */
 	private Page page;
 	/** Object of returned results. Usually it is a collection. */
