@@ -381,3 +381,23 @@
 /sesam-jndi/.settings
 /sesam-jndi/target
 
+/sesam-annotation-apis/sesam-annotation-apis.iml
+/sesam-annotation-processors/pom.xml.bak
+/sesam-annotation-processors/sesam-annotation-processors.iml
+/sesam-annotation-processors/sesam-entity-provider-processor/pom.xml.bak
+/sesam-annotation-processors/sesam-entity-provider-processor/sesam-entity-provider-processor.iml
+
+/sesam-annotation-processors/sesam-entity-provider-processor/target
+/sesam-annotation-processors/sesam-provider-context-processor/target
+/sesam-annotation-processors/sesam-provider-context-processor/*.bak
+/sesam-annotation-processors/sesam-provider-context-processor/*.iml
+/sesam-annotation-supports/*.iml
+/sesam-fork/sesam-fork-api/*.iml
+/sesam-fork/*.iml
+/sesam-fork/sesam-fork-parent/*.iml
+/sesam-fork/sesam-fork-server/*.iml
+/sesam-jndi/*.iml
+/*.iml
+/sesam-os/*.iml
+/sesam-remote-openmq/*.iml
+/sesam-remote/sesam-remote.iml
