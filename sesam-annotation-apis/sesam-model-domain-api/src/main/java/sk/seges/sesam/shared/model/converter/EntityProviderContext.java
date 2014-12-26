@@ -15,8 +15,16 @@ public abstract class EntityProviderContext {
 
 	public abstract EntityProviderContext get();
 
-    public <DTO, DOMAIN> List<Class<?>> getDtoClassForDomain(Class<DOMAIN> domainClass) {
-        if (domainClass == null) {
+    public List<Class<?>> getDtoClassForDomain(String domainClassName) {
+        if (domainClassName == null) {
+            return null;
+        }
+
+        Class<?> domainClass;
+
+        try {
+            domainClass = Class.forName(domainClassName);
+        } catch (ClassNotFoundException e) {
             return null;
         }
 
