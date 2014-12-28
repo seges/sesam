@@ -120,7 +120,6 @@ public abstract class AnnotationTest {
 	}
 
 	protected String getResource(String name) {
-        getClass().getResource("BasicAnnotationProcessorTestCase.class")
         URL resource = Thread.currentThread().getContextClassLoader().getResource(name);
         if (resource == null) {
             throw new RuntimeException("Unable to find resource for the: " + name);
