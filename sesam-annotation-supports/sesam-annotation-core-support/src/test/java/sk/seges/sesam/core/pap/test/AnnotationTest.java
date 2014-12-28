@@ -168,11 +168,11 @@ public abstract class AnnotationTest {
     protected File getResourceFile(String directorySuffix, Class<?> clazz, String suffix) {
 
         String resource = getResource(
-				DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + suffix);
+				toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + suffix);
 
         if (resource == null) {
 			throw new RuntimeException("Unable to find output file " +
-					DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + suffix);
+					toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + suffix);
 		}
 
 		return new File(resource);
