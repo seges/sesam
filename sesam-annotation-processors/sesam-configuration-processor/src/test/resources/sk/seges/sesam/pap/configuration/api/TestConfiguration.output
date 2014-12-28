@@ -1,5 +1,4 @@
 package sk.seges.sesam.pap.configuration.api;
-
 import java.io.PrintStream;
 
 import javax.annotation.Generated;
@@ -7,28 +6,27 @@ import javax.annotation.Generated;
 import sk.seges.sesam.core.configuration.annotation.Settings;
 import sk.seges.sesam.core.configuration.api.ConfigurationValue;
 import sk.seges.sesam.core.configuration.utils.ConfigurationUtils;
-import sk.seges.sesam.pap.configuration.api.TestConfiguration;
 
 @Settings(configuration = TestConfiguration.class)
 @Generated(value = "sk.seges.sesam.pap.configuration.processor.SettingsProcessor")
 public class TestConfigurationSettings {
-
+	 
 	private Boolean bromine;
-
+	
 	private Integer brominePort;
-
+	
 	private String bromineServer;
-
+	
 	private Integer seleniumPort;
-
+	
 	private Boolean seleniumRemote;
-
+	
 	private String seleniumServer;
-
+	
 	private String testURI;
-
+	
 	private String testURL;
-
+	
 	/**
 	* Enables/disables support for bromine.
 	*/
@@ -127,7 +125,7 @@ public class TestConfigurationSettings {
 		this.testURI = ConfigurationUtils.getConfigurationValue(configurations, "test.testUri");
 		this.testURL = ConfigurationUtils.getConfigurationValue(configurations, "test.testHost");
 	}
-
+	
 	public TestConfigurationSettings(Boolean bromine, Integer brominePort, String bromineServer, Integer seleniumPort, Boolean seleniumRemote, String seleniumServer, String testURI, String testURL) {
 		this.bromine = bromine;
 		this.brominePort = brominePort;
@@ -138,7 +136,7 @@ public class TestConfigurationSettings {
 		this.testURI = testURI;
 		this.testURL = testURL;
 	}
-
+	
 	public TestConfigurationSettings(TestConfigurationSettings testConfigurationSettings) {
 		this.bromine = testConfigurationSettings.getBromine();
 		this.brominePort = testConfigurationSettings.getBrominePort();
@@ -149,7 +147,7 @@ public class TestConfigurationSettings {
 		this.testURI = testConfigurationSettings.getTestURI();
 		this.testURL = testConfigurationSettings.getTestURL();
 	}
-
+	
 	public TestConfigurationSettings merge(TestConfigurationSettings testConfigurationSettings) {
 		if (testConfigurationSettings == null) {
 			return this;
@@ -180,19 +178,19 @@ public class TestConfigurationSettings {
 		}
 		return this;
 	}
-
+	
 	public void printHelp(PrintStream out) {
 		printHelp(out, "", null);
 	}
-
+	
 	public void printHelp(PrintStream out, String prefix, String name) {
-		out.println(prefix + "test.bromineEnabled            Enables/disables support for bromine." + (name != null ? "for " + name : ""));
-		out.println(prefix + "test.brominePort               Defines port name where the bromine server is located." + (name != null ? "for " + name : ""));
-		out.println(prefix + "test.bromineHost               Defines host name where the bromine server is located." + (name != null ? "for " + name : ""));
-		out.println(prefix + "test.seleniumPort              Defines port name where the selenium server is located." + (name != null ? "for " + name : ""));
-		out.println(prefix + "test.testRemote                Defines support for connection to the remote server instance." + (name != null ? "for " + name : ""));
-		out.println(prefix + "test.seleniumHost              Defines host name where the selenium server is located." + (name != null ? "for " + name : ""));
-		out.println(prefix + "test.testUri                   Defines relative URI of the testing home page." + (name != null ? "for " + name : ""));
-		out.println(prefix + "test.testHost                  Defines root URL of the testing site." + (name != null ? "for " + name : ""));
+		out.format("%-50s Enables/disables support for bromine." + (name != null ? " for " + name : "") + "\n", prefix + "test.bromineEnabled");
+		out.format("%-50s Defines port name where the bromine server is located." + (name != null ? " for " + name : "") + "\n", prefix + "test.brominePort");
+		out.format("%-50s Defines host name where the bromine server is located." + (name != null ? " for " + name : "") + "\n", prefix + "test.bromineHost");
+		out.format("%-50s Defines port name where the selenium server is located." + (name != null ? " for " + name : "") + "\n", prefix + "test.seleniumPort");
+		out.format("%-50s Defines support for connection to the remote server instance." + (name != null ? " for " + name : "") + "\n", prefix + "test.testRemote");
+		out.format("%-50s Defines host name where the selenium server is located." + (name != null ? " for " + name : "") + "\n", prefix + "test.seleniumHost");
+		out.format("%-50s Defines relative URI of the testing home page." + (name != null ? " for " + name : "") + "\n", prefix + "test.testUri");
+		out.format("%-50s Defines root URL of the testing site." + (name != null ? " for " + name : "") + "\n", prefix + "test.testHost");
 	}
 }

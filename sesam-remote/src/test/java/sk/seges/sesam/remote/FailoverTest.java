@@ -44,6 +44,6 @@ public class FailoverTest extends AbstractJMSTestCase {
             }
         }).start();
         ((AMQBrokerManipulation)brokerManipulation).getBroker().stop();
-        Thread.sleep(10000);
+        Thread.sleep(1000);
     }
 }

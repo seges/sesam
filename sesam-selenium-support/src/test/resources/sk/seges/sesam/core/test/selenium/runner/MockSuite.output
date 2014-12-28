@@ -1,51 +1,65 @@
 package sk.seges.sesam.core.test.selenium.runner;
-
 import javax.annotation.Generated;
 
-import sk.seges.sesam.core.test.selenium.runner.MockSuiteRunner;
-import sk.seges.sesam.core.test.selenium.runner.SeleniumSuiteRunner;
 import sk.seges.sesam.core.test.selenium.usecase.MockSelenise;
+import sk.seges.sesam.core.test.webdriver.runner.SeleniumSuiteRunner;
 
 @Generated(value = "sk.seges.sesam.pap.test.selenium.processor.SeleniumSuiteRunnerProcessor")
 public class MockSuiteRunner extends SeleniumSuiteRunner {
-
+	 
 	public static void main(String[] args) {
 		new MockSuiteRunner().run();
 	}
-
+	
 	public void run() {
-
+	
 		try {
 			MockSelenise mockSelenise = new MockSelenise();
-			getPrinter(mockSelenise).initialize(getTestResult(mockSelenise));
-			mockSelenise.setUp();
+			if (mockSelenise.ensureSettings().getReportSettings().getHtml().getSupport().getEnabled() != null && mockSelenise.ensureSettings().getReportSettings().getHtml().getSupport().getEnabled()) {
+				getPrinter(mockSelenise).initialize(getTestResult(mockSelenise));
+			}
 			try {
+				mockSelenise.setUp("testMethod1");
 				mockSelenise.testMethod1();
-			} catch (Exception ex) {
-				System.out.println(ex);
+			} catch (Throwable ex) {
+				try {
+					ex.printStackTrace(System.out);
+				} catch (Throwable ex1) {
+					System.out.println(ex1);
+				}
 			} finally {
 				mockSelenise.tearDown();
-				getTestResult(mockSelenise).addTestCaseResult(mockSelenise.getTestInfo());
+				if (getTestResult(mockSelenise) != null) {
+					getTestResult(mockSelenise).addTestCaseResult(mockSelenise.getTestInfo());
+				}
 			}
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			System.out.println(ex);
 		}
 		try {
 			MockSelenise mockSelenise = new MockSelenise();
-			getPrinter(mockSelenise).initialize(getTestResult(mockSelenise));
-			mockSelenise.setUp();
+			if (mockSelenise.ensureSettings().getReportSettings().getHtml().getSupport().getEnabled() != null && mockSelenise.ensureSettings().getReportSettings().getHtml().getSupport().getEnabled()) {
+				getPrinter(mockSelenise).initialize(getTestResult(mockSelenise));
+			}
 			try {
+				mockSelenise.setUp("testMethod2");
 				mockSelenise.testMethod2();
-			} catch (Exception ex) {
-				System.out.println(ex);
+			} catch (Throwable ex) {
+				try {
+					ex.printStackTrace(System.out);
+				} catch (Throwable ex1) {
+					System.out.println(ex1);
+				}
 			} finally {
 				mockSelenise.tearDown();
-				getTestResult(mockSelenise).addTestCaseResult(mockSelenise.getTestInfo());
+				if (getTestResult(mockSelenise) != null) {
+					getTestResult(mockSelenise).addTestCaseResult(mockSelenise.getTestInfo());
+				}
 			}
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			System.out.println(ex);
 		}
 		printReports();
+		handleTestResult();
 	}
-	
 }

@@ -1,28 +1,26 @@
 package sk.seges.sesam.pap.configuration;
 
-import java.io.File;
-
-import javax.annotation.processing.Processor;
-
 import org.junit.Test;
-
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.test.AnnotationTest;
 import sk.seges.sesam.pap.configuration.api.TestConfiguration;
 import sk.seges.sesam.pap.configuration.model.setting.SettingsTypeElement;
 import sk.seges.sesam.pap.configuration.processor.SettingsProcessor;
 
+import javax.annotation.processing.Processor;
+import java.io.File;
+
 public class ConfigurationProcessorTest extends AnnotationTest {
 
 	@Test
 	public void testConfiguration() {
-		assertCompilationSuccessful(compileFiles(Compiler.JAVAC, TestConfiguration.class));
+		compileFiles(Compiler.JAVAC, TestConfiguration.class);
 		assertOutput(getResourceFile(TestConfiguration.class), getOutputFile(TestConfiguration.class));
 	}
 
-	@Test
+    @Test
 	public void testConfigurationInEclipse() {
-		assertCompilationSuccessful(compileFiles(Compiler.ECLIPSE, TestConfiguration.class));
+		compileFiles(Compiler.ECLIPSE, TestConfiguration.class);
 		assertOutput(getResourceFile(TestConfiguration.class), getOutputFile(TestConfiguration.class));
 	}
 

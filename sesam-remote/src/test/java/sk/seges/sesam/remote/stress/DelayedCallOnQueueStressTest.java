@@ -24,13 +24,13 @@ public class DelayedCallOnQueueStressTest extends AbstractStressTestCase {
             protected void callMethods() throws Exception {
                 tds.test1();
             }
-            
+
             @Override
             protected void afterCallMethods() throws Exception {
                 Thread.sleep(300);
             }
         };
-        
+
         callTest(100, methodCalls, getClass().getName() + "testCallMethodOnProxyDelayed");
     }
 }

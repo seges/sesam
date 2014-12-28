@@ -1,20 +1,30 @@
 package sk.seges.sesam.core.test.selenium.usecase;
-
 import javax.annotation.Generated;
 
-import sk.seges.sesam.core.test.selenium.configuration.DefaultTestSettings;
 import sk.seges.sesam.core.test.selenium.configuration.annotation.CredentialsSettings;
-import sk.seges.sesam.core.test.selenium.configuration.annotation.MailSettings;
 import sk.seges.sesam.core.test.selenium.configuration.annotation.Mail.Provider;
+import sk.seges.sesam.core.test.selenium.configuration.annotation.MailSettings;
+import sk.seges.sesam.core.test.selenium.configuration.annotation.MailSettings.ProviderSettings;
+import sk.seges.sesam.core.test.selenium.configuration.annotation.Report.Screenshot.When;
 import sk.seges.sesam.core.test.selenium.configuration.annotation.ReportSettings;
-import sk.seges.sesam.core.test.selenium.configuration.annotation.ReportSettings.ScreenshotConfigurationSettings;
+import sk.seges.sesam.core.test.selenium.configuration.annotation.ReportSettings.CommandReportSettings;
+import sk.seges.sesam.core.test.selenium.configuration.annotation.ReportSettings.ConsoleReportSettings;
+import sk.seges.sesam.core.test.selenium.configuration.annotation.ReportSettings.HtmlReportSettings;
+import sk.seges.sesam.core.test.selenium.configuration.annotation.ReportSettings.HtmlReportSettings.IssueTrackerSettings;
+import sk.seges.sesam.core.test.selenium.configuration.annotation.ReportSettings.ScreenshotSettings;
+import sk.seges.sesam.core.test.selenium.configuration.annotation.ReportSettings.ScreenshotSettings.AfterSettings;
+import sk.seges.sesam.core.test.selenium.configuration.annotation.ReportSettings.ScreenshotSettings.BeforeSettings;
+import sk.seges.sesam.core.test.selenium.configuration.annotation.ReportSettings.SupportSettings;
 import sk.seges.sesam.core.test.selenium.configuration.annotation.SeleniumSettings;
 import sk.seges.sesam.core.test.selenium.configuration.api.Browsers;
+import sk.seges.sesam.core.test.selenium.report.model.SeleniumOperation;
+import sk.seges.sesam.core.test.selenium.runner.MockSuiteSettingsProvider;
+import sk.seges.sesam.core.test.webdriver.configuration.DefaultTestSettings;
 
 @org.junit.Ignore
 @Generated(value = "sk.seges.sesam.pap.test.selenium.processor.SeleniumTestConfigurationProcessor")
-public class AdvancedMockSeleniseConfiguration extends DefaultTestSettings {
-
+public class AdvancedMockSeleniseConfiguration extends DefaultTestSettings implements MockSuiteSettingsProvider {
+	 
 	public AdvancedMockSeleniseConfiguration(java.lang.String param) {
 		super(param);
 	}
@@ -27,27 +37,56 @@ public class AdvancedMockSeleniseConfiguration extends DefaultTestSettings {
 		super(flags);
 	}
 	
+	public CommandReportSettings getCommandReportSettings() {
+		CommandReportSettings result = new CommandReportSettings(collectSystemProperties());
+		return result;
+	}
+	
+	public ConsoleReportSettings getConsoleReportSettings() {
+		ConsoleReportSettings result = new ConsoleReportSettings(collectSystemProperties());
+		return result;
+	}
+	
 	public CredentialsSettings getCredentialsSettings() {
 		CredentialsSettings result = new CredentialsSettings(collectSystemProperties());
 		return result;
 	}
 	
+	public HtmlReportSettings getHtmlReportSettings() {
+		HtmlReportSettings result = new HtmlReportSettings(collectSystemProperties());
+		return result;
+	}
+	
 	public MailSettings getMailSettings() {
 		MailSettings result = new MailSettings(collectSystemProperties());
-		result.merge(new MailSettings("mail", "host", "pass", Provider.IMAPS));
+		result.merge(new MailSettings("host", "mail", "pass", Provider.IMAPS));
+		return result;
+	}
+	
+	public ProviderSettings getProviderSettings() {
+		ProviderSettings result = new ProviderSettings(collectSystemProperties());
 		return result;
 	}
 	
 	public ReportSettings getReportSettings() {
 		ReportSettings result = new ReportSettings(collectSystemProperties());
-		result.merge(new ReportSettings(new ScreenshotConfigurationSettings(true, "result", "screenshots")));
+		result.merge(new ReportSettings(new ConsoleReportSettings(new CommandReportSettings(new sk.seges.sesam.core.test.selenium.report.model.SeleniumOperation[] { SeleniumOperation.ASSERTION, SeleniumOperation.FAIL, SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, SeleniumOperation.NAVIGATE_BACK, SeleniumOperation.NAVIGATE_FORWARD }), new CommandReportSettings(new sk.seges.sesam.core.test.selenium.report.model.SeleniumOperation[] { SeleniumOperation.ASSERTION, SeleniumOperation.FAIL, SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, SeleniumOperation.NAVIGATE_BACK, SeleniumOperation.NAVIGATE_FORWARD }), new SupportSettings(null, true)), new HtmlReportSettings(new IssueTrackerSettings("%url%%issue_number%", null), "en", new CommandReportSettings(new sk.seges.sesam.core.test.selenium.report.model.SeleniumOperation[] { SeleniumOperation.ASSERTION, SeleniumOperation.FAIL, SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, SeleniumOperation.NAVIGATE_BACK, SeleniumOperation.NAVIGATE_FORWARD }), new CommandReportSettings(new sk.seges.sesam.core.test.selenium.report.model.SeleniumOperation[] { SeleniumOperation.ASSERTION, SeleniumOperation.FAIL, SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, SeleniumOperation.NAVIGATE_BACK, SeleniumOperation.NAVIGATE_FORWARD }), "classpath:sk/seges/sesam/webdriver/report/metal/report_default.vm", new SupportSettings("result", true), "path to the report"), new ScreenshotSettings(new AfterSettings(new sk.seges.sesam.core.test.selenium.report.model.SeleniumOperation[] { SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.SEND_KEYS, SeleniumOperation.NAVIGATE_TO }), new BeforeSettings(new sk.seges.sesam.core.test.selenium.report.model.SeleniumOperation[] { SeleniumOperation.ASSERTION, SeleniumOperation.FAIL, SeleniumOperation.CLICK_ON, SeleniumOperation.CHANGE_VALUE, SeleniumOperation.NAVIGATE_TO, SeleniumOperation.NAVIGATE_BACK, SeleniumOperation.NAVIGATE_FORWARD }), new SupportSettings("screenshots", true), new sk.seges.sesam.core.test.selenium.configuration.annotation.Report.Screenshot.When[] { When.ON_SUCCESS, When.ON_FAILURE })));
+		return result;
+	}
+	
+	public ScreenshotSettings getScreenshotSettings() {
+		ScreenshotSettings result = new ScreenshotSettings(collectSystemProperties());
 		return result;
 	}
 	
 	public SeleniumSettings getSeleniumSettings() {
 		SeleniumSettings result = new SeleniumSettings(collectSystemProperties());
-		result.merge(new SeleniumSettings("localhost", 4444, false, "localhost", 8080, false, "testURL", null, Browsers.FIREFOX));
+		result.merge(new SeleniumSettings(Browsers.FIREFOX, null, null, "testURL"));
 		return result;
 	}
 	
+	public SupportSettings getSupportSettings() {
+		SupportSettings result = new SupportSettings(collectSystemProperties());
+		return result;
+	}
 }

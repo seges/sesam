@@ -1,16 +1,14 @@
 package sk.seges.sesam.pap.configuration;
 
-import java.io.File;
-
-import javax.annotation.processing.Processor;
-
 import org.junit.Test;
-
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.test.AnnotationTest;
 import sk.seges.sesam.pap.configuration.api.TestAnnotation;
 import sk.seges.sesam.pap.configuration.model.parameter.ModelType;
 import sk.seges.sesam.pap.configuration.processor.PojoAnnotationTransformerProcessor;
+
+import javax.annotation.processing.Processor;
+import java.io.File;
 
 public class ModelProcessorTest extends AnnotationTest {
 
@@ -20,7 +18,7 @@ public class ModelProcessorTest extends AnnotationTest {
 		assertOutput(getResourceFile(TestAnnotation.class), getOutputFile(TestAnnotation.class));
 	}
 
-	@Test
+    @Test
 	public void testConfigurationInEclipse() {
 		assertCompilationSuccessful(compileFiles(Compiler.ECLIPSE, TestAnnotation.class));
 		assertOutput(getResourceFile(TestAnnotation.class), getOutputFile(TestAnnotation.class));

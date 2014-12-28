@@ -15,11 +15,11 @@ public class EntityWithValidationTestCase extends DtoTestCase {
 		assertOutput(getResourceFile(ValidationPackageDTOConfiguration.class), getOutputFile(ValidationPackageDTOConfiguration.class));
 	}
 
-	@Test
-	public void testCopyAnnotationByTypes() {
-		assertCompilationSuccessful(compileFiles(ValidationTypesDTOConfiguration.class));
-		assertOutput(getResourceFile(ValidationTypesDTOConfiguration.class), getOutputFile(ValidationTypesDTOConfiguration.class));
-	}
+//	@Test
+//	public void testCopyAnnotationByTypes() {
+//		assertCompilationSuccessful(compileFiles(ValidationTypesDTOConfiguration.class));
+//		assertOutput(getResourceFile(ValidationTypesDTOConfiguration.class), getOutputFile(ValidationTypesDTOConfiguration.class));
+//	}
 
 	@Override
 	protected Processor[] getProcessors() {

@@ -1,9 +1,19 @@
 package sk.seges.sesam.core.pap.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
+import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
+import sk.seges.sesam.core.pap.test.manager.CompilerManager;
+import sk.seges.sesam.core.pap.test.manager.EclipseCompilerManager;
+import sk.seges.sesam.core.pap.test.manager.JavacCompilerManager;
+import sk.seges.sesam.core.pap.test.model.utils.TestProcessingEnvironment;
+import sk.seges.sesam.core.pap.test.model.utils.TestRoundEnvironment;
+import sk.seges.sesam.core.pap.utils.ClassFinder;
 
+import javax.annotation.processing.Processor;
+import javax.tools.Diagnostic;
+import javax.tools.Diagnostic.Kind;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -13,20 +23,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.*;
 
-import javax.annotation.processing.Processor;
-import javax.tools.Diagnostic;
-import javax.tools.Diagnostic.Kind;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-
-import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
-import sk.seges.sesam.core.pap.model.mutable.utils.MutableProcessingEnvironment;
-import sk.seges.sesam.core.pap.test.manager.CompilerManager;
-import sk.seges.sesam.core.pap.test.manager.EclipseCompilerManager;
-import sk.seges.sesam.core.pap.test.manager.JavacCompilerManager;
-import sk.seges.sesam.core.pap.test.model.utils.TestProcessingEnvironment;
-import sk.seges.sesam.core.pap.test.model.utils.TestRoundEnvironment;
-import sk.seges.sesam.core.pap.utils.ClassFinder;
+import static org.junit.Assert.*;
 
 public abstract class AnnotationTest {
 
@@ -123,8 +120,11 @@ public abstract class AnnotationTest {
 	}
 
 	protected String getResource(String name) {
-		//getClass().getResource
-		return Thread.currentThread().getContextClassLoader().getResource(name).getFile().replaceAll("%5c", getDirectorySeparatorPattern());
+        URL resource = Thread.currentThread().getContextClassLoader().getResource(name);
+        if (resource == null) {
+            throw new RuntimeException("Unable to find resource for the: " + name);
+        }
+        return resource.getFile().replaceAll("%5c", getDirectorySeparatorPattern());
 	}
 
 	private String getDirectorySeparatorPattern() {
@@ -150,29 +150,29 @@ public abstract class AnnotationTest {
 	}
 	
 	protected File getEclipseResourceFile(String directorySuffix, Class<?> clazz) {
-		String resource = getResource(
-				DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + OUTPUT_ECLIPSE_FILE_SUFFIX);
-		
-		if (resource == null) {
-			throw new RuntimeException("Unable to find output file " +
-					DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + OUTPUT_ECLIPSE_FILE_SUFFIX);
-		}
-
-		return new File(resource);
+        return getResourceFile(directorySuffix, clazz, OUTPUT_ECLIPSE_FILE_SUFFIX);
 	}
 
 	protected File getResourceFile(Class<?> clazz) {
-		return getResourceFile(null, clazz);
+		return getResourceFile(null, clazz, OUTPUT_FILE_SUFFIX);
 	}
-	
-	protected File getResourceFile(String directorySuffix, Class<?> clazz) {
 
-		String resource = getResource(
-				DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + OUTPUT_FILE_SUFFIX);
-		
-		if (resource == null) {
+    protected File getResourceFile(Class<?> clazz, String suffix) {
+        return getResourceFile(null, clazz, suffix);
+    }
+
+    protected File getResourceFile(String directorySuffix, Class<?> clazz) {
+        return getResourceFile(directorySuffix, clazz, OUTPUT_FILE_SUFFIX);
+    }
+
+    protected File getResourceFile(String directorySuffix, Class<?> clazz, String suffix) {
+
+        String resource = getResource(
+				DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + suffix);
+
+        if (resource == null) {
 			throw new RuntimeException("Unable to find output file " +
-					DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + OUTPUT_FILE_SUFFIX );
+					DIRECTORY_SEPARATOR + toPath(clazz.getPackage()) + DIRECTORY_SEPARATOR + (directorySuffix != null ? (directorySuffix + DIRECTORY_SEPARATOR) : "") + clazz.getSimpleName() + suffix);
 		}
 
 		return new File(resource);
@@ -207,7 +207,7 @@ public abstract class AnnotationTest {
 		try {
 			BufferedReader input = new BufferedReader(new FileReader(file));
 			try {
-				String line = null; // not declared within while loop
+				String line; // not declared within while loop
 				while ((line = input.readLine()) != null) {
 					content.add(line);
 				}
@@ -277,7 +277,7 @@ public abstract class AnnotationTest {
 			assert (element != null);
 
 			ClassFinder classFinder = new ClassFinder();
-			addCollection(files, classFinder.findClassesInPackage(((Package)element).getName()));
+			addCollection(files, classFinder.findClassesInPackage(element.getName()));
 		}
 	}
 
@@ -303,7 +303,7 @@ public abstract class AnnotationTest {
 				if (file != null) {
 					files.add(file);
 				} else {
-					// These are innerclasses, etc ... that should not be defined in this way
+					// These are inner classes, etc ... that should not be defined in this way
 				}
 			} else if (element instanceof Package) {
 				ClassFinder classFinder = new ClassFinder();

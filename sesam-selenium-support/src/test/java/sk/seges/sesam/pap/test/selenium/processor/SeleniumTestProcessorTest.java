@@ -15,8 +15,8 @@ import sk.seges.sesam.pap.test.selenium.processor.model.SeleniumTestSettingsType
 public class SeleniumTestProcessorTest extends AnnotationTest {
 
 	@Test
-	public void testTestCase() {
-		assertCompilationSuccessful(compileFiles(MockSelenise.class, MockSuite.class));
+	public void testConfiguration() {
+		compileFiles(MockSelenise.class, MockSuite.class);
 		assertOutput(getResourceFile(MockSelenise.class), getOutputFile(MockSelenise.class));
 	}
 

@@ -33,7 +33,7 @@ public class JMSInvocationHandlerTest extends AbstractJMSTestCase {
         IDummyService tds = new JMSInvocationHandler<IDummyService>((JMSBridgeConfiguration) config).createProxy(IDummyService.class);
         Assert.assertEquals(true, tds instanceof IDummyService);
     }
-    
+
     public void testInvokeVariousMethodsOnProxyWithoutListener() throws Exception {
         config = new JMSBridgeConfiguration(createFactory("vmConnectionFactory1"), "testDest", "QUEUE", 1000);
         ((JMSBridgeConfiguration) config).setResponseHandling(EJMSResponseHandling.TEMPORARY_QUEUE);
@@ -47,15 +47,15 @@ public class JMSInvocationHandlerTest extends AbstractJMSTestCase {
         }
         fail("Call should be timeouted.");
     }
-    
+
     public void testCallMethodsOnProxy() throws Exception {
         config = new JMSBridgeConfiguration(createFactory("vmConnectionFactory1"), "testDest", "QUEUE", 10000);
         ((JMSBridgeConfiguration) config).setResponseHandling(EJMSResponseHandling.TEMPORARY_QUEUE);
         IDummyService tds = new JMSInvocationHandler<IDummyService>((JMSBridgeConfiguration) config).createProxy(IDummyService.class);
-        
+
         DummyServiceImpl tdsi = new DummyServiceImpl();
         new JMSCommandListener<IDummyService>((JMSBridgeConfiguration) config, tdsi);
-        
+
 //        agent.registerInvocationCollector(config, Side.SERVER);
         tds.test1();
         assertEquals(840, tds.test2());
@@ -69,15 +69,15 @@ public class JMSInvocationHandlerTest extends AbstractJMSTestCase {
         }
         fail("Call of test5 should throw exception.");
     }
-    
+
     public void testCallMethodOnProxyWithTopicConfiguration() throws Exception {
         config = new JMSBridgeConfiguration(createFactory("vmConnectionFactory1"), "testDest", "TOPIC", 1000);
         ((JMSBridgeConfiguration) config).setResponseHandling(EJMSResponseHandling.TEMPORARY_QUEUE);
         IDummyService tds = new JMSInvocationHandler<IDummyService>((JMSBridgeConfiguration) config).createProxy(IDummyService.class);
-        
+
         DummyServiceImpl tdsi = new DummyServiceImpl();
         new JMSCommandListener<IDummyService>((JMSBridgeConfiguration) config, tdsi);
-        
+
         tds.test1();
     }
 }

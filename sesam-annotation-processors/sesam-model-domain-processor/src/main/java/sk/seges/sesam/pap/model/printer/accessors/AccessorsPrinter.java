@@ -44,12 +44,15 @@ public class AccessorsPrinter extends CopyPrinter {
 			}
 		};
 
-		for (AnnotationMirror annotation: annotations) {
+        System.out.println("1");
 
-			MutableAnnotationMirror duplicitAnnotation = get(result, annotation);
+        for (AnnotationMirror annotation: annotations) {
 
-			if (duplicitAnnotation != null) {
-				annotationAccessor.merge(duplicitAnnotation, annotation);
+			MutableAnnotationMirror duplicateAnnotation = get(result, annotation);
+
+			if (duplicateAnnotation != null) {
+                System.out.println("Merging");
+				annotationAccessor.merge(duplicateAnnotation, annotation);
 			} else {
 				result.add(annotationAccessor.toMutable(annotation));
 			}
@@ -61,13 +64,13 @@ public class AccessorsPrinter extends CopyPrinter {
 	@Override
 	public void print(TransferObjectContext context) {
 
-		if (context.isSuperclassMethod()) {
-			return;
-		}
+        List<MutableAnnotationMirror> supportedAnnotations = mergeAnnotations(getSupportedAnnotations(context));
 
-		String modifier = Modifier.PUBLIC.toString() + " ";
-		
-		List<MutableAnnotationMirror> supportedAnnotations = mergeAnnotations(getSupportedAnnotations(context));
+        if (context.isSuperclassMethod() && supportedAnnotations.size() == 0) {
+            return;
+        }
+
+        String modifier = Modifier.PUBLIC.toString() + " ";
 
 		for (MutableAnnotationMirror supportedAnnotation: supportedAnnotations) {
 			annotationPrinter.print(supportedAnnotation);
@@ -83,9 +86,23 @@ public class AccessorsPrinter extends CopyPrinter {
 		}
 		
 		pw.println(" {");
-		pw.println("return " + context.getDtoFieldName() + ";");
+        pw.print("return ");
+
+        if (context.isSuperclassMethod()) {
+            //TODO if it is superclass method, but its overridden in the configuration
+            //with validation annotations, it should be printed
+
+            pw.println("super." + context.getDtoMethod().getSimpleName().toString() + "();");
+        } else {
+            pw.println(context.getDtoFieldName() + ";");
+        }
+
 		pw.println("}");
 		pw.println();
+
+        if (context.isSuperclassMethod()) {
+            return;
+        }
 
 		pw.println(modifier + "void " + MethodHelper.toSetter(context.getDtoFieldName()) + 
 				"(", context.getDtoFieldType(), " " + context.getDtoFieldName() + ") {");

@@ -231,7 +231,7 @@ public class MutableTypes implements Types {
 	public MutableTypeVariable getTypeVariable(String name, MutableTypeMirror[] upperBounds, MutableTypeMirror[] lowerBounds) {
 		MutableVariable typeVariable = new MutableVariable();
 		typeVariable.setVariable(name);
-		Set<MutableTypeMirror> bounds = new HashSet<MutableTypeMirror>();
+		Set<MutableTypeMirror> bounds = new LinkedHashSet<MutableTypeMirror>();
 		
 		int boundSize = 0;
 		for (MutableTypeMirror bound: lowerBounds) {
@@ -271,7 +271,7 @@ public class MutableTypes implements Types {
 	public MutableTypeVariable getTypeVariable(String name, MutableTypeMirror... upperBounds) {
 		MutableVariable typeVariable = new MutableVariable();
 		typeVariable.setVariable(name);
-		Set<MutableTypeMirror> bounds = new HashSet<MutableTypeMirror>();
+		Set<MutableTypeMirror> bounds = new LinkedHashSet<MutableTypeMirror>();
 		for (MutableTypeMirror bound: upperBounds) {
 			if (bound != null) {
 				if (bound != null && (!bound.getKind().isDeclared() || name == null || !bound.toString().equals(Object.class.getCanonicalName()))) {

@@ -1,5 +1,4 @@
 package sk.seges.sesam.pap.equals;
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -9,22 +8,31 @@ import sk.seges.sesam.pap.model.annotation.TransferObjectMapping;
 
 @SuppressWarnings("serial")
 @TransferObjectMapping(dtoClass = EntityWithEqualsDTO.class,
-		domainClassName = "sk.seges.sesam.pap.model.Entity", 
-		configurationClassName = "sk.seges.sesam.pap.equals.EntityWithEqualsDTOConfiguration", 
+		domainClassName = "sk.seges.sesam.pap.equals.EqualsEntity",
+		configurationClassName = "sk.seges.sesam.pap.equals.EntityWithEqualsDTOConfiguration",
+		generateConverter = false, generateDto = false,
 		converterClassName = "sk.seges.sesam.pap.equals.EntityWithEqualsDTOConverter")
 @Generated(value = "sk.seges.sesam.pap.model.TransferObjectProcessor")
 public class EntityWithEqualsDTO implements Serializable {
 
+	public static final String DATE = "date";
+
 	private Date date;
+
+	public static final String NICEURL = "niceurl";
 
 	private String niceurl;
 
+	public static final String VALUE = "value";
+
 	private Long value;
+
+	public static final String WEB_ID = "webId";
 
 	private String webId;
 
-	public EntityWithEqualsDTO() {
-	}
+	public EntityWithEqualsDTO() {}
+
 	public EntityWithEqualsDTO(Date date, String niceurl, Long value, String webId) {
 		this.date = date;
 		this.niceurl = niceurl;
@@ -65,7 +73,7 @@ public class EntityWithEqualsDTO implements Serializable {
 	}
 
 	private boolean processingEquals = false;
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -75,61 +83,19 @@ public class EntityWithEqualsDTO implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		EntityWithEqualsDTO other = (EntityWithEqualsDTO) obj;
-		if (date == null) {
-			if (other.date != null)
-				return false;
-		} else { 
-			if (!processingEquals) {
-				processingEquals = true;
-				if (!date.equals(other.date)) {
-					processingEquals = false;
-					return false;
-				} else {
-					processingEquals = false;
-				}
-			}
-		}
-		if (niceurl == null) {
-			if (other.niceurl != null)
-				return false;
-		} else { 
-			if (!processingEquals) {
-				processingEquals = true;
-				if (!niceurl.equals(other.niceurl)) {
-					processingEquals = false;
-					return false;
-				} else {
-					processingEquals = false;
-				}
-			}
-		}
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else { 
-			if (!processingEquals) {
-				processingEquals = true;
-				if (!value.equals(other.value)) {
-					processingEquals = false;
-					return false;
-				} else {
-					processingEquals = false;
-				}
-			}
-		}
-		if (webId == null) {
-			if (other.webId != null)
-				return false;
-		} else { 
-			if (!processingEquals) {
-				processingEquals = true;
-				if (!webId.equals(other.webId)) {
-					processingEquals = false;
-					return false;
-				} else {
-					processingEquals = false;
-				}
-			}
+		if (!_equalsSupport(date, other.date)) return false;
+		if (!_equalsSupport(niceurl, other.niceurl)) return false;
+		if (!_equalsSupport(value, other.value)) return false;
+		if (!_equalsSupport(webId, other.webId)) return false;
+		return true;
+	}
+	private boolean _equalsSupport(Object o1, Object o2) {
+		if (o1 == null) {
+			if (o2 != null) return false;
+		} else if (!processingEquals) {
+			processingEquals = true;
+			if (!o1.equals(o2)) return processingEquals = false;
+			else processingEquals = false;
 		}
 		return true;
 	}

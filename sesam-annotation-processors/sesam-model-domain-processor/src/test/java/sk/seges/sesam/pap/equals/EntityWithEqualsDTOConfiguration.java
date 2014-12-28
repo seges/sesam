@@ -6,7 +6,7 @@ import sk.seges.sesam.pap.model.annotation.Mapping;
 import sk.seges.sesam.pap.model.annotation.TransferObjectMapping;
 import sk.seges.sesam.pap.model.annotation.Mapping.MappingType;
 
-@TransferObjectMapping(domainClass = Entity.class)
+@TransferObjectMapping(domainClass = EqualsEntity.class)
 @Mapping(MappingType.AUTOMATIC)
 @GenerateHashcode(generate = false)
 public interface EntityWithEqualsDTOConfiguration {}

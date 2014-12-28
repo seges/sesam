@@ -1,6 +1,7 @@
 package sk.seges.sesam.core.pap.model.mutable.utils;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import sk.seges.sesam.core.pap.model.mutable.api.MutableAnnotationMirror;
@@ -11,7 +12,7 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeValue;
 class MutableAnnotation implements MutableAnnotationMirror {
 
 	private final MutableDeclaredType type;
-	private Map<MutableExecutableType, MutableTypeValue> values = new HashMap<MutableExecutableType, MutableTypeValue>();
+	private Map<MutableExecutableType, MutableTypeValue> values = new LinkedHashMap<MutableExecutableType, MutableTypeValue>();
 	private final MutableProcessingEnvironment processingEnv;
 	
 	public MutableAnnotation(MutableDeclaredType type, MutableProcessingEnvironment processingEnv) {

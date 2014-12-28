@@ -36,7 +36,11 @@ public class SuperclassProcessorTestCase extends AnnotationTest {
 	}
 
 	private File getOutputFile(Class<?> clazz) {
-		MutableDeclaredType outputClass = toMutable(clazz).addClassSufix(SuperclassAwareType.SUFFIX);
-		return new File(OUTPUT_DIRECTORY, toPath(outputClass.getPackageName()) + "/" + outputClass.getSimpleName() + SOURCE_FILE_SUFFIX);
+        System.out.println("4");
+
+        MutableDeclaredType outputClass = toMutable(clazz).addClassSufix(SuperclassAwareType.SUFFIX);
+		File r = new File(OUTPUT_DIRECTORY, toPath(outputClass.getPackageName()) + "/" + outputClass.getSimpleName() + SOURCE_FILE_SUFFIX);
+        System.out.println("5");
+        return r;
 	}
 }

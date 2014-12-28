@@ -1,20 +1,5 @@
 package sk.seges.sesam.pap.model.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
-
 import sk.seges.sesam.core.pap.model.InitializableValue;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
@@ -36,6 +21,16 @@ import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.resolver.api.EntityResolver;
 import sk.seges.sesam.pap.model.utils.TransferObjectHelper;
 
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
+import java.io.Serializable;
+import java.util.*;
+
 class DtoDeclared extends TomDeclaredConfigurationHolder implements GeneratedClass, DtoDeclaredType {
 
 	private final boolean generated;
@@ -52,8 +47,6 @@ class DtoDeclared extends TomDeclaredConfigurationHolder implements GeneratedCla
 
 		this.dtoType = dtoType;
 		this.generated = false;
-		
-		//initialize();
 	}
 
 	DtoDeclared(DeclaredType dtoType, EnvironmentContext<TransferObjectProcessingEnvironment> envContext, ConfigurationContext configurationContext) {
@@ -61,8 +54,6 @@ class DtoDeclared extends TomDeclaredConfigurationHolder implements GeneratedCla
 
 		this.dtoType = getTypeUtils().toMutableType(dtoType);
 		this.generated = false;
-				
-		//initialize();
 	}
 
 	
@@ -74,8 +65,6 @@ class DtoDeclared extends TomDeclaredConfigurationHolder implements GeneratedCla
 	}
 		
 	void setup() {
-		//initialize();
-		
 		setKind(MutableTypeKind.CLASS);
 		
 		DomainDeclaredType superClassDomainType = getInstantiableDomain().getSuperClass();
@@ -135,7 +124,7 @@ class DtoDeclared extends TomDeclaredConfigurationHolder implements GeneratedCla
 		if (types == null) {
 			return null;
 		}
-		Set<MutableTypeMirror> result = new HashSet<MutableTypeMirror>();
+		Set<MutableTypeMirror> result = new LinkedHashSet<MutableTypeMirror>();
 		
 		for (MutableTypeMirror type: types) {
 			result.add(environmentContext.getProcessingEnv().getTransferObjectUtils().getDomainType(type).getDto());
@@ -148,8 +137,6 @@ class DtoDeclared extends TomDeclaredConfigurationHolder implements GeneratedCla
 
 		this.dtoType = (MutableDeclaredType) getTypeUtils().toMutableType(dtoType);
 		this.generated = false;
-				
-		//initialize();
 	}
 
 	protected List<ConfigurationTypeElement> getConfigurationsForType() {

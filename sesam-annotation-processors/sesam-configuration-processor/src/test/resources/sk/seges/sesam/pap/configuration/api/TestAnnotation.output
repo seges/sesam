@@ -1,5 +1,4 @@
 package sk.seges.sesam.pap.configuration.api;
-
 import javax.annotation.Generated;
 
 import sk.seges.sesam.pap.configuration.api.TestAnnotation.TestTarget;
@@ -7,13 +6,13 @@ import sk.seges.sesam.pap.configuration.api.TestAnnotation.TestType;
 
 @Generated(value = "sk.seges.sesam.pap.configuration.processor.PojoAnnotationTransformerProcessor")
 public class TestAnnotationModel {
-
+	 
 	private String[] fields = {};
-
+	
 	private TestTarget[] target = {TestTarget.RETURN_VALUE, TestTarget.ARGUMENTS};
-
+	
 	private TestType value = TestType.PROPAGATE;
-
+	
 	public String[] getFields() {
 		return fields;
 	}
@@ -40,11 +39,10 @@ public class TestAnnotationModel {
 	
 	public TestAnnotationModel() {
 	}
-
+	
 	public TestAnnotationModel(String[] fields, TestTarget[] target, TestType value) {
 		this.fields = fields;
 		this.target = target;
 		this.value = value;
 	}
-
 }

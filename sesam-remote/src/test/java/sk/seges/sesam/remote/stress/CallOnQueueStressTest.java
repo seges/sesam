@@ -25,7 +25,7 @@ public class CallOnQueueStressTest extends AbstractStressTestCase {
                 tds.test1();
             }
         };
-        
+
         callTest(300, methodCalls, getClass().getName() + "_testClassMethodsOnProxy");
     }
 }

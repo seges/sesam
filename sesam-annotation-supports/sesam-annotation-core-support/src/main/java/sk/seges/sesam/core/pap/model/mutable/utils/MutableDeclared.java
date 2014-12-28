@@ -1,12 +1,6 @@
 package sk.seges.sesam.core.pap.model.mutable.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -252,7 +246,7 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 		return this;
 	};
 
-	public MutableDeclaredType addPackageSufix(String sufix) {
+ 	public MutableDeclaredType addPackageSufix(String sufix) {
 		dirty();
 		invalidateEnclosedType();
 		packageName += sufix;
@@ -588,15 +582,16 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 		for (MutableTypeVariable typeVariable: mutableTypeVariables) {
 			this.typeVariables.add(typeVariable);
 		}
-		
-		return this;
+
+        return this;
 	}
 	
 	@Override
 	public MutableDeclaredType addTypeVariable(MutableTypeVariable typeVariable) {
 //		dirty();
 		ensureTypeVariables().add(typeVariable);
-		return this;
+
+        return this;
 	}
 
 	public boolean hasTypeParameters() {
@@ -666,7 +661,7 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 			
 			if (typeParameter.getLowerBounds() != null) {
 				
-				Set<MutableTypeMirror> strippedLowerBounds = new HashSet<MutableTypeMirror>();
+				Set<MutableTypeMirror> strippedLowerBounds = new LinkedHashSet<MutableTypeMirror>();
 				
 				for (MutableTypeMirror lowerBound: typeParameter.getLowerBounds()) {
 					if (lowerBound instanceof MutableDeclaredType) {
@@ -681,7 +676,7 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 			
 			if (typeParameter.getUpperBounds() != null) {
 				
-				Set<MutableTypeMirror> strippedUpperBounds = new HashSet<MutableTypeMirror>();
+				Set<MutableTypeMirror> strippedUpperBounds = new LinkedHashSet<MutableTypeMirror>();
 
 				for (MutableTypeMirror upperBound: typeParameter.getUpperBounds()) {
 					if (upperBound instanceof MutableDeclaredType) {

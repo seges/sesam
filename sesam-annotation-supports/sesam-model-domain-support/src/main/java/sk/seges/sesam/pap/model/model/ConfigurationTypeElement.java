@@ -1,12 +1,5 @@
 package sk.seges.sesam.pap.model.model;
 
-import java.util.*;
-
-import javax.lang.model.element.*;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.util.ElementFilter;
-
 import sk.seges.sesam.core.pap.model.InitializableValue;
 import sk.seges.sesam.core.pap.model.api.ClassSerializer;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
@@ -21,6 +14,12 @@ import sk.seges.sesam.pap.model.annotation.TransferObjectMapping;
 import sk.seges.sesam.pap.model.model.api.domain.DomainDeclaredType;
 import sk.seges.sesam.pap.model.model.api.domain.DomainType;
 import sk.seges.sesam.pap.model.model.api.dto.DtoDeclaredType;
+
+import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.util.ElementFilter;
+import java.util.*;
 
 public class ConfigurationTypeElement extends TomBaseType {
 
@@ -232,7 +231,7 @@ public class ConfigurationTypeElement extends TomBaseType {
 			return null;
 		}
 		
-		Set<MutableTypeMirror> result = new HashSet<MutableTypeMirror>();
+		Set<MutableTypeMirror> result = new LinkedHashSet<MutableTypeMirror>();
 		
 		for (MutableTypeMirror bound: bounds) {
 			DomainType domainType = envContext.getProcessingEnv().getTransferObjectUtils().getDomainType(bound);
@@ -396,7 +395,7 @@ public class ConfigurationTypeElement extends TomBaseType {
 	
 	private Set<MutableTypeMirror> getDtoBounds(Set<? extends MutableTypeMirror> bounds) {
 	
-		Set<MutableTypeMirror> baseBounds = new HashSet<MutableTypeMirror>();
+		Set<MutableTypeMirror> baseBounds = new LinkedHashSet<MutableTypeMirror>();
 		
 		for (MutableTypeMirror lowerBound : bounds) {
 			baseBounds.add(envContext.getProcessingEnv().getTransferObjectUtils().getDomainType(lowerBound).getDto());

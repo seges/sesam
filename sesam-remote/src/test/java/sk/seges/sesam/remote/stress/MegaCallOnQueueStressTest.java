@@ -25,14 +25,11 @@ public class MegaCallOnQueueStressTest extends AbstractStressTestCase {
         AbstractStressMethodCalls methodCalls = new AbstractStressMethodCalls() {
             protected void callMethods() throws Exception {
                 tds.test1();
-//                tds.test2();
-//                tds.test4(4, "ff");
                 System.out.println(i++);
                 Thread.sleep(100);
-                
             }
         };
-        
-        callTest(500000, methodCalls, getClass().getName() + "_testClassMethodsOnProxy");
+
+        callTest(1000, methodCalls, getClass().getName() + "_testClassMethodsOnProxy");
     }
 }

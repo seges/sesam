@@ -13,14 +13,14 @@ public class EntityWithValidation extends Entity {
 		return super.getWebId();
 	}
 
-	@NotNull
+    @NotNull
 	@Size(min = 1, max = 255)
 	@Pattern(regexp = "[a-zA-Z0-9\\-_]*")
 	public String getNiceurl() {
 		return super.getNiceurl();
 	}
 
-	@NotNull
+    @NotNull
 	public Date getDate() {
 		return super.getDate();
 	}

@@ -31,7 +31,7 @@ public class SuperclassProcessor extends MutableAnnotationProcessor {
 
 		@Override
 		protected MutableDeclaredType getDelegate() {
-			return context.getMutableType().setSuperClass(context.getMutableType().clone()).addClassSufix(SUFFIX);
+			return context.getMutableType().setSuperClass(context.getMutableType().clone().stripTypeParametersTypes()).addClassSufix(SUFFIX);
 		}
 	}
 

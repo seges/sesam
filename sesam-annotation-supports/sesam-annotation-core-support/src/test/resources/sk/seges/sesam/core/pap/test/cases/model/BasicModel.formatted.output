@@ -1,5 +1,4 @@
 package sk.seges.sesam.core.pap.test.cases.model;
-
 import sk.seges.sesam.core.pap.test.cases.model.AnotherModel;
 import sk.seges.sesam.core.pap.test.cases.model.ReferenceModel;
 

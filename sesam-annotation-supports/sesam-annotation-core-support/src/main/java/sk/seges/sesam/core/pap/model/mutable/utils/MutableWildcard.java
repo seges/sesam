@@ -1,6 +1,7 @@
 package sk.seges.sesam.core.pap.model.mutable.utils;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
@@ -22,7 +23,7 @@ class MutableWildcard extends MutableVariable implements MutableWildcardType {
 
 	@Override
 	public void setExtendsBound(MutableTypeMirror bound) {
-		Set<MutableTypeMirror> bounds = new HashSet<MutableTypeMirror>();
+		Set<MutableTypeMirror> bounds = new LinkedHashSet<MutableTypeMirror>();
 		if (bound != null) {
 			bounds.add(bound);
 		}

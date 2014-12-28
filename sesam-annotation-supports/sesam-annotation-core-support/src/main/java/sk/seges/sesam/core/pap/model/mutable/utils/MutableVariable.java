@@ -1,6 +1,7 @@
 package sk.seges.sesam.core.pap.model.mutable.utils;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import sk.seges.sesam.core.pap.model.api.ClassSerializer;
@@ -11,8 +12,8 @@ import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
 class MutableVariable extends MutableType implements MutableTypeVariable {
 
 	protected String variable;
-	protected Set<MutableTypeMirror> lowerBounds = new HashSet<MutableTypeMirror>();
-	protected Set<MutableTypeMirror> upperBounds = new HashSet<MutableTypeMirror>();
+	protected Set<MutableTypeMirror> lowerBounds = new LinkedHashSet<MutableTypeMirror>();
+	protected Set<MutableTypeMirror> upperBounds = new LinkedHashSet<MutableTypeMirror>();
 	
 	@Override
 	public String getVariable() {
@@ -35,7 +36,7 @@ class MutableVariable extends MutableType implements MutableTypeVariable {
 	public MutableTypeVariable setLowerBounds(Set<? extends MutableTypeMirror> bounds) {
 		this.lowerBounds = (Set<MutableTypeMirror>) bounds;
 		if (this.lowerBounds == null) {
-			this.lowerBounds = new HashSet<MutableTypeMirror>();
+			this.lowerBounds = new LinkedHashSet<MutableTypeMirror>();
 		}
 		return this;
 	}
@@ -56,7 +57,7 @@ class MutableVariable extends MutableType implements MutableTypeVariable {
 	public MutableTypeVariable setUpperBounds(Set<? extends MutableTypeMirror> bounds) {
 		this.upperBounds = (Set<MutableTypeMirror>) bounds;
 		if (this.upperBounds == null) {
-			this.upperBounds = new HashSet<MutableTypeMirror>();
+			this.upperBounds = new LinkedHashSet<MutableTypeMirror>();
 		}
 		return this;
 	}
