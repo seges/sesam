@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 
 public abstract class AnnotationTest {
 
-	protected static final String DIRECTORY_SEPARATOR = "\\";
+	protected static final String DIRECTORY_SEPARATOR = isWindows() ? "\\" : "/";
 	private static final String TEST_SOURCE_FOLDER = "src" + DIRECTORY_SEPARATOR + "test" + DIRECTORY_SEPARATOR + "java";
 	private static final String MAIN_SOURCE_FOLDER = "src" + DIRECTORY_SEPARATOR + "main" + DIRECTORY_SEPARATOR + "java";
 	protected static final String SOURCE_FILE_SUFFIX = ".java";
@@ -120,6 +120,7 @@ public abstract class AnnotationTest {
 	}
 
 	protected String getResource(String name) {
+        getClass().getResource("BasicAnnotationProcessorTestCase.class")
         URL resource = Thread.currentThread().getContextClassLoader().getResource(name);
         if (resource == null) {
             throw new RuntimeException("Unable to find resource for the: " + name);
