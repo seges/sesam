@@ -146,7 +146,7 @@ public class ConfigurationTypeElement extends TomBaseType {
 			return null;
 		}
 
-		if (domain.getModifiers().contains(Modifier.ABSTRACT)) {
+		if (domain.getModifiers() != null && domain.getModifiers().contains(Modifier.ABSTRACT)) {
 			return null;
 		}
 

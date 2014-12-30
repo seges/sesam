@@ -52,7 +52,7 @@ public class DefaultConverterConstructorParametersResolver implements ConverterC
 	}
 
 	@Override
-	public ParameterElement[] getConstructorAditionalParameters() {
+	public ParameterElement[] getConstructorAdditionalParameters() {
 
 		ParameterElement[] variableElements = new ParameterElement[2];
 		variableElements[0] = getConverterCacheParameter();

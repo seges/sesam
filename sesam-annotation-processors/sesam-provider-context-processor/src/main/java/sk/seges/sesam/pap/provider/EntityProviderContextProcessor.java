@@ -68,7 +68,7 @@ public class EntityProviderContextProcessor extends AbstractTransferProcessingPr
             public ConverterConstructorParametersResolver constructParameterResolver(UsageType usageType) {
                 return new ConverterConstructorParametersResolver() {
                     @Override
-                    public ParameterElement[] getConstructorAditionalParameters() {
+                    public ParameterElement[] getConstructorAdditionalParameters() {
                         return new ParameterElement[0];
                     }
                 };

@@ -5,7 +5,7 @@
 	<!-- The Basics -->
 	<groupId>sk.seges.sesam</groupId>
 	<artifactId>sesam-os-base-parent</artifactId>
-	<version>2.0.0</version>
+	<version>2.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<!-- More Project Information -->
@@ -57,7 +57,7 @@
 
 	<properties>
 		<!-- !DO NOT FORGET TO CHANGE THIS VERSION WHEN RELEASING SESAM! -->
-		<sesam-os.version>2.0.0</sesam-os.version>
+		<sesam-os.version>2.1.0-SNAPSHOT</sesam-os.version>
 
 		<!-- from Sonatype -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -97,7 +97,7 @@
 		<h2.version>1.1.117</h2.version>
 
 		<!-- Eclipse -->
-		<eclipse.jdt.version>3.7.1</eclipse.jdt.version>
+		<eclipse.jdt.version>4.4</eclipse.jdt.version>
 		
 		<!--
 			JPA version is taken from org.hibernate:ejb3-persistence, it looks

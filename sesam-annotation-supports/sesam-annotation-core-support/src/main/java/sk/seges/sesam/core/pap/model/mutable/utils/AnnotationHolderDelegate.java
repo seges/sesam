@@ -1,14 +1,13 @@
 package sk.seges.sesam.core.pap.model.mutable.utils;
 
-import java.lang.annotation.Annotation;
-import java.util.*;
-
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-
 import sk.seges.sesam.core.pap.accessor.AnnotationAccessor;
 import sk.seges.sesam.core.pap.model.api.HasAnnotations;
 import sk.seges.sesam.core.pap.model.mutable.api.MutableAnnotationMirror;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import java.lang.annotation.Annotation;
+import java.util.*;
 
 class AnnotationHolderDelegate implements HasAnnotations {
 
@@ -23,7 +22,7 @@ class AnnotationHolderDelegate implements HasAnnotations {
 		this.element = null;
 		this.hasAnnotations = null;
 		this.processingEnv = processingEnv;
-		this.annotations = new HashSet<AnnotationMirror>();
+		this.annotations = new LinkedHashSet<AnnotationMirror>();
 	}
 	
 	AnnotationHolderDelegate(MutableProcessingEnvironment processingEnv, Element element) {
@@ -68,14 +67,14 @@ class AnnotationHolderDelegate implements HasAnnotations {
 
 	void initializeAnnotations() {
 		if (annotations == null) {
-			annotations = new HashSet<AnnotationMirror>();
+			annotations = new LinkedHashSet<AnnotationMirror>();
 			copyAnnotations();
 		}
 	}
 
 	void initializeMutableAnnotations() {
 		if (mutableAnnotations == null) {
-			mutableAnnotations = new HashSet<MutableAnnotationMirror>();
+			mutableAnnotations = new LinkedHashSet<MutableAnnotationMirror>();
 			copyMutableAnnotations();
 		}
 	}
@@ -115,7 +114,7 @@ class AnnotationHolderDelegate implements HasAnnotations {
 	
 	void clone(AnnotationHolderDelegate annotationHolderDelegate) {
 		if (getAnnotations() != null) {
-			annotationHolderDelegate.annotations = new HashSet<AnnotationMirror>();
+			annotationHolderDelegate.annotations = new LinkedHashSet<AnnotationMirror>();
 			for (AnnotationMirror annotationMirror: getAnnotations()) {
 				annotationHolderDelegate.annotations.add(annotationMirror);
 			}

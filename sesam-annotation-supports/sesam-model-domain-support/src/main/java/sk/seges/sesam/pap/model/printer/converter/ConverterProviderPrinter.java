@@ -177,7 +177,7 @@ public class ConverterProviderPrinter extends AbstractConverterPrinter {
 	}
 
 	protected ParameterElement[] getConverterParameters(ConverterTypeElement converterTypeElement, ExecutableElement method) {
-		return parametersResolverProvider.getParameterResolver(usageType).getConstructorAditionalParameters();
+		return parametersResolverProvider.getParameterResolver(usageType).getConstructorAdditionalParameters();
 	}
 	
 	protected int printConverterParametersUsage(FormattedPrintWriter pw, List<ConverterConstructorParameter> converterParameters) {

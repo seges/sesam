@@ -13,9 +13,9 @@ public class HasConstructorParametersDelegate {
 	public ParameterElement[] getRequiredParameters(MutableProcessingEnvironment processingEnv, 
 			ConverterConstructorParametersResolver parametersResolver, ConverterConstructorParametersResolver classParametersResolver) {
 
-		ParameterElement[] allParameters = ParametersFilter.PROPAGATED_IMUTABLE.filterParameters(parametersResolver.getConstructorAditionalParameters());
+		ParameterElement[] allParameters = ParametersFilter.PROPAGATED_IMUTABLE.filterParameters(parametersResolver.getConstructorAdditionalParameters());
 
-		ParameterElement[] localParameters = ParametersFilter.PROPAGATED_IMUTABLE.filterParameters(classParametersResolver.getConstructorAditionalParameters());
+		ParameterElement[] localParameters = ParametersFilter.PROPAGATED_IMUTABLE.filterParameters(classParametersResolver.getConstructorAdditionalParameters());
 
 		List<ParameterElement> generatedParameters = new ArrayList<ParameterElement>();
 
@@ -39,6 +39,6 @@ public class HasConstructorParametersDelegate {
 	}
 	
 	public ParameterElement[] getConverterParameters(MutableProcessingEnvironment processingEnv, ConverterConstructorParametersResolver parametersResolver) {
-		return ParametersFilter.PROPAGATED_IMUTABLE.filterParameters(parametersResolver.getConstructorAditionalParameters());
+		return ParametersFilter.PROPAGATED_IMUTABLE.filterParameters(parametersResolver.getConstructorAdditionalParameters());
 	}
 }

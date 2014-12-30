@@ -19,8 +19,8 @@ import sk.seges.sesam.pap.model.model.api.dto.DtoType;
 import sk.seges.sesam.pap.model.printer.converter.ConverterProviderPrinter;
 import sk.seges.sesam.pap.model.printer.converter.ConverterTargetType;
 import sk.seges.sesam.pap.model.printer.converter.ParameterUsagePrinter;
-import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.model.resolver.DefaultConverterConstructorParametersResolver;
+import sk.seges.sesam.pap.model.resolver.ProviderConstructorParametersResolverProvider;
 import sk.seges.sesam.pap.service.printer.model.ServiceConverterPrinterContext;
 
 import javax.lang.model.element.*;
@@ -47,7 +47,7 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 		switch (returnLocalType.getKind()) {
 			case CLASS:
 			case INTERFACE:
-				if (stripWildcardTypeVariables(((MutableDeclaredType)returnLocalType))) {
+				if (stripWildcardTypeVariables(returnLocalType)) {
 					pw.print("(", ((MutableDeclaredType)returnLocalType).clone().stripTypeParameters(), ")");
 				}
 				
@@ -55,8 +55,8 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 		}
 	}
 
-	private boolean stripWildcardTypeVariables(MutableDeclaredType owner, MutableTypeVariable typeVariable) {
-		if (typeVariable.getVariable() != null && typeVariable.getVariable() == MutableWildcardType.WILDCARD_NAME) {
+	private boolean stripWildcardTypeVariables(MutableTypeVariable typeVariable) {
+		if (typeVariable.getVariable() != null && typeVariable.getVariable().equals(MutableWildcardType.WILDCARD_NAME)) {
 			return true;
 		}
 			
@@ -90,7 +90,7 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 				List<? extends MutableTypeVariable> typeVariables = ((MutableDeclaredType)type).getTypeVariables();
 				if (typeVariables != null) {
 					for (MutableTypeVariable typeVariable: typeVariables) {
-						if (stripWildcardTypeVariables((MutableDeclaredType)type, typeVariable)) {
+						if (stripWildcardTypeVariables(typeVariable)) {
 							return true;
 						}
 					}
@@ -133,6 +133,10 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 		if (!remoteMethod.getReturnType().getKind().equals(TypeKind.VOID)) {
 			returnDtoType = processingEnv.getTransferObjectUtils().getDtoType(remoteMethod.getReturnType());
 		}
+
+        if (returnDtoType == null) {
+            throw new RuntimeException("Unknown return type for the method " + remoteMethod.toString());
+        }
 
 		MutableExecutableElement remoteMutableMethod = processingEnv.getElementUtils().toMutableElement(remoteMethod);
 
@@ -182,7 +186,7 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 				}
 			});
 
-			ParameterElement[] converterParameters = parametersResolverProvider.getParameterResolver(ProviderConstructorParametersResolverProvider.UsageType.DEFINITION).getConstructorAditionalParameters();
+			ParameterElement[] converterParameters = parametersResolverProvider.getParameterResolver(ProviderConstructorParametersResolverProvider.UsageType.DEFINITION).getConstructorAdditionalParameters();
 
 			ParameterUsagePrinter parameterUsagePrinter = new ParameterUsagePrinter(pw);
 
@@ -389,11 +393,11 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 			case INTERFACE:
 				MutableDeclaredType clone = ((MutableDeclaredType)type).clone();
 				List<? extends MutableTypeVariable> typeVariables = clone.getTypeVariables();
-				clone.setTypeVariables(getSubtypesForWildcards((MutableDeclaredType)processingEnv.getTypeUtils().toMutableType(processingEnv.getElementUtils().getTypeElement(((MutableDeclaredType)type).getCanonicalName())), 
-						typeVariables, ownerMethod).toArray(new MutableTypeVariable[] {}));
+				clone.setTypeVariables(getSubtypesForWildcards(processingEnv.getTypeUtils().toMutableType(processingEnv.getElementUtils().getTypeElement(((MutableDeclaredType)type).getCanonicalName())),
+						typeVariables, ownerMethod).toArray(new MutableTypeVariable[]{}));
 				return clone;
 			case TYPEVAR:
-				if (((MutableTypeVariable)type).getVariable() != null && ((MutableTypeVariable)type).getVariable() == MutableWildcardType.WILDCARD_NAME) {
+				if (((MutableTypeVariable)type).getVariable() != null && ((MutableTypeVariable)type).getVariable().equals(MutableWildcardType.WILDCARD_NAME)) {
 					return getBoundType(((MutableTypeVariable)type).clone(), ownerMethod);
 				}
 			default:

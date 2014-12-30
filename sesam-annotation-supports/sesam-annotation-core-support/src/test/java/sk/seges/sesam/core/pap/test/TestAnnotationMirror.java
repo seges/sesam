@@ -41,7 +41,7 @@ public class TestAnnotationMirror implements AnnotationMirror {
 		elementValues = new HashMap<ExecutableElement, AnnotationValue>();
 		
 		for (Method method: methods) {
-			elementValues.put(new TestExecutableElement(method), new TestAnnotationValue(method.getDefaultValue()));
+            elementValues.put(new TestExecutableElement(method), new TestAnnotationValue(method.getDefaultValue()));
 		}
 		
 		return elementValues;

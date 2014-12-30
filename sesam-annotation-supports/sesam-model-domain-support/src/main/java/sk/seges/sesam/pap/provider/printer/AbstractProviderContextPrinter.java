@@ -68,7 +68,7 @@ public abstract class AbstractProviderContextPrinter {
 
         int j = 0;
 
-        ParameterElement[] constructorAditionalParameters = parametersResolverProvider.getParameterResolver(ProviderConstructorParametersResolverProvider.UsageType.PROVIDER_CONTEXT_CONSTRUCTOR).getConstructorAditionalParameters();
+        ParameterElement[] constructorAditionalParameters = parametersResolverProvider.getParameterResolver(ProviderConstructorParametersResolverProvider.UsageType.PROVIDER_CONTEXT_CONSTRUCTOR).getConstructorAdditionalParameters();
 
         for (final ConstructorParameter constructorParameter: constructorParameters) {
             if (j > 0) {

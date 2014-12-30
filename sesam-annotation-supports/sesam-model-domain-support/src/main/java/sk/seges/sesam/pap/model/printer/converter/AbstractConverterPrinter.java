@@ -46,7 +46,7 @@ public class AbstractConverterPrinter {
 		if (constructors.size() > 0) {
 			ExecutableElement constructor = constructors.iterator().next();
 			
-			ParameterElement[] constructorAditionalParameters = parametersResolverProvider.getParameterResolver(UsageType.DEFINITION).getConstructorAditionalParameters();
+			ParameterElement[] constructorAditionalParameters = parametersResolverProvider.getParameterResolver(UsageType.DEFINITION).getConstructorAdditionalParameters();
 			
 			for (VariableElement parameter: constructor.getParameters()) {
 				String name = getParameterName(parameter, constructorAditionalParameters);

@@ -22,7 +22,7 @@ public class FluentProcessorTest extends AnnotationTest {
 
 	@Override
 	protected final Processor[] getProcessors() {
-		if(processorsUnderTest.isEmpty()) {
+		if (processorsUnderTest.isEmpty()) {
 			throw new RuntimeException("No processors defined");
 		}
 		Processor[] array = new Processor[processorsUnderTest.size()];

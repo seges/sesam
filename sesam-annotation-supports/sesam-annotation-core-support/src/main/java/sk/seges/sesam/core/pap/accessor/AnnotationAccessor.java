@@ -84,7 +84,7 @@ public abstract class AnnotationAccessor {
 			}
 		}
 		
-		Class<?> result = null;
+		Class<?> result;
 		try {
 			result = fakeClass.toClass();
 		} catch (CannotCompileException e) {
@@ -240,7 +240,7 @@ public abstract class AnnotationAccessor {
 		public Object visitType(TypeMirror t, AnnotationValue p) {
 			return AnnotationAccessor.getType(t, processingEnv);
 		}
-	};
+	}
 
 	private static class ArrayValueVisitor extends SimpleAnnotationValueVisitor6<Class<?>, Void> {
 
@@ -343,7 +343,7 @@ public abstract class AnnotationAccessor {
 					AnnotationValue value = annotationMethod.getValue();
 					Object result = value.accept(new AnnotationValueVisitor(processingEnv, annotationMethod.getKey().getReturnType()), value);
 					if (result == null) {
-						return value;
+						return value.getValue();
 					}
 					
 					return result;
@@ -359,8 +359,8 @@ public abstract class AnnotationAccessor {
 	private static Object enhance(AnnotationMirror annotationMirror, Class<?> annotationClass, MutableProcessingEnvironment processingEnv) {
 		List<Class<?>> interfaces = new ArrayList<Class<?>>();
 		for (Class<?> interfaceClass: annotationClass.getInterfaces()) {
-			interfaces.add(interfaceClass);
-		}
+            interfaces.add(interfaceClass);
+        }
 		interfaces.add(WrapsAnnotationMirror.class);
 		if (annotationClass.isInterface()) {
 			interfaces.add(annotationClass);
@@ -368,8 +368,8 @@ public abstract class AnnotationAccessor {
 		return Enhancer.create(annotationClass, interfaces.toArray(new Class[] {}), new AnnotationMirrorProxy(annotationMirror, processingEnv));
 	}
 
-	protected AnnotationMirror getAnnotationMirror(HasAnnotations annoationHolder, AnnotationFilter... annotationFilters) {
-		for (AnnotationMirror annotationMirror: annoationHolder.getAnnotations()) {
+	protected AnnotationMirror getAnnotationMirror(HasAnnotations annotationHolder, AnnotationFilter... annotationFilters) {
+		for (AnnotationMirror annotationMirror: annotationHolder.getAnnotations()) {
 			for (AnnotationFilter annotationFilter: annotationFilters) {
 				if (!annotationFilter.isAnnotationIgnored(annotationMirror)) {
 					return annotationMirror;
@@ -415,6 +415,10 @@ public abstract class AnnotationAccessor {
 	
 	protected AnnotationMirror getAnnotationMirror(Element element, AnnotationFilter... annotationFilters) {
 
+        if (element.getAnnotationMirrors() == null) {
+            return null;
+        }
+
 		for (AnnotationMirror annotationMirror: element.getAnnotationMirrors()) {
 			for (AnnotationFilter annotationFilter: annotationFilters) {
 				if (!annotationFilter.isAnnotationIgnored(annotationMirror)) {
@@ -451,7 +455,7 @@ public abstract class AnnotationAccessor {
 	
 	protected <T> T toPojo(AnnotationMirror annotation, Class<T> clazz) {
 		
-		T newInstance = null;
+		T newInstance;
 
 		try {
 			newInstance = clazz.newInstance();

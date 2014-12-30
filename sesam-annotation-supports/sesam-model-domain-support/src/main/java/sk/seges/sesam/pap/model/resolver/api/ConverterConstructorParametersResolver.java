@@ -6,6 +6,6 @@ public interface ConverterConstructorParametersResolver {
 
 	public static final String THIS = "this";
 
-	ParameterElement[] getConstructorAditionalParameters();
+	ParameterElement[] getConstructorAdditionalParameters();
 	
 }
