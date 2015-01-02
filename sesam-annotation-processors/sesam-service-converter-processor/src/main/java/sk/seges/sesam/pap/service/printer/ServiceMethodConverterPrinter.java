@@ -132,11 +132,11 @@ public class ServiceMethodConverterPrinter extends AbstractServiceMethodPrinter 
 		
 		if (!remoteMethod.getReturnType().getKind().equals(TypeKind.VOID)) {
 			returnDtoType = processingEnv.getTransferObjectUtils().getDtoType(remoteMethod.getReturnType());
-		}
 
-        if (returnDtoType == null) {
-            throw new RuntimeException("Unknown return type for the method " + remoteMethod.toString());
-        }
+            if (returnDtoType == null) {
+                throw new RuntimeException("Unknown return type for the method " + remoteMethod.toString());
+            }
+		}
 
 		MutableExecutableElement remoteMutableMethod = processingEnv.getElementUtils().toMutableElement(remoteMethod);
 

@@ -44,14 +44,11 @@ public class AccessorsPrinter extends CopyPrinter {
 			}
 		};
 
-        System.out.println("1");
-
         for (AnnotationMirror annotation: annotations) {
 
 			MutableAnnotationMirror duplicateAnnotation = get(result, annotation);
 
 			if (duplicateAnnotation != null) {
-                System.out.println("Merging");
 				annotationAccessor.merge(duplicateAnnotation, annotation);
 			} else {
 				result.add(annotationAccessor.toMutable(annotation));

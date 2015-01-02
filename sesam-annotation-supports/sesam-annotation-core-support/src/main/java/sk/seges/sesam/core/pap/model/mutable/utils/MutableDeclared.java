@@ -1,6 +1,10 @@
 package sk.seges.sesam.core.pap.model.mutable.utils;
 
-import java.util.*;
+import sk.seges.sesam.core.pap.model.api.ClassSerializer;
+import sk.seges.sesam.core.pap.model.mutable.api.*;
+import sk.seges.sesam.core.pap.model.mutable.api.element.MutableVariableElement;
+import sk.seges.sesam.core.pap.structure.api.PackageValidator;
+import sk.seges.sesam.core.pap.writer.HierarchyPrintWriter;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -9,17 +13,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
-
-import sk.seges.sesam.core.pap.model.api.ClassSerializer;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableDeclaredType;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableExecutableType;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeMirror;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableTypeVariable;
-import sk.seges.sesam.core.pap.model.mutable.api.MutableWildcardType;
-import sk.seges.sesam.core.pap.model.mutable.api.element.MutableVariableElement;
-import sk.seges.sesam.core.pap.structure.api.PackageValidator;
-import sk.seges.sesam.core.pap.utils.ProcessorUtils;
-import sk.seges.sesam.core.pap.writer.HierarchyPrintWriter;
+import java.util.*;
 
 //TODO rename to MutableType
 class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclaredType {
@@ -135,14 +129,19 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 	}
 	
 	private void copyModifiers() {
+
 		if (type != null && type.getKind().equals(TypeKind.DECLARED)) {
 		
 			TypeElement typeElement = (TypeElement)((DeclaredType)type).asElement();	
 			if (this.modifiers == null) {
 				this.modifiers = new ArrayList<Modifier>();
-			}
-			this.modifiers.clear();
-			this.modifiers.addAll(typeElement.getModifiers());
+			} else {
+                this.modifiers.clear();
+            }
+
+            if (typeElement.getModifiers() != null) {
+                this.modifiers.addAll(typeElement.getModifiers());
+            }
 		} else {
 			this.modifiers = new ArrayList<Modifier>();
 			this.modifiers.add(Modifier.PUBLIC);
@@ -189,7 +188,7 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 	
 	public MutableDeclaredType getEnclosedClass() {
 		return enclosedClass;
-	};
+	}
 	
 	public MutableDeclaredType setSimpleName(String simpleName) {
 		dirty();
@@ -216,7 +215,7 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 	
 	public List<MutableTypeVariable> getTypeVariables() {
 		return Collections.unmodifiableList(ensureTypeVariables());
-	};
+	}
 
 	private void dirty() {
 		if (type != null) {
@@ -237,21 +236,21 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 		invalidateEnclosedType();
 		simpleName += sufix;	
 		return this;
-	};
+	}
 	
 	public MutableDeclaredType addClassPrefix(String prefix) {
 		dirty();
 		invalidateEnclosedType();
 		simpleName = prefix + simpleName;
 		return this;
-	};
+	}
 
  	public MutableDeclaredType addPackageSufix(String sufix) {
 		dirty();
 		invalidateEnclosedType();
 		packageName += sufix;
 		return this;
-	};
+	}
 
 	@Override
 	public MutableDeclaredType replaceClassSuffix(String originalSuffix, String newSuffix) {
@@ -292,29 +291,30 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 		invalidateEnclosedType();
 		this.packageName = packageName;
 		return this;
-	};
+	}
 	
 	public MutableDeclaredType changePackage(PackageValidator packageValidator) {
 		return changePackage(packageValidator.toString());
-	};
+	}
 
 	public String getCanonicalName() {
 		if (enclosedClass != null) {
 			return enclosedClass.getCanonicalName() + "." + simpleName;
 		}
 		return (packageName != null ? (packageName + ".") : "") + simpleName;
-	};
+	}
+
 	//TODO: check if there should be $ or dot
 	public String getQualifiedName() {
-		if (enclosedClass != null) {
-			return enclosedClass.getCanonicalName() + "$" + simpleName;
-		}
-		return getCanonicalName();
-	};
+        if (enclosedClass != null) {
+            return enclosedClass.getCanonicalName() + "$" + simpleName;
+        }
+        return getCanonicalName();
+    }
 		
 	public TypeMirror asType() {
 		return type;
-	};
+	}
 
 
 	String toString(MutableDeclared declaredType) {
@@ -385,7 +385,7 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 			if (i > 0) {
 				types += ", ";
 			}
-			types += typeParameter.toString(serializer, typed);
+			types += typeParameter.toString(serializer, true);
 			i++;
 		}
 
@@ -396,7 +396,7 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 	
 	public MutableTypeKind getKind() {
 		return this.kind;
-	};
+	}
 
 	public MutableDeclaredType setKind(MutableTypeKind kind) {
 		dirty();
@@ -440,7 +440,7 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 		
 		if (typeVariables.size() > 0) {
 			//merge with superclass type variables
-			setTypeVariables(typeVariables.toArray(new MutableTypeVariable[] {}));
+			setTypeVariables(typeVariables.toArray(new MutableTypeVariable[typeVariables.size()]));
 		}
 		
 		//TODO handle conflict type variables - with same names
@@ -489,8 +489,8 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 				}
 				typeParameter.setVariable(variable);
 			} else if (recursive) {
-				renameBounds(typeParameter.getUpperBounds(), actionType, parameter, oldName, recursive);
-				renameBounds(typeParameter.getLowerBounds(), actionType, parameter, oldName, recursive);
+				renameBounds(typeParameter.getUpperBounds(), actionType, parameter, oldName, true);
+				renameBounds(typeParameter.getLowerBounds(), actionType, parameter, oldName, true);
 			}
 		}
 	
@@ -501,7 +501,7 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 		dirty();
 		this.typeVariables = new LinkedList<MutableTypeVariable>();
 		return this;
-	};
+	}
 
 	@Override
 	public int hashCode() {
@@ -578,10 +578,8 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 
 	public MutableDeclaredType setTypeVariables(MutableTypeVariable... mutableTypeVariables) {
 		this.typeVariables = new LinkedList<MutableTypeVariable>();
-		
-		for (MutableTypeVariable typeVariable: mutableTypeVariables) {
-			this.typeVariables.add(typeVariable);
-		}
+
+        Collections.addAll(this.typeVariables, mutableTypeVariables);
 
         return this;
 	}
@@ -598,13 +596,10 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 		if (typeVariables != null) {
 			return typeVariables.size() > 0;
 		}
-		
-		if (type != null && type.getKind().equals(TypeKind.DECLARED)) {
-			return ((DeclaredType)type).getTypeArguments().size() > 0;
-		}
-		
-		return false;
-	}
+
+        return type != null && type.getKind().equals(TypeKind.DECLARED) && ((DeclaredType) type).getTypeArguments().size() > 0;
+
+    }
 
 	public boolean hasVariableParameterTypes() {
 		if (!hasTypeParameters()) {
@@ -643,13 +638,11 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 			}
 		}
 		
-		return result.toArray(new MutableTypeVariable[] {});
+		return result.toArray(new MutableTypeVariable[result.size()]);
 	}
 
 	public MutableDeclaredType stripTypeParametersVariables() {
 
-		boolean invalidate = false;
-		
 		MutableTypeVariable[] variables = new MutableTypeVariable[getTypeVariables().size()];
 
 		int i = 0;
@@ -688,16 +681,13 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 				
 				typeVariable.setUpperBounds(strippedUpperBounds);
 				
-				if (typeVariable.getLowerBounds() == null && typeVariable.getUpperBounds() == null || (typeVariable.getLowerBounds().size() == 0 && typeVariable.getUpperBounds().size() == 0)) {
+				if ((typeVariable.getLowerBounds() == null || typeVariable.getLowerBounds().size() == 0) &&
+                    (typeVariable.getUpperBounds() == null || typeVariable.getUpperBounds().size() == 0)) {
 					typeVariable.setVariable(typeParameter.getVariable());
 				}
 			}
 			
 			i++;
-		}
-		
-		if (invalidate) {
-			dirty();
 		}
 
 		return setTypeVariables(variables);
@@ -750,17 +740,9 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 		for (MutableTypeVariable typeParameter: getTypeVariables()) {
 			if (typeParameter.getVariable() != null && !typeParameter.getVariable().equals(MutableWildcardType.WILDCARD_NAME)) {
 				MutableVariable typeVariable = new MutableVariable();
-				typeVariable.setVariable(typeParameter.getVariable().toString());
+				typeVariable.setVariable(typeParameter.getVariable());
 				variables[i] = typeVariable;
 				invalidate = true;
-//			} else if (typeParameter.getVariable() != null && typeParameter.getVariable().equals(MutableWildcardType.WILDCARD_NAME) &&
-//				(typeParameter.getLowerBounds().size() + typeParameter.getUpperBounds().size()) > 0) {
-//				MutableVariable typeVariable = new MutableVariable();
-//				typeVariable.setLowerBounds(stripTypeParametersTypes(typeParameter.getLowerBounds()));
-//				typeVariable.setUpperBounds(stripTypeParametersTypes(typeParameter.getUpperBounds()));
-//				typeVariable.setVariable(null);
-//				variables[i] = typeVariable;
-//				invalidate = true;
 			} else {
 				variables[i] = typeParameter;
 				stripTypeParametersTypes(typeParameter.getLowerBounds());
@@ -791,7 +773,8 @@ class MutableDeclared extends MutableHasAnnotationsType implements MutableDeclar
 	
 	@Override
 	public MutableDeclaredType clone() {
-		MutableDeclared result = new MutableDeclared(type, packageName, simpleName, processingEnv);
+
+        MutableDeclared result = new MutableDeclared(type, packageName, simpleName, processingEnv);
 		result.enclosedClass = enclosedClass;
 		annotationHolderDelegate.clone(result.annotationHolderDelegate);
 		
