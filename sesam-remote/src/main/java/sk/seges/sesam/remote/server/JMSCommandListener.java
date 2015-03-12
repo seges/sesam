@@ -84,7 +84,8 @@ public class JMSCommandListener<T> implements MessageListener, ExceptionListener
         }
     }
     
-    public void start() {
+    @Override
+	public void start() {
         try {
         	if(connection != null) {
                 connection.close();
@@ -157,7 +158,9 @@ public class JMSCommandListener<T> implements MessageListener, ExceptionListener
     /* (non-Javadoc)
      * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
      */
-    public void onMessage(Message message) {
+    @Override
+	public void onMessage(Message message) {
+    	log.info("Received message : " + message);
         IInvocationCollector collector = CollectorUtils.connectJMXCollector(connector, configuration);
         
         long start = System.currentTimeMillis();
@@ -339,7 +342,8 @@ public class JMSCommandListener<T> implements MessageListener, ExceptionListener
             log.info("transportInterupted");
     }
 
-    public void onException(JMSException arg0) {
+    @Override
+	public void onException(JMSException arg0) {
         log.error("JMS onException (" + arg0.getErrorCode() + ")", arg0);
         if(arg0.getLinkedException() != null)
             log.error("Linked exception ", arg0.getLinkedException());

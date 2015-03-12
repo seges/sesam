@@ -64,6 +64,8 @@ public abstract class AbstractResponseProcessor {
         if(log.isInfoEnabled())
             log.info("Message sent" + "(" + new Date(time - System.currentTimeMillis()) + ")");
         synchronized (lock) {
+        	log.debug("enter synchro block with command: " + command);
+        	log.debug("waitTimeout: " + waitTimeout);
             send(context, command, null, responseQueue);
             lock.wait(waitTimeout);
             response = responseListener.getReturnValue();
@@ -76,6 +78,7 @@ public abstract class AbstractResponseProcessor {
     }
 
     private void send(InvocationContext context, RemoteCommand command, Integer priority, Destination reply) throws JMSException {
+    	log.debug("start sending message...");
         MessageProducer producer = context.getProducer();
         producer.setDeliveryMode(configuration.getDeliveryMode());
 
@@ -98,5 +101,6 @@ public abstract class AbstractResponseProcessor {
             m.setJMSReplyTo(reply);
         }
         producer.send(m);
+        log.debug("end sending message...");
     }
 }
