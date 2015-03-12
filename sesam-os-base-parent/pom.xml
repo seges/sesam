@@ -1761,7 +1761,7 @@ org.eclipse.jdt.core.compiler.source=1.6]]>
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>copy-resources</id>
+						<id>copy-docker-resources</id>
 						<!-- here the phase you need -->
 						<phase>validate</phase>
 						<goals>
